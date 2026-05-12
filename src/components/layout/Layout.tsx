@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import Footer from './Footer';
+import FloatingChat from '../chat/FloatingChat';
 
 export default function Layout() {
   return (
@@ -11,6 +13,8 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      <Footer />
+      <FloatingChat />
     </div>
   );
 }

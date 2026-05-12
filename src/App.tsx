@@ -7,6 +7,7 @@ import Blog from './pages/Blog';
 import Guide from './pages/Guide';
 import AIConsultant from './pages/AIConsultant';
 import Dashboard from './pages/Dashboard';
+import VendorDetail from './pages/VendorDetail';
 import { AppProvider } from './context/AppContext';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="guide" element={<Guide />} />
             <Route path="ai-consultant" element={<AIConsultant />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="vendor/:vendorId" element={<VendorDetail />} />
           </Route>
         </Routes>
       </BrowserRouter>

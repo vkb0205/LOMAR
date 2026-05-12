@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Heart, ArrowRight } from 'lucide-react';
+import { Send, Heart, ArrowRight, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { Database } from '../types/database';
+
+type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
+type ProductRow = Database['public']['Tables']['products']['Row'];
+type VendorRow = Database['public']['Tables']['vendors']['Row'];
 
 const customizationOptions: Record<string, { title: string, options: string[] }[]> = {
   'Váy Cưới': [
@@ -62,36 +67,61 @@ export default function Customize() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [dbOptions, setDbOptions] = useState<Record<string, { title: string, options: string[] }[]>>(customizationOptions);
-  
-  const tabs = ['Váy Cưới', 'Vest', 'Venue', 'Trang Trí', 'Làm Đẹp'];
+
+  const [tabs, setTabs] = useState(['Váy Cưới', 'Vest', 'Venue', 'Trang Trí', 'Làm Đẹp']);
+  const [liveImages, setLiveImages] = useState(defaultImages);
+  const [livePrices, setLivePrices] = useState(basePrices);
   const properties = dbOptions[activeTab] || dbOptions['Váy Cưới'] || [];
 
-  // Fetch customization options from Supabase
+  // Fetch real categories and vendors from Supabase
   useEffect(() => {
-    async function fetchConfig() {
+    async function fetchLiveData() {
       try {
-        const { data: categories } = await supabase.from('categories').select('*');
-        const { data: properties } = await supabase.from('customization_properties').select('*').order('sort_order');
-        const { data: options } = await supabase.from('customization_options').select('*');
-
-        if (categories && properties && options) {
-          const newConfig: Record<string, any> = {};
-          categories.forEach((cat: any) => {
-            const catProps = properties.filter((p: any) => p.category_id === cat.id);
-            newConfig[cat.name] = catProps.map((p: any) => {
-              const pOptions = options.filter((o: any) => o.property_id === p.id).map((o: any) => o.name);
-              return { title: p.title, options: pOptions };
-            });
-          });
-          if (Object.keys(newConfig).length > 0) {
-             setDbOptions(newConfig);
+        // 1. Fetch products to get categories, images, and prices
+        const { data: productData } = await supabase.from('products').select('*');
+        if (productData && productData.length > 0) {
+          const typedProducts = productData as ProductRow[];
+          
+          // Get unique categories
+          const uniqueCategories = [...new Set(typedProducts.map(p => p.category).filter(Boolean))] as string[];
+          if (uniqueCategories.length > 0) {
+            setTabs(uniqueCategories);
           }
+
+          // Build dynamic images and prices map
+          const newImages: Record<string, string> = { ...defaultImages };
+          const newPrices: Record<string, number> = { ...basePrices };
+          
+          uniqueCategories.forEach(cat => {
+            const firstProd = typedProducts.find(p => p.category === cat);
+            if (firstProd) {
+              if (firstProd.image_url) newImages[cat] = firstProd.image_url;
+              if (firstProd.price) newPrices[cat] = Number(firstProd.price);
+            }
+          });
+          
+          setLiveImages(newImages);
+          setLivePrices(newPrices);
+        }
+
+        // 2. Fetch real vendors for the 'Venue' section
+        const { data: vendorData } = await supabase.from('vendors').select('name');
+        if (vendorData) {
+          const vendorNames = (vendorData as VendorRow[]).map(v => v.name).filter(Boolean) as string[];
+          setDbOptions(prev => ({
+            ...prev,
+            'Venue': prev['Venue']?.map(group => 
+              group.title === 'Cửa Hàng' 
+                ? { ...group, options: vendorNames.length > 0 ? vendorNames : group.options }
+                : group
+            ) || []
+          }));
         }
       } catch (error) {
-        console.error('Error fetching config:', error);
+        console.error('Error fetching live data for customization:', error);
       }
     }
-    fetchConfig();
+    fetchLiveData();
   }, []);
 
   // Fetch chat history from Supabase
@@ -99,7 +129,7 @@ export default function Customize() {
     async function fetchChat() {
       const { data } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
       if (data && data.length > 0) {
-        setMessages(data.map(m => ({ text: m.text, isUser: m.role === 'user' })));
+        setMessages((data as ChatMessageRow[]).map(m => ({ text: m.content || '', isUser: m.role === 'user' })));
       }
     }
     fetchChat();
@@ -133,7 +163,7 @@ export default function Customize() {
       const botText = `Bé Song đã ghi nhận bạn chọn "${option}" cho phần ${propTitle}. Thật tuyệt vời!`;
       setTimeout(async () => {
         setMessages(prev => [...prev, { text: botText, isUser: false }]);
-        await supabase.from('chat_messages').insert({ role: 'assistant', text: botText });
+        await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
       }, 500);
     }
   };
@@ -143,23 +173,23 @@ export default function Customize() {
     const userText = inputValue;
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
-    
+
     // Insert into DB
-    await supabase.from('chat_messages').insert({ role: 'user', text: userText });
+    await supabase.from('chat_messages').insert({ role: 'user', content: userText } as any);
 
     setTimeout(async () => {
       const botText = 'Bé Song đang tìm kiếm lựa chọn hoàn hảo nhất cho ý tưởng của bạn...';
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
-      await supabase.from('chat_messages').insert({ role: 'assistant', text: botText });
+      await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
     }, 1000);
   };
 
   // Dynamic price calculation
   const currentSelectionsCount = selections[activeTab] ? Object.keys(selections[activeTab]).length : 0;
-  const currentPrice = basePrices[activeTab] + (currentSelectionsCount * 500000);
+  const currentPrice = (livePrices[activeTab] || basePrices[activeTab]) + (currentSelectionsCount * 500000);
 
   return (
-    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4">
+    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FEF6F7] min-h-screen">
 
       {/* Upper Navigation Tabs */}
       <div className="max-w-[1200px] w-full mx-auto mb-6 flex justify-center overflow-x-auto no-scrollbar py-2">
@@ -208,7 +238,7 @@ export default function Customize() {
                     )}
                   </div>
                 </div>
-                {activePropertyIndex === idx && <ArrowRight className="w-4 h-4 text-[#F494A2]" />}
+                <ChevronRight className={`w-4 h-4 text-[#F494A2] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
               </button>
 
               {/* Options Expansion */}
@@ -243,7 +273,7 @@ export default function Customize() {
             {/* Main Preview Image */}
             <div className="flex-1 w-full h-full relative overflow-hidden bg-white rounded-2xl md:mr-4">
               <img
-                src={defaultImages[activeTab]}
+                src={liveImages[activeTab] || defaultImages[activeTab]}
                 alt="Preview"
                 className="absolute inset-0 w-full h-full object-cover rounded-2xl"
                 style={{ objectPosition: 'top center' }}
@@ -255,7 +285,7 @@ export default function Customize() {
               <div className="w-20 lg:w-24 flex flex-col gap-3 relative z-10 hidden md:flex overflow-y-auto no-scrollbar py-2">
                 {[1, 2, 3, 4, 5].map((item, i) => (
                   <button key={item} className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${i === 0 ? 'border-[#F494A2] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                    <img src={`${defaultImages[activeTab]}&sig=${item}`} alt="thumb" className="w-full h-full object-cover" />
+                    <img src={`${liveImages[activeTab] || defaultImages[activeTab]}&sig=${item}`} alt="thumb" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -266,9 +296,9 @@ export default function Customize() {
           {/* Details / Capabilities row */}
           <div className="bg-[#FFFDFD] rounded-2xl p-6 shadow-sm border border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-rose-100 pb-4 md:pb-0 pr-0 md:pr-6">
-              <h3 className="font-bold text-[#1D3557] text-sm mb-2 uppercase tracking-wider">{activeTab === 'Venue' ? 'GIỚI THIỆU SKY DREAM' : 'GIỚI THIỆU'}</h3>
+              <h3 className="font-bold text-[#1D3557] text-sm mb-2 uppercase tracking-wider">GIỚI THIỆU</h3>
               <p className="text-xs text-[#1D3557]/70 leading-relaxed line-clamp-3">
-                Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng LOMAR tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
+                Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng Bé Song Hỷ tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
               </p>
             </div>
             <div className="flex-1 flex gap-4 lg:gap-8 justify-around px-4">
@@ -294,7 +324,7 @@ export default function Customize() {
         <aside className="lg:w-[350px] flex flex-col gap-6">
 
           <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-8 flex flex-col items-center">
-            <span className="font-serif text-[#1D3557] font-bold text-lg mb-2">Dự Toán Chi Phí</span>
+            <span className="font-serif text-[#1D3557] font-bold text-lg mb-2 uppercase tracking-widest">Dự Toán Chi Phí</span>
             <h2 className="text-3xl lg:text-4xl font-bold text-[#F494A2] mb-6 tracking-tight">
               {currentPrice.toLocaleString('vi-VN')} <span className="text-xl">VND</span>
             </h2>
@@ -307,7 +337,7 @@ export default function Customize() {
                 <Heart className="w-4 h-4 fill-current opacity-80" />
               </button>
             </div>
-            <button className="w-full py-3.5 bg-[#FFF5F5] text-[#1D3557] border border-rose-100 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-colors">
+            <button className="w-full py-3.5 bg-[#F494A2] text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md">
               ĐẶT LỊCH THỬ
             </button>
           </div>

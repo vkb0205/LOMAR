@@ -29,7 +29,7 @@ export default function Home() {
           <img
             src={trainImg}
             alt="Train Outline"
-            className="w-full h-full object-cover object-bottom md:object-center opacity-100 mix-blend-multiply"
+            className="w-full h-full object-cover object-bottom md:object-center opacity-100 mix-blend-multiply -translate-y-50"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-white/80" />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white/50 md:to-white/80" />
@@ -37,7 +37,7 @@ export default function Home() {
 
         <div className="relative z-10 w-full max-w-[1200px] mx-auto px-4 flex flex-col h-full justify-center pb-24 md:pb-32">
 
-          <div className="relative flex flex-col items-start lg:text-left mb-8 lg:mb-0 w-full lg:w-2/3 mt-10 md:mt-0">
+          <div className="relative flex flex-col items-start lg:text-left mb-8 lg:mb-0 w-full lg:w-2/3 translate-y-15">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -173,16 +173,16 @@ export default function Home() {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: i * 0.15 }} // Hiệu ứng delay bậc thang
-                className="bg-white rounded-[24px] overflow-hidden shadow-md shadow-rose-100/50 border border-rose-50 flex flex-col items-center hover:shadow-lg transition-shadow relative pb-[120px] aspect-[3/4] max-w-[320px] mx-auto w-full group"
+                className="bg-white rounded-[24px] overflow-hidden shadow-md shadow-rose-100/50 border border-rose-50 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[420px] max-w-[320px] mx-auto w-full group"
               >
-                <div className="pt-8 px-4 flex flex-col items-center relative z-10 w-full h-full">
+                <div className="pt-8 pb-4 px-4 flex flex-col items-center flex-1 w-full">
                   <div className={`w-14 h-14 rounded-full flex items-center justify-center text-rose-300 mb-4 group-hover:scale-110 transition-transform`}>
                     <pillar.icon className="w-10 h-10 stroke-[1.5]" />
                   </div>
-                  <h3 className={`font-serif font-bold text-xl mb-4 ${pillar.color}`}>{pillar.title}</h3>
+                  <h3 className={`font-serif font-bold text-xl mb-3 ${pillar.color}`}>{pillar.title}</h3>
                   <p className="text-[#1D3557] text-xs leading-relaxed whitespace-pre-line text-center">{pillar.desc}</p>
                 </div>
-                <div className="absolute bottom-0 left-0 w-full h-[50%] p-2">
+                <div className="w-full h-48 p-2 mt-auto">
                   <div className="w-full h-full rounded-[16px] overflow-hidden relative">
                     <img src={pillar.img} alt={pillar.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/50 pointer-events-none" />
@@ -197,8 +197,17 @@ export default function Home() {
       {/* =========================================
           3. DẤU ẤN PHÁT TRIỂN SECTION 
       ========================================= */}
-      <section className="pt-24 pb-12 px-4 w-full relative bg-[#FFF9FA] rounded-t-[40px] md:rounded-t-[80px] mt-[-40px] shadow-[0_-15px_40px_-15px_rgba(0,0,0,0.05)] z-20">
-        <div className="max-w-[1200px] mx-auto">
+      <section className="pt-24 pb-20 px-4 w-full relative bg-[#FFF9FA] overflow-hidden z-20">
+
+        {/* Background Decorations */}
+        {/* <div className="absolute top-10 left-[-60px] opacity-10 pointer-events-none rotate-45">
+          <Flower2 className="w-64 h-64 text-rose-300" />
+        </div>
+        <div className="absolute top-40 right-[-80px] opacity-10 pointer-events-none -rotate-12">
+          <Navigation className="w-80 h-80 text-rose-300" />
+        </div> */}
+
+        <div className="max-w-[1200px] mx-auto relative z-10">
 
           <motion.div
             variants={fadeBlurVariant}
@@ -206,63 +215,71 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6 }}
-            className="flex items-center justify-center mb-4 gap-2 md:gap-4"
+            className="flex flex-col items-center mb-16"
           >
-            <div className="h-px bg-rose-200 w-10 md:w-16"></div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-[#1D3557] uppercase">
-              DẤU ẤN <span className="text-[#F494A2]">PHÁT TRIỂN</span>
-            </h2>
-            <div className="h-px bg-rose-200 w-10 md:w-16"></div>
+            <div className="flex items-center gap-6 w-full max-w-3xl">
+              <div className="h-[1px] bg-rose-200 flex-1"></div>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-[#1D3557] uppercase">
+                CÂU CHUYỆN <span className="text-[#F494A2]">CỦA CHÚNG TÔI</span>
+              </h2>
+              <div className="h-[1px] bg-rose-200 flex-1"></div>
+            </div>
+            <Heart className="w-3 h-3 text-rose-300 mt-4 fill-current" />
           </motion.div>
 
-          <motion.div
-            variants={fadeBlurVariant}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <Heart className="w-4 h-4 text-rose-200 mx-auto fill-current mb-16" />
-          </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-center">
 
-          {/* Timeline above text */}
-          <div className="relative mb-24 max-w-4xl mx-auto pl-6 md:pl-0">
-            <div className="hidden md:block absolute top-[28px] left-[15%] right-[15%] h-px bg-rose-200 z-0"></div>
+            {/* Left Description */}
+            <motion.div
+              variants={fadeBlurVariant}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="lg:col-span-1 text-center lg:text-left"
+            >
+              <p className="text-[#1D3557] text-sm md:text-base leading-relaxed font-serif italic opacity-80">
+                Từ một con phố với bề dày lịch sử, Hồ Văn Huê không ngừng chuyển mình để trở thành điểm đến cưới hàng đầu của các cặp đôi tại <span className="text-[#F494A2] font-bold not-italic">TP.HCM.</span>
+              </p>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10 border-l border-rose-200 md:border-l-0 ml-4 md:ml-0">
-              {[
-                { year: '1960+', title: 'Hình thành\nvà phát triển\nkhu vực', icon: Landmark },
-                { year: '1990+', title: 'Thiên đường\náo cưới và dịch vụ\ncưới đầu tiên', icon: Gift },
-                { year: '2010+', title: 'Nâng tầm chất lượng\ndịch vụ, đa dạng\ntrải nghiệm', icon: Navigation },
-                { year: '2024+', title: 'Ra mắt hệ sinh thái\n"Phố Hạnh Phúc\nHồ Văn Huê"', icon: HeartHandshake },
-              ].map((ms, i) => (
-                <motion.div
-                  key={i}
-                  variants={fadeBlurVariant}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: i * 0.15 }} // Hiệu ứng delay bậc thang
-                  className="flex flex-row md:flex-col items-start md:items-center md:text-center text-left relative group cursor-default"
-                >
-                  <div className="absolute w-3 h-3 bg-rose-300 rounded-full -left-[31px] top-5 md:hidden border-2 border-white"></div>
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white shadow-md border border-rose-100 flex items-center justify-center text-rose-400 mb-0 md:mb-6 shrink-0 relative mr-4 md:mr-0 z-10 group-hover:-translate-y-1 transition-transform">
-                    <ms.icon className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif font-bold text-lg md:text-xl text-[#F494A2] mb-1 md:mb-2">{ms.year}</h3>
-                    <p className="text-[11px] md:text-xs text-[#1D3557] whitespace-pre-line leading-relaxed">{ms.title}</p>
-                  </div>
-                </motion.div>
-              ))}
+            {/* Right Timeline - Wrapped in a subtle border box */}
+            <div className="lg:col-span-3 relative bg-white/40 backdrop-blur-sm border border-rose-100 rounded-[40px] md:rounded-[60px] p-8 md:p-12 lg:p-16">
+              <div className="absolute top-[80px] left-[10%] right-[10%] h-[1px] bg-rose-200 z-0 hidden md:block"></div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-4 relative z-10">
+                {[
+                  { year: '1960+', title: 'Hình thành\nvà phát triển\nkhu vực', icon: Landmark },
+                  { year: '1990+', title: 'Thiên đường\náo cưới và dịch vụ\ncưới đầu tiên', icon: Flower2 },
+                  { year: '2010+', title: 'Nâng tầm chất lượng\ndịch vụ, đa dạng\ntrải nghiệm', icon: Building2 },
+                  { year: '2024+', title: 'Ra mắt hệ sinh thái\n"Phố Hạnh Phúc\nHồ Văn Huê"', icon: HeartHandshake },
+                ].map((ms, i) => (
+                  <motion.div
+                    key={i}
+                    variants={fadeBlurVariant}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: i * 0.15 }}
+                    className="flex flex-col items-center text-center group cursor-default"
+                  >
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border border-rose-100 flex items-center justify-center text-rose-300 mb-6 shrink-0 relative z-10 group-hover:scale-105 transition-transform shadow-sm group-hover:shadow-md group-hover:border-rose-200">
+                      <ms.icon className="w-7 h-7 md:w-8 md:h-8 stroke-[1]" />
+                    </div>
+                    <h3 className="font-serif font-bold text-xl md:text-2xl text-[#1D3557] mb-2 group-hover:text-[#F494A2] transition-colors">{ms.year}</h3>
+                    <p className="text-[10px] md:text-[11px] text-[#1D3557] whitespace-pre-line leading-relaxed opacity-70 uppercase font-bold tracking-wider">{ms.title}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
 
+
           {/* Lower Content containing Mascot and Banner */}
-          <div className="flex flex-col xl:flex-row gap-8 xl:gap-6 relative z-10 w-full items-center justify-center">
+          <div className="flex flex-col xl:flex-row gap-8 xl:gap-6 relative z-10 w-full items-center justify-center mt-20">
 
             {/* Mascot & Chat card */}
-            <motion.div
+            {/* <motion.div
               variants={fadeBlurVariant}
               initial="hidden"
               whileInView="visible"
@@ -299,7 +316,7 @@ export default function Home() {
                   </div>
                 </button>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Banner */}
             <motion.div
@@ -327,11 +344,9 @@ export default function Home() {
                 </Link>
               </div>
             </motion.div>
-
           </div>
         </div>
       </section>
-
     </div>
   );
 }
