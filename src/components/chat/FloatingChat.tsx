@@ -23,15 +23,18 @@ export default function FloatingChat() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isHovered && mascotRef.current) {
+      if (mascotRef.current) {
         const rect = mascotRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        mouseX.set(e.clientX - centerX);
-        mouseY.set(e.clientY - centerY);
-      } else {
-        mouseX.set(0);
-        mouseY.set(0);
+        
+        // Calculate distance from center
+        const dx = e.clientX - centerX;
+        const dy = e.clientY - centerY;
+        
+        // Update eye positions
+        mouseX.set(dx);
+        mouseY.set(dy);
       }
     };
     window.addEventListener('mousemove', handleMouseMove);
