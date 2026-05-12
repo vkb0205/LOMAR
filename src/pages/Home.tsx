@@ -220,7 +220,7 @@ export default function Home() {
             <div className="flex items-center gap-6 w-full max-w-3xl">
               <div className="h-[1px] bg-rose-200 flex-1"></div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-[#1D3557] uppercase">
-                CÂU CHUYỆN <span className="text-[#F494A2]">CỦA CHÚNG TÔI</span>
+                DẤU ẤN <span className="text-[#F494A2]">PHÁT TRIỂN</span>
               </h2>
               <div className="h-[1px] bg-rose-200 flex-1"></div>
             </div>
