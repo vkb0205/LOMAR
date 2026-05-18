@@ -9,7 +9,7 @@ const fadeBlurVariant = {
   visible: { opacity: 1, y: 0, filter: 'blur(0px)' }
 };
 
-const trainImg = '/src/img/train_marriage.jpeg';
+import trainImg from '../img/train_marriage.jpeg';
 
 
 export default function Home() {
