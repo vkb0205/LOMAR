@@ -1,7 +1,101 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, User, Clock, Flame, Folder, Hash, ImagePlus, Smile } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+// Định nghĩa kiểu dữ liệu cho bài viết sau khi format
+interface BlogPost {
+  id: string;
+  name: string;
+  time: string;
+  content: string;
+  tags: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  avatar: string;
+}
 
 export default function Blog() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        setLoading(true);
+        // Fetch posts
+        const { data: postsData, error: postsError } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (postsError || !postsData || postsData.length === 0) {
+          setPosts([]);
+          return;
+        }
+
+        // Fetch related data for each post
+        const formattedPosts: BlogPost[] = await Promise.all((postsData as any[]).map(async (post: any) => {
+          // Fetch user info
+          let authorName = 'Anonymous';
+          let authorAvatar = 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=100';
+          if (post.user_id) {
+            const { data: userData } = await supabase.from('users').select('username, avatar_url').eq('id', post.user_id).single();
+            if (userData) {
+              const u = userData as any;
+              authorName = u.username || authorName;
+              authorAvatar = u.avatar_url || authorAvatar;
+            }
+          }
+
+          // Fetch likes count
+          const { count: likesCount } = await supabase.from('post_likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id);
+          
+          // Fetch comments count
+          const { count: commentsCount } = await supabase.from('post_comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id);
+
+          // Fetch tags
+          const { data: postTagsData } = await supabase.from('post_tags').select('tag_id').eq('post_id', post.id);
+          let tagsString = '';
+          if (postTagsData && postTagsData.length > 0) {
+            const tagIds = (postTagsData as any[]).map(pt => pt.tag_id);
+            const { data: tagsData } = await supabase.from('tags').select('name').in('id', tagIds);
+            if (tagsData) {
+              tagsString = (tagsData as any[]).map(t => `#${t.name}`).join(' ');
+            }
+          }
+
+          // Format time (simple relative time mockup)
+          const postDate = new Date(post.created_at || new Date());
+          const now = new Date();
+          const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
+          const timeStr = diffInHours < 24 ? `${diffInHours || 1} giờ` : `${Math.floor(diffInHours / 24)} ngày`;
+
+          return {
+            id: post.id,
+            name: authorName,
+            time: timeStr,
+            content: post.content || '',
+            tags: tagsString,
+            likes: likesCount || 0,
+            comments: commentsCount || 0,
+            shares: 0, // Not in schema, default to 0
+            avatar: authorAvatar
+          };
+        }));
+
+        setPosts(formattedPosts);
+      } catch (error) {
+        console.error('Error fetching blog data:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
   return (
     <div className="w-full flex-1 p-4 md:p-6 font-sans flex flex-col items-center">
       
@@ -92,41 +186,12 @@ export default function Blog() {
 
            {/* Feed Container */}
            <div className="flex flex-col gap-6">
-              {[
-                { 
-                  name: 'User_nickname 1', 
-                  time: '2 giờ', 
-                  content: 'Vừa tham quan Sky Dream Venue ở Hồ Văn Huê xong, không gian đúng là sang trọng và lãng mạn như mơ! 💖\nKhông biết mọi người đã chọn được venue ưng ý cho ngày cưới chưa nè?', 
-                  tags: '#VenueDep #HoVanHue #WeddingInspo',
-                  likes: 128, comments: 23, shares: 16,
-                  avatar: 'https://images.unsplash.com/photo-1542042161784-26ab9e041e89?auto=format&fit=crop&q=80&w=100'
-                },
-                { 
-                  name: 'User_nickname 2', 
-                  time: '5 giờ', 
-                  content: 'Checklist chuẩn bị cưới siêu chi tiết mà mình tổng hợp được.\nHy vọng giúp ích cho các cặp đôi sắp cưới nè! 📝', 
-                  tags: '#ChecklistCuoi #WeddingPlanning',
-                  likes: 98, comments: 12, shares: 8,
-                  avatar: 'https://images.unsplash.com/photo-1512418490979-92798cec1380?auto=format&fit=crop&q=80&w=100'
-                },
-                { 
-                  name: 'User_nickname 3', 
-                  time: '1 ngày', 
-                  content: 'Ý tưởng trang trí tiệc cưới tone pastel siêu xinh cho mùa xuân 🌸\nLưu lại ngay để tham khảo nha mọi người!', 
-                  tags: '#TrangTriTiecCuoi #PastelWedding',
-                  likes: 156, comments: 31, shares: 22,
-                  avatar: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&q=80&w=100'
-                },
-                { 
-                  name: 'User_nickname 4', 
-                  time: '2 ngày', 
-                  content: 'Nhẫn cưới nên chọn như thế nào cho phù hợp?\nChia sẻ kinh nghiệm chọn nhẫn từ A-Z 💍', 
-                  tags: '#NhanCuoi #KinhNghiemCuoi',
-                  likes: 72, comments: 9, shares: 5,
-                  avatar: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=100'
-                },
-              ].map((post, i) => (
-                <div key={i} className="bg-[#FFFDFD] rounded-[32px] p-6 shadow-sm border border-rose-50 flex flex-col gap-4">
+              {loading ? (
+                <div className="w-full py-20 flex justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F494A2]"></div>
+                </div>
+              ) : posts.map((post) => (
+                <div key={post.id} className="bg-[#FFFDFD] rounded-[32px] p-6 shadow-sm border border-rose-50 flex flex-col gap-4">
                   {/* Header */}
                   <div className="flex items-center gap-3">
                      <div className="w-12 h-12 rounded-full shadow-sm flex shrink-0 overflow-hidden bg-rose-100">

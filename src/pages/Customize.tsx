@@ -1,133 +1,239 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Heart, ArrowRight, ChevronRight } from 'lucide-react';
+import { Send, Heart, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../types/database';
+import { useAppContext } from '../context/AppContext';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 type ProductRow = Database['public']['Tables']['products']['Row'];
 type VendorRow = Database['public']['Tables']['vendors']['Row'];
 
-const customizationOptions: Record<string, { title: string, options: string[] }[]> = {
-  'Váy Cưới': [
-    { title: 'Kiểu Váy', options: ['A-Line', 'Ball Gown', 'Mermaid', 'Trumpet'] },
-    { title: 'Đính Kết Hạt', options: ['Pha lê Swarovski', 'Ngọc trai', 'Kim sa'] },
-    { title: 'Thân Trên', options: ['Cúp ngực', 'Trễ vai', 'Cổ chữ V'] },
-    { title: 'Thân Trước', options: ['Trơn satin', 'Xếp ly', 'Phủ ren'] },
-    { title: 'Thân Sau', options: ['Đan dây', 'Cài nút ngọc', 'Khoét sâu lưng'] }
-  ],
-  'Vest': [
-    { title: 'Kiểu Vest', options: ['Suit 2 mảnh', 'Suit 3 mảnh', 'Tuxedo'] },
-    { title: 'Dáng Vest', options: ['Slim Fit', 'Regular Fit', 'Classic'] },
-    { title: 'Ve Áo Vest', options: ['Ve K (Notch)', 'Ve Nhọn', 'Ve Sam'] },
-    { title: 'Nút Áo Khoác', options: ['1 Nút', '2 Nút', '6 Nút'] },
-  ],
-  'Venue': [
-    { title: 'Cửa Hàng', options: ['Sky Dream', 'Dream Palace', 'Earth Dream'] },
-    { title: 'Phong Cách', options: ['Sang trọng', 'Lãng mạn', 'Cổ điển'] },
-    { title: 'Quy Mô', options: ['Dưới 200 khách', '200 - 500 khách', 'Trên 500 khách'] },
-    { title: 'Ngân Sách', options: ['Phổ thông', 'Trung cấp', 'Cao cấp'] },
-  ],
-  'Trang Trí': [
-    { title: 'Tone Màu Chủ Đạo', options: ['Hồng Pastel', 'Trắng Tinh Khôi', 'Đỏ Rực Rỡ', 'Xanh Biển'] },
-    { title: 'Phong Cách', options: ['Rustic', 'Luxury', 'Minimalism', 'Vintage'] },
-    { title: 'Hoa Cưới', options: ['Hoa Tươi', 'Hoa Lụa', 'Hoa Khô', 'Kết Hợp'] },
-    { title: 'Sân Khấu', options: ['Màn Hình LED', 'Phông Rèm Cổ Điển', 'Khung Hoa Cổng'] },
-  ],
-  'Làm Đẹp': [
-    { title: 'Layout Makeup', options: ['Tự nhiên (Hàn Quốc)', 'Tây Âu Sắc Sảo', 'Trong Trẻo', 'Cổ Điển'] },
-    { title: 'Kiểu Tóc', options: ['Búi Cao Sang Trọng', 'Thả Xoăn Lọn To', 'Búi Thấp Đính Hoa'] },
-    { title: 'Chăm Sóc Da', options: ['Phục hồi chuyên sâu', 'Trị mụn', 'Dưỡng trắng', 'Cấp ẩm'] },
-  ]
+type OptionGroup = {
+  id: string;
+  title: string;
+  options: { id: string; name: string; price: number }[];
 };
 
-const defaultImages: Record<string, string> = {
-  'Váy Cưới': 'https://images.unsplash.com/photo-1595000072051-5afcb1eef556?auto=format&fit=crop&q=80&w=1000',
-  'Vest': 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1000',
-  'Venue': 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000',
-  'Trang Trí': 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=1000',
-  'Làm Đẹp': 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&q=80&w=1000'
-};
+const MOCK_USER_ID = 'user_1';
 
-const basePrices: Record<string, number> = {
-  'Váy Cưới': 8000000,
-  'Vest': 5500000,
-  'Venue': 45000000,
-  'Trang Trí': 15000000,
-  'Làm Đẹp': 3500000
-};
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1000';
 
 export default function Customize() {
-  const [activeTab, setActiveTab] = useState('Váy Cưới');
+  const { customizedServices, saveCustomizedService } = useAppContext();
+  const [activeTab, setActiveTab] = useState('');
   const [activePropertyIndex, setActivePropertyIndex] = useState(0);
   const [selections, setSelections] = useState<Record<string, Record<string, string>>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Chat state
   const [messages, setMessages] = useState<{ text: string, isUser: boolean }[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
 
-  const [dbOptions, setDbOptions] = useState<Record<string, { title: string, options: string[] }[]>>(customizationOptions);
+  // State lưu trữ TẤT CẢ dữ liệu từ Supabase
+  const [allProducts, setAllProducts] = useState<ProductRow[]>([]);
+  const [allVendors, setAllVendors] = useState<Record<string, VendorRow>>({});
+  const [allImages, setAllImages] = useState<Record<string, string[]>>({});
+  const [allOptions, setAllOptions] = useState<any[]>([]); // Lưu raw options data
+  const [productOptionMap, setProductOptionMap] = useState<any[]>([]); // Lưu product_options
 
-  const [tabs, setTabs] = useState(['Váy Cưới', 'Vest', 'Venue', 'Trang Trí', 'Làm Đẹp']);
-  const [liveImages, setLiveImages] = useState(defaultImages);
-  const [livePrices, setLivePrices] = useState(basePrices);
-  const properties = dbOptions[activeTab] || dbOptions['Váy Cưới'] || [];
+  const [tabs, setTabs] = useState<string[]>([]);
 
-  // Fetch real categories and vendors from Supabase
+  // State cực kỳ quan trọng: Lưu ID của sản phẩm đang được chọn cho từng Tab
+  const [activeProductIds, setActiveProductIds] = useState<Record<string, string>>({});
+  const [selectedThumb, setSelectedThumb] = useState<string | null>(null);
+
   useEffect(() => {
     async function fetchLiveData() {
       try {
-        // 1. Fetch products to get categories, images, and prices
         const { data: productData } = await supabase.from('products').select('*');
+        const { data: imageData } = await supabase.from('product_images').select('*');
+        const { data: prodOptData } = await supabase.from('product_options').select('*');
+        const { data: vendorData } = await supabase.from('vendors').select('*');
+        const { data: custData } = await supabase
+          .from('customization_options')
+          .select(`id, category, name, customization_values ( id, value_name, extra_price )`)
+          .order('display_order', { ascending: true });
+
         if (productData && productData.length > 0) {
           const typedProducts = productData as ProductRow[];
-          
-          // Get unique categories
+          setAllProducts(typedProducts);
+          if (prodOptData) setProductOptionMap(prodOptData);
+          if (custData) setAllOptions(custData);
+
+          // Chỉ hiển thị các danh mục cho phép tùy chỉnh
+          const allowedCategories = ['Váy Cưới', 'Vest', 'Venue'];
           const uniqueCategories = [...new Set(typedProducts.map(p => p.category).filter(Boolean))] as string[];
-          if (uniqueCategories.length > 0) {
-            setTabs(uniqueCategories);
+          const displayTabs = uniqueCategories.filter(cat => allowedCategories.includes(cat));
+          if (displayTabs.length > 0) {
+            setTabs(displayTabs);
+          } else {
+            setTabs(allowedCategories);
           }
 
-          // Build dynamic images and prices map
-          const newImages: Record<string, string> = { ...defaultImages };
-          const newPrices: Record<string, number> = { ...basePrices };
-          
-          uniqueCategories.forEach(cat => {
-            const firstProd = typedProducts.find(p => p.category === cat);
-            if (firstProd) {
-              if (firstProd.image_url) newImages[cat] = firstProd.image_url;
-              if (firstProd.price) newPrices[cat] = Number(firstProd.price);
+          // Tạo vendor map
+          if (vendorData) {
+            const vMap: Record<string, VendorRow> = {};
+            vendorData.forEach((v: any) => vMap[v.id] = v);
+            setAllVendors(vMap);
+          }
+
+          // Phân loại hình ảnh cho từng sản phẩm
+          const imgMap: Record<string, string[]> = {};
+          typedProducts.forEach(p => {
+            const pImgs = (imageData as any[])?.filter(img => img.product_id === p.id)
+              .sort((a, b) => (b.is_main ? 1 : 0) - (a.is_main ? 1 : 0))
+              .map(img => img.image_url || '')
+              .filter(url => !!url) || [];
+            imgMap[p.id] = pImgs.length > 0 ? pImgs : (p.image_url ? [p.image_url] : []);
+          });
+          setAllImages(imgMap);
+
+          // Gán mặc định hoặc lấy từ customizedServices đã lưu
+          const initialActiveIds: Record<string, string> = {};
+          const initialSelections: Record<string, Record<string, string>> = {};
+
+          const activeCats = displayTabs.length > 0 ? displayTabs : allowedCategories;
+          activeCats.forEach(cat => {
+            const saved = customizedServices[cat];
+            if (saved) {
+              initialActiveIds[cat] = saved.productId;
+              const sel: Record<string, string> = {};
+              saved.selectedOptions.forEach(opt => {
+                sel[opt.optionGroupId] = opt.valueId;
+              });
+              initialSelections[cat] = sel;
+            } else {
+              const firstProduct = typedProducts.find(p => p.category?.toLowerCase() === cat.toLowerCase());
+              if (firstProduct) initialActiveIds[cat] = firstProduct.id;
             }
           });
-          
-          setLiveImages(newImages);
-          setLivePrices(newPrices);
-        }
+          setActiveProductIds(initialActiveIds);
+          setSelections(initialSelections);
 
-        // 2. Fetch real vendors for the 'Venue' section
-        const { data: vendorData } = await supabase.from('vendors').select('name');
-        if (vendorData) {
-          const vendorNames = (vendorData as VendorRow[]).map(v => v.name).filter(Boolean) as string[];
-          setDbOptions(prev => ({
-            ...prev,
-            'Venue': prev['Venue']?.map(group => 
-              group.title === 'Cửa Hàng' 
-                ? { ...group, options: vendorNames.length > 0 ? vendorNames : group.options }
-                : group
-            ) || []
-          }));
+          if (activeCats.length > 0) {
+            setActiveTab(activeCats[0]);
+          }
         }
       } catch (error) {
-        console.error('Error fetching live data for customization:', error);
+        console.error('Lỗi khi fetch data:', error);
       }
     }
     fetchLiveData();
   }, []);
 
+  // Tự động kiểm tra và sửa activeProductIds nếu ID sản phẩm không tồn tại trong database (ví dụ do mock data cũ lưu trong localStorage)
+  useEffect(() => {
+    if (activeTab && allProducts.length > 0) {
+      const currentId = activeProductIds[activeTab];
+      const exists = allProducts.some(p => p.id === currentId);
+      if (!exists) {
+        const fallbackProd = allProducts.find(p => p.category?.toLowerCase() === activeTab?.toLowerCase());
+        if (fallbackProd) {
+          setActiveProductIds(prev => ({ ...prev, [activeTab]: fallbackProd.id }));
+        }
+      }
+    }
+  }, [activeTab, allProducts, activeProductIds]);
+
+  // Lấy dữ liệu của sản phẩm HIỆN TẠI đang được chọn
+  const activeProductId = activeProductIds[activeTab];
+  const activeProduct = allProducts.find(p => p.id === activeProductId);
+  const vendorInfo = activeProduct?.vendor_id ? allVendors[activeProduct.vendor_id] : null;
+
+  // Tính toán Customization Options chỉ dành riêng cho sản phẩm hiện tại
+  const currentProperties: OptionGroup[] = React.useMemo(() => {
+    if (!activeProduct) return [];
+    // Tìm các option_id được phép dùng cho product này
+    const allowedOptionIds = productOptionMap.filter(po => po.product_id === activeProduct.id).map(po => po.option_id);
+
+    return allOptions
+      .filter(opt => allowedOptionIds.includes(opt.id))
+      .map(opt => {
+        const vals = (opt.customization_values || []).map((v: any) => ({
+          id: v.id, name: v.value_name, price: Number(v.extra_price || 0)
+        }));
+        return { id: opt.id, title: opt.name || 'Tùy chọn', options: vals };
+      });
+  }, [activeProduct, productOptionMap, allOptions]);
+
+  // Đồng bộ lựa chọn tự động sang AppContext khi người dùng thay đổi sản phẩm hoặc tùy chọn
+  useEffect(() => {
+    if (!activeProductId || !activeProduct) return;
+
+    // Lấy thông tin options đang chọn
+    const activeTabSelections = selections[activeTab] || {};
+    const selectedOptionDetails: any[] = [];
+    let totalPrice = Number(activeProduct.price || 0);
+
+    currentProperties.forEach(prop => {
+      const selectedValueId = activeTabSelections[prop.id];
+      if (selectedValueId) {
+        const optionVal = prop.options.find(o => o.id === selectedValueId);
+        if (optionVal) {
+          totalPrice += optionVal.price;
+          selectedOptionDetails.push({
+            optionGroupId: prop.id,
+            optionGroupName: prop.title,
+            valueId: selectedValueId,
+            valueName: optionVal.name,
+            price: optionVal.price
+          });
+        }
+      }
+    });
+
+    const currentService = {
+      category: activeTab,
+      productId: activeProductId,
+      productName: activeProduct.name || '',
+      basePrice: Number(activeProduct.price || 0),
+      totalPrice: totalPrice,
+      imageUrl: allImages[activeProductId]?.[0] || PLACEHOLDER_IMAGE,
+      vendorName: vendorInfo?.name || 'Bé Song Hỷ',
+      selectedOptions: selectedOptionDetails
+    };
+
+    // Chỉ lưu nếu có thay đổi thực sự
+    const prevSaved = customizedServices[activeTab];
+    const isDifferent = !prevSaved || 
+      prevSaved.productId !== activeProductId || 
+      JSON.stringify(prevSaved.selectedOptions) !== JSON.stringify(selectedOptionDetails);
+
+    if (isDifferent) {
+      saveCustomizedService(activeTab, currentService);
+    }
+  }, [
+    activeTab, 
+    activeProductId, 
+    selections, 
+    activeProduct, 
+    currentProperties, 
+    allImages, 
+    vendorInfo,
+    customizedServices,
+    saveCustomizedService
+  ]);
+
+  // Handle thay đổi sản phẩm (Dropdown)
+  const handleProductChange = (newProductId: string) => {
+    setActiveProductIds(prev => ({ ...prev, [activeTab]: newProductId }));
+    setSelectedThumb(null);
+    setActivePropertyIndex(0);
+    // Reset selections khi đổi sản phẩm khác để tránh lỗi option
+    setSelections(prev => ({ ...prev, [activeTab]: {} }));
+  };
+
   // Fetch chat history from Supabase
   useEffect(() => {
     async function fetchChat() {
-      const { data } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', MOCK_USER_ID)
+        .order('created_at', { ascending: true });
+
       if (data && data.length > 0) {
         setMessages((data as ChatMessageRow[]).map(m => ({ text: m.content || '', isUser: m.role === 'user' })));
       }
@@ -137,35 +243,37 @@ export default function Customize() {
 
   // Update chat greeting when tab changes
   useEffect(() => {
-    setMessages([
-      { text: `Mẫu ${activeTab.toLowerCase()} trong mơ của bạn như thế nào nhỉ ?`, isUser: false },
-      { text: `Hãy tự thiết kế ${activeTab.toLowerCase()} của bạn bằng các công cụ bên trái nha! Bé Song sẽ gợi ý lựa chọn phù hợp cho bạn nè!`, isUser: false }
-    ]);
-    setActivePropertyIndex(0);
+    if (activeTab) {
+      setMessages([
+        { text: `Mẫu ${activeTab.toLowerCase()} trong mơ của bạn như thế nào nhỉ ?`, isUser: false },
+        { text: `Hãy tự thiết kế ${activeTab.toLowerCase()} của bạn bằng các công cụ bên trái nha! Bé Song sẽ gợi ý lựa chọn phù hợp cho bạn nè!`, isUser: false }
+      ]);
+      setActivePropertyIndex(0);
+      setSelectedThumb(null);
+    }
   }, [activeTab]);
 
-  // Scroll to bottom of chat
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
-  const handleOptionSelect = (tab: string, propTitle: string, option: string) => {
+  const handleOptionSelect = (propId: string, valueId: string, valueName: string) => {
     setSelections(prev => ({
       ...prev,
-      [tab]: {
-        ...(prev[tab] || {}),
-        [propTitle]: option
-      }
+      [activeTab]: { ...(prev[activeTab] || {}), [propId]: valueId }
     }));
-
-    // Auto reply from bot when option selected
-    if (!messages.some(m => m.text.includes(option))) {
-      const botText = `Bé Song đã ghi nhận bạn chọn "${option}" cho phần ${propTitle}. Thật tuyệt vời!`;
-      setTimeout(async () => {
-        setMessages(prev => [...prev, { text: botText, isUser: false }]);
-        await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
-      }, 500);
-    }
+    setSelectedThumb(null);
+    const botText = `Bé Song đã ghi nhận bạn chọn "${valueName}". Thật tuyệt vời!`;
+    setTimeout(async () => {
+      setMessages(prev => [...prev, { text: botText, isUser: false }]);
+      await supabase.from('chat_messages').insert({
+        user_id: MOCK_USER_ID,
+        role: 'assistant',
+        content: botText
+      } as any);
+    }, 500);
   };
 
   const handleSendMessage = async () => {
@@ -173,35 +281,96 @@ export default function Customize() {
     const userText = inputValue;
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
-
-    // Insert into DB
-    await supabase.from('chat_messages').insert({ role: 'user', content: userText } as any);
-
+    await supabase.from('chat_messages').insert({
+      user_id: MOCK_USER_ID,
+      role: 'user',
+      content: userText
+    } as any);
     setTimeout(async () => {
       const botText = 'Bé Song đang tìm kiếm lựa chọn hoàn hảo nhất cho ý tưởng của bạn...';
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
-      await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
+      await supabase.from('chat_messages').insert({
+        user_id: MOCK_USER_ID,
+        role: 'assistant',
+        content: botText
+      } as any);
     }, 1000);
   };
 
-  // Dynamic price calculation
-  const currentSelectionsCount = selections[activeTab] ? Object.keys(selections[activeTab]).length : 0;
-  const currentPrice = (livePrices[activeTab] || basePrices[activeTab]) + (currentSelectionsCount * 500000);
+  // Tính giá động = Giá gốc sản phẩm + Giá các options
+  let currentPrice = Number(activeProduct?.price || 0);
+  const currentTabSelections = selections[activeTab];
+
+  if (currentTabSelections && currentProperties.length > 0) {
+    Object.entries(currentTabSelections).forEach(([propId, selectedValueId]) => {
+      const propGroup = currentProperties.find(p => p.id === propId);
+      if (propGroup) {
+        const selectedVal = propGroup.options.find(o => o.id === selectedValueId);
+        if (selectedVal) currentPrice += selectedVal.price;
+      }
+    });
+  }
+
+  const handleSaveDesign = async () => {
+    if (!activeProduct) return;
+    setIsSaving(true);
+    try {
+      const userId = 'U01';
+      // Tạo designId ngẫu nhiên
+      const designId = Math.random().toString(36).substring(2, 12);
+      
+      // 1. Insert into user_designs
+      const { error: designError } = await supabase
+        .from('user_designs')
+        .insert({
+          id: designId,
+          user_id: userId,
+          category: activeTab,
+          total_price: currentPrice
+        } as any);
+
+      if (designError) throw designError;
+
+      // 2. Insert selections into user_design_selections
+      const activeTabSelections = selections[activeTab] || {};
+      const selectionsToInsert = Object.entries(activeTabSelections).map(([optionGroupId, valueId]) => ({
+        design_id: designId,
+        value_id: valueId
+      }));
+
+      if (selectionsToInsert.length > 0) {
+        const { error: selectionsError } = await supabase
+          .from('user_design_selections')
+          .insert(selectionsToInsert as any);
+
+        if (selectionsError) throw selectionsError;
+      }
+
+      alert('Lưu thiết kế thành công!');
+      // Reset selections
+      setSelections(prev => ({ ...prev, [activeTab]: {} }));
+    } catch (error) {
+      console.error('Lỗi khi lưu thiết kế:', error);
+      alert('Đã xảy ra lỗi khi lưu thiết kế. Vui lòng thử lại!');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Quản lý hình ảnh hiển thị
+  const productImages = activeProductId ? allImages[activeProductId] : [];
+  const baseImage = productImages?.[0] || PLACEHOLDER_IMAGE;
+  const currentMainImage = selectedThumb || baseImage;
 
   return (
     <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FEF6F7] min-h-screen">
-
-      {/* Upper Navigation Tabs */}
       <div className="max-w-[1200px] w-full mx-auto mb-6 flex justify-center overflow-x-auto no-scrollbar py-2">
         <div className="flex bg-white rounded-full shadow-sm p-1 border border-rose-100">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab
-                ? 'bg-[#F494A2] text-white shadow-inner'
-                : 'bg-transparent text-[#1D3557] hover:text-[#F494A2]'
-                }`}
+              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab ? 'bg-[#F494A2] text-white shadow-inner' : 'bg-transparent text-[#1D3557] hover:text-[#F494A2]'}`}
             >
               {tab}
             </button>
@@ -209,105 +378,194 @@ export default function Customize() {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
+      <div className="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 lg:h-[800px] items-start">
 
-        {/* Left Sidebar (Properties & Options) */}
-        <aside className="lg:w-[320px] flex-shrink-0 flex flex-col gap-3">
-          {properties.map((prop, idx) => (
-            <div key={prop.title} className="flex flex-col bg-white/50 rounded-3xl border border-rose-100 overflow-hidden shadow-sm transition-all">
+        {/* Left Sidebar */}
+        <aside className="lg:w-[320px] flex-shrink-0 flex flex-col gap-3 overflow-y-auto no-scrollbar pb-4 h-full">
+
+          {/* BỘ CHỌN SẢN PHẨM GỐC - CUSTOM VISUAL DROPDOWN */}
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-rose-100 p-4 shadow-sm mb-2 relative z-20">
+            <label className="block text-[10px] font-bold text-[#F494A2] mb-3 uppercase tracking-widest">
+              Chọn Mẫu {activeTab}
+            </label>
+
+            <div className="relative">
               <button
-                onClick={() => setActivePropertyIndex(idx)}
-                className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx
-                  ? 'bg-white text-[#F494A2]'
-                  : 'bg-transparent text-[#1D3557] hover:bg-white'
-                  }`}
+                onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
+                className="w-full bg-white border border-rose-100 text-[#1D3557] rounded-2xl p-3 text-sm font-serif flex items-center justify-between hover:border-[#F494A2] transition-colors shadow-sm"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#F494A2]' : 'border-rose-200 text-rose-300'}`}>
-                    {selections[activeTab]?.[prop.title] ? (
-                      <div className="w-4 h-4 rounded-full bg-[#F494A2]"></div>
-                    ) : (
-                      <span className="w-4 h-4 rounded-full border border-current"></span>
-                    )}
+                  {/* TĂNG KÍCH THƯỚC ẢNH VÀ ĐỔI TỶ LỆ DỌC */}
+                  <div className="w-12 h-16 rounded-lg overflow-hidden border border-rose-50 shadow-sm shrink-0 bg-gray-50">
+                    <img
+                      src={allImages[activeProductId]?.[0] || PLACEHOLDER_IMAGE}
+                      alt=""
+                      className="w-full h-full object-cover object-top"
+                      onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
+                    />
                   </div>
-                  <div className="flex flex-col items-start">
-                    <span className="font-bold">{prop.title}</span>
-                    {selections[activeTab]?.[prop.title] && (
-                      <span className="text-[10px] text-gray-500 font-sans font-medium uppercase tracking-widest">{selections[activeTab][prop.title]}</span>
-                    )}
+                  <div className="flex flex-col items-start text-left">
+                    <span className="font-bold line-clamp-2 text-[15px]">{activeProduct?.name || 'Chọn sản phẩm'}</span>
+                    <span className="text-[10px] text-gray-500 font-sans font-medium uppercase mt-1 tracking-wider">Mẫu hiện tại</span>
                   </div>
                 </div>
-                <ChevronRight className={`w-4 h-4 text-[#F494A2] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#F494A2] transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Options Expansion */}
-              {activePropertyIndex === idx && (
-                <div className="flex flex-wrap gap-2 px-6 pb-6 pt-2 bg-white">
-                  {prop.options.map(opt => {
-                    const isSelected = selections[activeTab]?.[prop.title] === opt;
-                    return (
-                      <button
-                        key={opt}
-                        onClick={() => handleOptionSelect(activeTab, prop.title, opt)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected
-                          ? 'bg-[#F494A2] text-white border-[#F494A2] shadow-sm'
-                          : 'bg-rose-50 text-[#1D3557] border-transparent hover:border-[#F494A2]'
-                          }`}
-                      >
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
+              {isProductDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-20" onClick={() => setIsProductDropdownOpen(false)}></div>
+                  <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-rose-50 overflow-hidden z-30 animate-in fade-in zoom-in duration-200">
+                    <div className="max-h-[350px] overflow-y-auto no-scrollbar p-2 space-y-1">
+                      {allProducts.filter(p => p.category?.toLowerCase() === activeTab?.toLowerCase()).length === 0 ? (
+                        <div className="text-center p-6 text-xs text-gray-500 font-sans">
+                          Không tìm thấy sản phẩm nào cho danh mục này.
+                        </div>
+                      ) : (
+                        allProducts.filter(p => p.category?.toLowerCase() === activeTab?.toLowerCase()).map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => {
+                              handleProductChange(p.id);
+                              setIsProductDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${activeProductId === p.id
+                              ? 'bg-rose-50 border border-rose-100'
+                              : 'hover:bg-rose-50/50 border border-transparent'
+                              }`}
+                          >
+                            {/* TĂNG KÍCH THƯỚC ẢNH TRONG LIST */}
+                            <div className="w-12 h-16 rounded-lg overflow-hidden border border-white shadow-sm flex-shrink-0 bg-gray-50">
+                              <img
+                                src={allImages[p.id]?.[0] || PLACEHOLDER_IMAGE}
+                                alt=""
+                                className="w-full h-full object-cover object-top"
+                                onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
+                              />
+                            </div>
+                            <div className="flex flex-col items-start text-left pr-2">
+                              <span className={`text-sm font-bold line-clamp-2 leading-tight ${activeProductId === p.id ? 'text-[#F494A2]' : 'text-[#1D3557]'}`}>
+                                {p.name}
+                              </span>
+                              <span className="text-[11px] text-gray-500 font-medium mt-1">
+                                {Number(p.price || 0).toLocaleString('vi-VN')} VND
+                              </span>
+                            </div>
+                            {activeProductId === p.id && (
+                              <div className="ml-auto w-2 h-2 rounded-full bg-[#F494A2] shrink-0"></div>
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
-          ))}
+          </div>
+
+          {/* DANH SÁCH TÙY CHỈNH CỦA SẢN PHẨM */}
+          <div className="relative z-10 space-y-3">
+            {currentProperties.length === 0 ? (
+              <div className="text-center p-6 text-sm text-gray-500 bg-white/50 rounded-3xl border border-rose-100">
+                Mẫu này không hỗ trợ tùy chỉnh.
+              </div>
+            ) : (
+              currentProperties.map((prop, idx) => (
+                <div key={prop.id} className="flex flex-col bg-white/50 rounded-3xl border border-rose-100 overflow-hidden shadow-sm transition-all">
+                  <button
+                    onClick={() => setActivePropertyIndex(idx)}
+                    className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx ? 'bg-white text-[#F494A2]' : 'bg-transparent text-[#1D3557] hover:bg-white'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#F494A2]' : 'border-rose-200 text-rose-300'}`}>
+                        {selections[activeTab]?.[prop.id] ? <div className="w-4 h-4 rounded-full bg-[#F494A2]"></div> : <span className="w-4 h-4 rounded-full border border-current"></span>}
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">{prop.title}</span>
+                        {selections[activeTab]?.[prop.id] && (
+                          <span className="text-[10px] text-gray-500 font-sans font-medium uppercase tracking-widest">
+                            {prop.options.find(o => o.id === selections[activeTab][prop.id])?.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 text-[#F494A2] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
+                  </button>
+
+                  {activePropertyIndex === idx && (
+                    <div className="flex flex-wrap gap-2 px-6 pb-6 pt-2 bg-white">
+                      {prop.options.map(opt => {
+                        const isSelected = selections[activeTab]?.[prop.id] === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => handleOptionSelect(prop.id, opt.id, opt.name)}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected ? 'bg-[#F494A2] text-white border-[#F494A2] shadow-sm' : 'bg-rose-50 text-[#1D3557] border-transparent hover:border-[#F494A2]'}`}
+                          >
+                            {opt.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </aside>
 
-        {/* Center Canvas (Preview) */}
-        <div className="flex-1 bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 overflow-hidden flex flex-col p-6 min-h-[650px]">
+        {/* Center Canvas */}
+        <div className="flex-1 bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 overflow-hidden flex flex-col p-6 min-h-[500px] lg:min-h-0 h-full">
+          <div className="mb-4">
+            <h1 className="text-2xl font-serif font-bold text-[#1D3557]">
+              {activeProduct?.name || activeTab}
+            </h1>
+            {vendorInfo && (
+              <p className="text-xs text-[#F494A2] font-bold uppercase tracking-widest mt-1">
+                Bởi {vendorInfo.name}
+              </p>
+            )}
+          </div>
 
           <div className="flex-1 rounded-[24px] overflow-hidden bg-white relative flex mb-6 p-2">
-
-            {/* Main Preview Image */}
             <div className="flex-1 w-full h-full relative overflow-hidden bg-white rounded-2xl md:mr-4">
               <img
-                src={liveImages[activeTab] || defaultImages[activeTab]}
+                src={currentMainImage}
                 alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover rounded-2xl"
+                className="absolute inset-0 w-full h-full object-cover rounded-2xl transition-opacity duration-500"
                 style={{ objectPosition: 'top center' }}
+                onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
               />
             </div>
 
-            {/* Thumbnail selector column (If not Venue) */}
-            {activeTab !== 'Venue' && (
-              <div className="w-20 lg:w-24 flex flex-col gap-3 relative z-10 hidden md:flex overflow-y-auto no-scrollbar py-2">
-                {[1, 2, 3, 4, 5].map((item, i) => (
-                  <button key={item} className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${i === 0 ? 'border-[#F494A2] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                    <img src={`${liveImages[activeTab] || defaultImages[activeTab]}&sig=${item}`} alt="thumb" className="w-full h-full object-cover" />
-                  </button>
-                ))}
+            {activeTab !== 'Venue' && productImages && productImages.length > 1 && (
+              <div className="w-20 lg:w-24 flex flex-col gap-3 relative z-10 hidden md:flex overflow-y-auto no-scrollbar py-2 animate-in fade-in slide-in-from-right duration-300">
+                {productImages.map((url, i) => {
+                  const isSelected = selectedThumb === url || (!selectedThumb && i === 0);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedThumb(url)}
+                      className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${isSelected ? 'border-[#F494A2] opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    >
+                      <img src={url} alt="thumb" className="w-full h-full object-cover" />
+                    </button>
+                  );
+                })}
               </div>
             )}
-
           </div>
 
-          {/* Details / Capabilities row */}
           <div className="bg-[#FFFDFD] rounded-2xl p-6 shadow-sm border border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-rose-100 pb-4 md:pb-0 pr-0 md:pr-6">
               <h3 className="font-bold text-[#1D3557] text-sm mb-2 uppercase tracking-wider">GIỚI THIỆU</h3>
               <p className="text-xs text-[#1D3557]/70 leading-relaxed line-clamp-3">
-                Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng Bé Song Hỷ tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
+                Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng {vendorInfo?.name || 'Bé Song Hỷ'} tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
               </p>
             </div>
             <div className="flex-1 flex gap-4 lg:gap-8 justify-around px-4">
-              {[
-                { title: 'CHẤT LIỆU CAO CẤP' },
-                { title: 'THIẾT KẾ ĐỘC QUYỀN' },
-                { title: 'MAY ĐO THEO SỐ ĐO' },
-                { title: 'BẢO HÀNH TRỌN ĐỜI' }
-              ].map((feat, i) => (
+              {[{ title: 'CHẤT LIỆU CAO CẤP' }, { title: 'THIẾT KẾ ĐỘC QUYỀN' }, { title: 'MAY ĐO THEO SỐ ĐO' }, { title: 'BẢO HÀNH TRỌN ĐỜI' }].map((feat, i) => (
                 <div key={i} className="flex flex-col items-center text-center max-w-[80px]">
                   <div className="w-10 h-10 rounded-full border border-rose-100 flex items-center justify-center text-[#F494A2] mb-2 shrink-0 bg-white shadow-sm">
                     <Heart className="w-4 h-4 fill-current" />
@@ -317,12 +575,10 @@ export default function Customize() {
               ))}
             </div>
           </div>
-
         </div>
 
         {/* Right Sidebar (Pricing & Chat) */}
-        <aside className="lg:w-[350px] flex flex-col gap-6">
-
+        <aside className="lg:w-[350px] flex flex-col gap-6 h-full min-h-0">
           <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-8 flex flex-col items-center">
             <span className="font-serif text-[#1D3557] font-bold text-lg mb-2 uppercase tracking-widest">Dự Toán Chi Phí</span>
             <h2 className="text-3xl lg:text-4xl font-bold text-[#F494A2] mb-6 tracking-tight">
@@ -330,8 +586,12 @@ export default function Customize() {
             </h2>
 
             <div className="flex w-full gap-3 mb-3">
-              <button className="flex-1 py-3.5 border border-[#F494A2] text-[#F494A2] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FFF5F5] transition-colors text-center whitespace-nowrap bg-white shadow-sm">
-                LƯU THIẾT KẾ
+              <button
+                onClick={handleSaveDesign}
+                disabled={isSaving}
+                className="flex-1 py-3.5 border border-[#F494A2] text-[#F494A2] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FFF5F5] transition-colors text-center whitespace-nowrap bg-white shadow-sm disabled:opacity-50"
+              >
+                {isSaving ? 'ĐANG LƯU...' : 'LƯU THIẾT KẾ'}
               </button>
               <button className="w-[44px] shrink-0 border border-rose-200 text-[#F494A2] rounded-full flex items-center justify-center hover:bg-[#FFF5F5] bg-white shadow-sm">
                 <Heart className="w-4 h-4 fill-current opacity-80" />
@@ -342,10 +602,11 @@ export default function Customize() {
             </button>
           </div>
 
-          {/* Interactive Chatbot */}
-          <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-6 flex-1 flex flex-col relative overflow-hidden">
-
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 mb-4 relative z-10 flex flex-col pr-2">
+          <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-6 flex-1 flex flex-col relative overflow-hidden h-[325px]">
+            <div
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto no-scrollbar space-y-4 mb-4 relative z-10 flex flex-col pr-2"
+            >
               {messages.map((msg, i) => (
                 <div
                   key={i}
@@ -357,10 +618,9 @@ export default function Customize() {
                   {msg.text}
                 </div>
               ))}
-              <div ref={chatEndRef} />
             </div>
 
-            <div className="relative z-10 w-full mt-auto pt-2 bg-white/50 backdrop-blur-md">
+            <div className="relative z-10 w-full mt-auto pt-4 pb-2 bg-white/50 backdrop-blur-md border-t border-rose-50/50">
               <input
                 type="text"
                 value={inputValue}
@@ -371,18 +631,14 @@ export default function Customize() {
               />
               <button
                 onClick={handleSendMessage}
-                className="absolute right-1.5 top-[50%] -translate-y-[35%] w-9 h-9 bg-[#F494A2] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F494A2] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>
             </div>
-
           </div>
-
         </aside>
-
       </div>
-
     </div>
   );
 }

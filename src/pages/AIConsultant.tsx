@@ -1,30 +1,81 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, MapPin, Star } from 'lucide-react';
-import { mockVendors } from '../data/mockData';
 import { motion, AnimatePresence } from 'motion/react';
+import { supabase } from '../lib/supabase';
+import { Database } from '../types/database';
+
+type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
+type ProductRow = Database['public']['Tables']['products']['Row'];
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  suggestedVendorId?: string;
+  suggested_product_id?: string | null;
 }
 
+const MOCK_USER_ID = 'user_1';
+
 export default function AIConsultant() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: 'Chào bạn! Mình là AI Consultant của Phố Hạnh Phúc. Bạn đang tìm Váy Cưới, Dịch Vụ Khám Sức Khỏe hay Studio Chụp Ảnh?'
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestedProduct, setSuggestedProduct] = useState<ProductRow | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Derived state to find the latest recommended vendor
-  const latestSuggestedVendorId = [...messages].reverse().find(m => m.suggestedVendorId)?.suggestedVendorId;
-  const suggestedVendor = mockVendors.find(v => v.id === latestSuggestedVendorId);
+  // Fetch initial chat messages
+  useEffect(() => {
+    async function fetchMessages() {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', MOCK_USER_ID)
+        .order('created_at', { ascending: true });
+
+      if (data && data.length > 0) {
+        const typedData = data as ChatMessageRow[];
+        setMessages(typedData.map(m => ({
+          id: m.id.toString(),
+          role: m.role as 'user' | 'assistant',
+          content: m.content || '',
+          suggested_product_id: m.suggested_product_id
+        })));
+      } else {
+        // Default initial message if no history
+        const defaultMsg: Message = {
+          id: 'default',
+          role: 'assistant',
+          content: 'Chào bạn! Mình là AI Consultant của Phố Hạnh Phúc. Bạn đang tìm Váy Cưới, Dịch Vụ Khám Sức Khỏe hay Studio Chụp Ảnh?'
+        };
+        setMessages([defaultMsg]);
+      }
+    }
+    fetchMessages();
+  }, []);
+
+  // Effect to fetch the latest suggested product
+  useEffect(() => {
+    async function fetchProduct() {
+      const latestSuggestedId = [...messages].reverse().find(m => m.suggested_product_id)?.suggested_product_id;
+      
+      if (latestSuggestedId) {
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', latestSuggestedId)
+          .single();
+          
+        if (data) {
+          setSuggestedProduct(data as ProductRow);
+        }
+      }
+    }
+    
+    if (messages.length > 0) {
+      fetchProduct();
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,40 +85,80 @@ export default function AIConsultant() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
+    const userContent = input;
+    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: userContent };
+    
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
-    // Mock AI response logic
-    setTimeout(() => {
-      let aiResponse = 'Rất tuyệt vời! Phố Hạnh Phúc có rất nhiều dịch vụ phù hợp với yêu cầu của bạn.';
-      let suggestedVendorId = undefined;
+    // Save user message to DB
+    await supabase.from('chat_messages').insert({
+      user_id: MOCK_USER_ID,
+      role: 'user',
+      content: userContent
+    } as any);
 
-      const lowerInput = userMessage.content.toLowerCase();
+    // Mock AI response logic
+    setTimeout(async () => {
+      let aiResponse = 'Rất tuyệt vời! Phố Hạnh Phúc có rất nhiều dịch vụ và sản phẩm phù hợp với yêu cầu của bạn.';
+      let suggestedProductId: string | null = null;
+
+      const lowerInput = userContent.toLowerCase();
       
-      if (lowerInput.includes('váy') || lowerInput.includes('cưới')) {
-        aiResponse = 'Nếu bạn đang tìm váy cưới, mình đặc biệt gợi ý Bella Bridal Studio. Họ đang có bộ sưu tập mới nhất rất đẹp và phù hợp!';
-        suggestedVendorId = 'v2';
-      } else if (lowerInput.includes('sức khỏe') || lowerInput.includes('khám')) {
-        aiResponse = 'Sức khỏe tiền hôn nhân rất quan trọng. Bạn có thể tham khảo Trung Tâm Khám Sức Khỏe Tiền Hôn Nhân ngay trên phố Hồ Văn Huê nhé.';
-        suggestedVendorId = 'v6';
-      } else if (lowerInput.includes('chụp ảnh') || lowerInput.includes('studio')) {
-        aiResponse = 'Dream Wedding Photography là một lựa chọn tuyệt vời cho những bộ ảnh phong cách Hàn Quốc lãng mạn.';
-        suggestedVendorId = 'v3';
+      try {
+        // Simple search for products based on keywords to suggest a real product
+        let queryCategory = '';
+        if (lowerInput.includes('váy') || lowerInput.includes('cưới')) {
+          queryCategory = 'Váy Cưới';
+        } else if (lowerInput.includes('vest')) {
+          queryCategory = 'Vest';
+        } else if (lowerInput.includes('venue') || lowerInput.includes('nhà hàng')) {
+          queryCategory = 'Venue';
+        } else if (lowerInput.includes('trang trí')) {
+          queryCategory = 'Trang Trí';
+        }
+
+        if (queryCategory) {
+          const { data } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', queryCategory)
+            .limit(1)
+            .single();
+
+          if (data) {
+            const typedProd = data as ProductRow;
+            aiResponse = `Dựa vào yêu cầu của bạn, mình đề xuất sản phẩm "${typedProd.name}" đang rất được ưa chuộng hiện nay!`;
+            suggestedProductId = typedProd.id;
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching suggestion', err);
       }
 
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: aiResponse,
-        suggestedVendorId
-      }]);
+        suggested_product_id: suggestedProductId
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
+
+      // Save assistant message to DB
+      await supabase.from('chat_messages').insert({
+        user_id: MOCK_USER_ID,
+        role: 'assistant',
+        content: aiResponse,
+        suggested_product_id: suggestedProductId
+      } as any);
+
     }, 1500);
   };
 
@@ -162,9 +253,9 @@ export default function AIConsultant() {
         
         <div className="flex-1 rounded-3xl border-2 border-dashed border-gray-200 p-4 flex items-center justify-center bg-gray-50/50 overflow-hidden relative">
           <AnimatePresence mode="wait">
-            {suggestedVendor ? (
+            {suggestedProduct ? (
               <motion.div
-                key={suggestedVendor.id}
+                key={suggestedProduct.id}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -172,24 +263,24 @@ export default function AIConsultant() {
                 className="w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
               >
                 <div className="h-48 relative bg-gray-200">
-                  <img src={suggestedVendor.image} alt={suggestedVendor.name} className="w-full h-full object-cover" />
+                  <img src={suggestedProduct.image_url || 'https://images.unsplash.com/photo-1595000072051-5afcb1eef556?auto=format&fit=crop&q=80'} alt={suggestedProduct.name || 'Product'} className="w-full h-full object-cover" />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-rose-600 shadow-sm flex items-center">
                     <Sparkles className="w-3 h-3 mr-1" /> AI Suggest
                   </div>
                 </div>
                 <div className="p-6">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{suggestedVendor.category}</span>
-                  <h3 className="text-2xl font-bold text-gray-900 mt-1 mb-2">{suggestedVendor.name}</h3>
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{suggestedProduct.category}</span>
+                  <h3 className="text-2xl font-bold text-gray-900 mt-1 mb-2">{suggestedProduct.name}</h3>
                   <div className="flex items-center text-sm text-gray-600 mb-4 space-x-4">
                     <span className="flex items-center text-amber-500 font-medium">
                       <Star className="w-4 h-4 fill-current mr-1" />
-                      {suggestedVendor.rating}
+                      5.0
                     </span>
                     <span className="flex items-center">
                       <MapPin className="w-4 h-4 mr-1 text-gray-400" />
                       Hồ Văn Huê
                     </span>
-                    <span className="font-bold text-gray-900">{suggestedVendor.priceTier}</span>
+                    <span className="font-bold text-gray-900">{Number(suggestedProduct.price || 0).toLocaleString('vi-VN')} VND</span>
                   </div>
                   <button className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-medium transition-colors">
                     Xem chi tiết

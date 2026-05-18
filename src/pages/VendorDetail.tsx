@@ -46,6 +46,8 @@ export default function VendorDetail() {
         setProducts(productsData || []);
       } catch (error) {
         console.error('Error fetching vendor details:', error);
+        setVendor(null);
+        setProducts([]);
       } finally {
         setLoading(false);
       }

@@ -28,16 +28,7 @@ export default function Services() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<string[]>(['Tất Cả', 'Váy Cưới', 'Chụp Ảnh', 'Địa Điểm', 'Trang Trí', 'Trang Điểm']);
   const [loading, setLoading] = useState(true);
-
-  // Mock data fallback in case Supabase is empty or unconfigured
-  const mockVendors = [
-    { id: '1', name: 'Sky Dream Venue', category: 'Địa Điểm', rating: 4.9, addr: 'Phú Nhuận, HCM', img: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=600' },
-    { id: '2', name: 'LOMAR Bridal', category: 'Váy Cưới', rating: 5.0, addr: 'Hồ Văn Huê, Phú Nhuận', img: 'https://images.unsplash.com/photo-1595000072051-5afcb1eef556?auto=format&fit=crop&q=80&w=600' },
-    { id: '3', name: 'Dream Studio', category: 'Chụp Ảnh', rating: 4.8, addr: 'Phú Nhuận, HCM', img: 'https://images.unsplash.com/photo-1537368910025-702800a44643?auto=format&fit=crop&q=80&w=600' },
-    { id: '4', name: 'Rose Decor', category: 'Trang Trí', rating: 4.7, addr: 'Quận 1, HCM', img: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600' },
-    { id: '5', name: 'Glow Makeup', category: 'Trang Điểm', rating: 4.9, addr: 'Quận 3, HCM', img: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&q=80&w=600' },
-    { id: '6', name: 'Classic Suit', category: 'Vest', rating: 4.6, addr: 'Hồ Văn Huê, Phú Nhuận', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=600' },
-  ];
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     async function fetchVendors() {
@@ -45,7 +36,7 @@ export default function Services() {
         const { data, error } = await supabase.from('vendors').select('*');
         if (error) throw error;
 
-        if (data && data.length > 0) {
+        if (data) {
           const mappedVendors: Vendor[] = (data as VendorRow[]).map((v) => ({
             id: v.id,
             name: v.name || 'Thương hiệu',
@@ -63,11 +54,11 @@ export default function Services() {
           ];
           setCategories(uniqueCategories as string[]);
         } else {
-          setVendors(mockVendors); // Fallback
+          setVendors([]);
         }
       } catch (error) {
         console.error('Error fetching vendors:', error);
-        setVendors(mockVendors); // Fallback
+        setVendors([]);
       } finally {
         setLoading(false);
       }
@@ -75,9 +66,13 @@ export default function Services() {
     fetchVendors();
   }, []);
 
-  const filteredVendors = activeCategory === 'Tất Cả'
-    ? vendors
-    : vendors.filter(v => v.category === activeCategory);
+  const filteredVendors = vendors.filter(v => {
+    const matchesCategory = activeCategory === 'Tất Cả' || v.category === activeCategory;
+    const matchesSearch = v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (v.category && v.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                          (v.addr && v.addr.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="w-full flex flex-col font-sans mb-20 bg-[#FEF6F7] min-h-screen">
@@ -120,6 +115,8 @@ export default function Services() {
             <input
               type="text"
               placeholder="Tìm kiếm dịch vụ, thương hiệu..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-14 pr-32 py-3 rounded-full focus:outline-none text-[#1D3557] bg-transparent"
             />
             <button className="absolute right-2 top-2 bottom-2 bg-[#F494A2] text-white px-6 md:px-8 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-400 transition-colors">
