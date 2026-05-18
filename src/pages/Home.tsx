@@ -80,11 +80,11 @@ export default function Home() {
           >
             <div className="inline-flex items-center justify-between lg:justify-start overflow-x-auto no-scrollbar py-4 px-2 md:py-6 md:px-2">
               {[
-                { title: 'GA\nVĂN MINH', icon: Landmark, to: '/van-minh' },
-                { title: 'GA\nHIỆN ĐẠI', icon: Building2, to: '/hien-dai' },
-                { title: 'GA\nNGHĨA TÌNH', icon: HandHeart, to: '/nghia-tinh' },
-                { title: 'GA\nTRI ÂN', icon: Flower2, to: '/tri-an' },
-                { title: 'GA\nHẸN VÀ HÔN', icon: Infinity, to: '/hen-va-hon' }
+                { title: 'GA\nVĂN MINH', icon: Landmark, to: '/dashboard?station=T01' },
+                { title: 'GA\nHIỆN ĐẠI', icon: Building2, to: '/dashboard?station=T02' },
+                { title: 'GA\nNGHĨA TÌNH', icon: HandHeart, to: '/dashboard?station=T03' },
+                { title: 'GA\nTRI ÂN', icon: Flower2, to: '/dashboard?station=T04' },
+                { title: 'GA\nHẸN VÀ HÔN', icon: Infinity, to: '/dashboard' }
               ].map((stop, i, arr) => (
                 <React.Fragment key={i}>
                   <Link to={stop.to} className="flex flex-col items-center gap-3 group shrink-0 z-10 w-20 md:w-24 hover:-translate-y-2 transition-transform duration-300">

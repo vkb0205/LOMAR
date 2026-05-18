@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { 
   CheckCircle2, Circle, Gift, HeartPulse, Ticket, ArrowRight, Lock, Heart, Sparkles,
@@ -28,12 +29,20 @@ interface Voucher {
 
 export default function Dashboard() {
   const { healthCheckCompleted, setHealthCheckCompleted } = useAppContext();
+  const [searchParams] = useSearchParams();
+  const stationParam = searchParams.get('station');
   
   const [tasks, setTasks] = useState<Task[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [savedDesigns, setSavedDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStationId, setActiveStationId] = useState<string>('T01');
+
+  useEffect(() => {
+    if (stationParam && ['T01', 'T02', 'T03', 'T04'].includes(stationParam)) {
+      setActiveStationId(stationParam);
+    }
+  }, [stationParam]);
 
   useEffect(() => {
     async function fetchDashboardData() {
