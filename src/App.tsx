@@ -13,7 +13,7 @@ import { AppProvider } from './context/AppContext';
 export default function App() {
   return (
     <AppProvider>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <BrowserRouter basename="/LOMAR">
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
