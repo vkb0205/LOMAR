@@ -21,6 +21,10 @@ export default function VendorDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [vendorId]);
+
+  useEffect(() => {
     async function fetchVendorData() {
       if (!vendorId) return;
       
