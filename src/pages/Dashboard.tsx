@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { 
+import {
   CheckCircle2, Circle, Gift, HeartPulse, Ticket, ArrowRight, Lock, Heart, Sparkles,
-  Activity, Camera, Layers, MapPin, ChevronDown, ChevronUp, Trophy 
+  Activity, Camera, Layers, MapPin, ChevronDown, ChevronUp, Trophy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
@@ -31,7 +31,7 @@ export default function Dashboard() {
   const { healthCheckCompleted, setHealthCheckCompleted } = useAppContext();
   const [searchParams] = useSearchParams();
   const stationParam = searchParams.get('station');
-  
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [savedDesigns, setSavedDesigns] = useState<any[]>([]);
@@ -73,7 +73,7 @@ export default function Dashboard() {
               status: progress?.status?.toLowerCase() || 'pending'
             };
           });
-          
+
           // Sync with context if health check task exists
           const healthTask = mergedTasks.find(t => t.taskId === 'T01' || t.name.toLowerCase().includes('sức khỏe'));
           if (healthTask) {
@@ -133,10 +133,10 @@ export default function Dashboard() {
     const isCompleted = task.status === 'completed';
     const newStatus = isCompleted ? 'pending' : 'completed';
     const dbStatus = newStatus === 'completed' ? 'Completed' : 'Pending';
-    
+
     // Update local state immediately for fast UI response
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
-    
+
     // Sync context if it's the health check task
     if (task.taskId === 'T01' || task.name.toLowerCase().includes('sức khỏe')) {
       setHealthCheckCompleted(newStatus === 'completed');
@@ -175,7 +175,7 @@ export default function Dashboard() {
 
         if (error) throw error;
       }
-        
+
       // Update vouchers that depend on this task
       const dependentVouchers = vouchers.filter(v => v.requiredTaskId === task.taskId);
       for (const voucher of dependentVouchers) {
@@ -263,7 +263,7 @@ export default function Dashboard() {
   const stations = [
     {
       id: 'T01',
-      name: 'Ga Sức Khỏe',
+      name: 'Sức Khỏe',
       category: 'Khám Sức Khỏe',
       description: 'Chăm sóc sức khỏe tiền hôn nhân là viên gạch đầu tiên xây dựng tổ ấm vững bền.',
       icon: Activity,
@@ -275,7 +275,7 @@ export default function Dashboard() {
     },
     {
       id: 'T02',
-      name: 'Ga Tình Yêu',
+      name: 'Tình Yêu',
       category: 'Studio',
       description: 'Lưu giữ những thước phim, khung hình kỷ niệm ngọt ngào trước thềm lễ cưới.',
       icon: Camera,
@@ -287,7 +287,7 @@ export default function Dashboard() {
     },
     {
       id: 'T03',
-      name: 'Ga Sắc Đẹp',
+      name: 'Sắc Đẹp',
       category: 'Váy Cưới / Vest',
       description: 'Khoác lên mình bộ trang phục may đo độc bản, lộng lẫy và hoàn hảo nhất.',
       icon: Layers,
@@ -299,7 +299,7 @@ export default function Dashboard() {
     },
     {
       id: 'T04',
-      name: 'Ga Hạnh Phúc',
+      name: 'Hạnh Phúc',
       category: 'Venue',
       description: 'Tìm kiếm không gian sảnh tiệc ấm cúng, sang trọng cho ngày trọng đại nhất.',
       icon: MapPin,
@@ -328,7 +328,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FFFDFD]">
-      
+
       {/* Dynamic Header Greeting & Interactive Progress Panel */}
       <div className="mb-8 bg-white rounded-3xl border border-rose-100/50 p-6 md:p-8 shadow-sm flex flex-col gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#FCEADE]/20 rounded-full blur-2xl"></div>
@@ -359,7 +359,7 @@ export default function Dashboard() {
             <span className="text-[#F494A2]">{progressPercentage}%</span>
           </div>
           <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-rose-100/20">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-[#F494A2] to-orange-400 rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${progressPercentage}%` }}
             ></div>
@@ -368,10 +368,10 @@ export default function Dashboard() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        
+
         {/* Left Column: Interactive Station Tabs & Content */}
         <div className="w-full lg:w-[68%] flex flex-col gap-6">
-          
+
           {/* Station Tabs Bar hovering above content */}
           <div className="flex bg-white rounded-2xl shadow-sm p-1.5 border border-rose-100/50 overflow-x-auto no-scrollbar gap-1.5">
             {stations.map((station) => {
@@ -384,11 +384,10 @@ export default function Dashboard() {
                 <button
                   key={station.id}
                   onClick={() => setActiveStationId(station.id)}
-                  className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-serif font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${
-                    isActive 
-                      ? 'bg-[#F494A2] text-white shadow-md border-[#F494A2]' 
+                  className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-serif font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${isActive
+                      ? 'bg-[#F494A2] text-white shadow-md border-[#F494A2]'
                       : 'bg-white hover:bg-rose-50/30 text-[#1D3557] border-transparent hover:border-rose-100'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : station.color}`} />
                   <span>{station.name}</span>
@@ -426,9 +425,8 @@ export default function Dashboard() {
                       </h2>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${
-                    isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-[#F494A2] border border-rose-100/30'
-                  }`}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-[#F494A2] border border-rose-100/30'
+                    }`}>
                     {isCompleted ? 'Trạng thái: Đã hoàn thành' : 'Trạng thái: Đang chờ'}
                   </span>
                 </div>
@@ -439,19 +437,17 @@ export default function Dashboard() {
                   </p>
 
                   {/* Task Card with Big Checkbox */}
-                  <div className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${
-                    isCompleted 
-                      ? 'bg-emerald-50/30 border-emerald-100/50' 
+                  <div className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${isCompleted
+                      ? 'bg-emerald-50/30 border-emerald-100/50'
                       : 'bg-rose-50/10 border-rose-100/30'
-                  }`}>
+                    }`}>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => task && toggleTaskStatus(task)}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm active:scale-95 ${
-                          isCompleted 
-                            ? 'border-emerald-500 bg-emerald-500 text-white' 
+                        className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm active:scale-95 ${isCompleted
+                            ? 'border-emerald-500 bg-emerald-500 text-white'
                             : 'border-rose-300 hover:border-[#F494A2] bg-white'
-                        }`}
+                          }`}
                       >
                         {isCompleted && <CheckCircle2 className="w-5 h-5 text-white" />}
                       </button>
@@ -489,8 +485,8 @@ export default function Dashboard() {
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {stationDesigns.map((design: any) => (
-                            <div 
-                              key={design.design_id} 
+                            <div
+                              key={design.design_id}
                               className="bg-white rounded-2xl border border-rose-50 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                             >
                               <div className="flex items-center justify-between mb-3">
@@ -538,7 +534,7 @@ export default function Dashboard() {
         <div className="w-full lg:w-[32%] shrink-0">
           <div className="bg-gray-900 rounded-3xl shadow-xl p-6 md:p-8 text-white h-full relative overflow-hidden min-h-[500px]">
             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
-            
+
             <h2 className="text-xl font-bold mb-6 flex items-center relative z-10 font-serif">
               <Gift className="w-6 h-6 mr-2 text-rose-400" />
               Ví Ưu Đãi Của Bạn
@@ -550,11 +546,11 @@ export default function Dashboard() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-400"></div>
                 </div>
               )}
-              
+
               <AnimatePresence mode="popLayout">
                 {vouchers.map(voucher => {
                   const isUnlocked = voucher.status === 'unlocked' || voucher.status === 'redeemed';
-                  
+
                   if (voucher.requiredTaskId && !isUnlocked) {
                     return (
                       <motion.div
