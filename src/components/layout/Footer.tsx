@@ -1,6 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Youtube, Mail, MapPin, Phone, Heart } from 'lucide-react';
+import { Facebook, Mail, MapPin, Phone, Heart } from 'lucide-react';
+
+function TiktokIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -17,50 +30,47 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
             <Link to="/" className="flex flex-col">
-               <span className="text-2xl font-serif font-bold text-[#1D3557] tracking-widest uppercase">PHỐ HẠNH PHÚC</span>
-               <span className="text-[10px] text-[#F494A2] font-bold tracking-[0.3em] uppercase">Hồ Văn Huê Wedding Platform</span>
+               <span className="text-2xl font-serif font-bold text-[#1B2C40] tracking-widest uppercase">PHỐ HẠNH PHÚC</span>
+               <span className="text-[10px] text-[#F2BFC8] font-bold tracking-[0.3em] uppercase">Hồ Văn Huê Wedding Platform</span>
             </Link>
-            <p className="text-sm text-[#1D3557]/70 leading-relaxed">
+            <p className="text-sm text-[#1B2C40]/70 leading-relaxed">
               Hệ sinh thái dịch vụ cưới hỏi hàng đầu tại "Phố Cưới" Hồ Văn Huê. Nơi hiện thực hóa giấc mơ ngày trọng đại của mọi cặp đôi.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F494A2] hover:bg-[#F494A2] hover:text-white transition-all">
+              <a href="#" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F2BFC8] hover:bg-[#F2BFC8] hover:text-white transition-all">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F494A2] hover:bg-[#F494A2] hover:text-white transition-all">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F494A2] hover:bg-[#F494A2] hover:text-white transition-all">
-                <Youtube className="w-5 h-5" />
+              <a href="#" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F2BFC8] hover:bg-[#F2BFC8] hover:text-white transition-all">
+                <TiktokIcon className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-serif font-bold text-[#1D3557] text-lg mb-6 uppercase tracking-wider">KHÁM PHÁ</h4>
+            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">KHÁM PHÁ</h4>
             <ul className="flex flex-col gap-4">
-              <li><Link to="/explore" className="text-sm text-[#1D3557]/70 hover:text-[#F494A2] transition-colors">Dịch vụ cưới</Link></li>
-              <li><Link to="/customize" className="text-sm text-[#1D3557]/70 hover:text-[#F494A2] transition-colors">Thiết kế phong cách</Link></li>
-              <li><Link to="/guide" className="text-sm text-[#1D3557]/70 hover:text-[#F494A2] transition-colors">Cẩm nang cưới</Link></li>
-              <li><Link to="/blog" className="text-sm text-[#1D3557]/70 hover:text-[#F494A2] transition-colors">Tin tức & Sự kiện</Link></li>
+              <li><Link to="/explore" className="text-sm text-[#1B2C40]/70 hover:text-[#F2BFC8] transition-colors">Dịch vụ cưới</Link></li>
+              <li><Link to="/customize" className="text-sm text-[#1B2C40]/70 hover:text-[#F2BFC8] transition-colors">Thiết kế phong cách</Link></li>
+              <li><Link to="/guide" className="text-sm text-[#1B2C40]/70 hover:text-[#F2BFC8] transition-colors">Cẩm nang cưới</Link></li>
+              <li><Link to="/blog" className="text-sm text-[#1B2C40]/70 hover:text-[#F2BFC8] transition-colors">Tin tức & Sự kiện</Link></li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-serif font-bold text-[#1D3557] text-lg mb-6 uppercase tracking-wider">LIÊN HỆ</h4>
+            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">LIÊN HỆ</h4>
             <ul className="flex flex-col gap-4">
-              <li className="flex items-start gap-3 text-sm text-[#1D3557]/70">
-                <MapPin className="w-5 h-5 text-[#F494A2] shrink-0" />
+              <li className="flex items-start gap-3 text-sm text-[#1B2C40]/70">
+                <MapPin className="w-5 h-5 text-[#F2BFC8] shrink-0" />
                 <span>123 Hồ Văn Huê, P.9, Q. Phú Nhuận, TP. HCM</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-[#1D3557]/70">
-                <Phone className="w-5 h-5 text-[#F494A2] shrink-0" />
+              <li className="flex items-center gap-3 text-sm text-[#1B2C40]/70">
+                <Phone className="w-5 h-5 text-[#F2BFC8] shrink-0" />
                 <span>0123 456 789</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-[#1D3557]/70">
-                <Mail className="w-5 h-5 text-[#F494A2] shrink-0" />
+              <li className="flex items-center gap-3 text-sm text-[#1B2C40]/70">
+                <Mail className="w-5 h-5 text-[#F2BFC8] shrink-0" />
                 <span>contact@phohanhphuc.com</span>
               </li>
             </ul>
@@ -68,15 +78,15 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h4 className="font-serif font-bold text-[#1D3557] text-lg mb-6 uppercase tracking-wider">BẢN TIN</h4>
-            <p className="text-sm text-[#1D3557]/70 mb-6">Đăng ký để nhận ưu đãi và cẩm nang cưới mới nhất.</p>
+            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">BẢN TIN</h4>
+            <p className="text-sm text-[#1B2C40]/70 mb-6">Đăng ký để nhận ưu đãi và cẩm nang cưới mới nhất.</p>
             <div className="flex flex-col gap-3">
               <input 
                 type="email" 
                 placeholder="Email của bạn" 
-                className="bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 text-sm focus:outline-none focus:ring-1 focus:ring-[#F494A2]"
+                className="bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 text-sm focus:outline-none focus:ring-1 focus:ring-[#F2BFC8]"
               />
-              <button className="bg-[#1D3557] text-white py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-[#F494A2] transition-colors shadow-lg">
+              <button className="bg-[#1B2C40] text-white py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-[#F2BFC8] transition-colors shadow-lg">
                 ĐĂNG KÝ
               </button>
             </div>
@@ -86,15 +96,15 @@ export default function Footer() {
 
         {/* Footer Bottom */}
         <div className="pt-8 border-t border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-xs text-[#1D3557]/50 font-medium">
+          <p className="text-xs text-[#1B2C40]/50 font-medium">
             &copy; {currentYear} PHỐ HẠNH PHÚC. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-xs text-[#1D3557]/50 font-medium">
+          <div className="flex items-center gap-2 text-xs text-[#1B2C40]/50 font-medium">
             Created with <Heart className="w-3 h-3 text-rose-300 fill-current" /> by Bé Song Hỷ
           </div>
           <div className="flex gap-8">
-            <a href="#" className="text-xs text-[#1D3557]/50 hover:text-[#F494A2] transition-colors font-medium">Điều khoản</a>
-            <a href="#" className="text-xs text-[#1D3557]/50 hover:text-[#F494A2] transition-colors font-medium">Bảo mật</a>
+            <a href="#" className="text-xs text-[#1B2C40]/50 hover:text-[#F2BFC8] transition-colors font-medium">Điều khoản</a>
+            <a href="#" className="text-xs text-[#1B2C40]/50 hover:text-[#F2BFC8] transition-colors font-medium">Bảo mật</a>
           </div>
         </div>
       </div>

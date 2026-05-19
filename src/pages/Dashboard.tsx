@@ -220,7 +220,7 @@ export default function Dashboard() {
           particleCount: 150,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#F494A2', '#FFF5F5', '#1D3557', '#FCEADE']
+          colors: ['#F2BFC8', '#FAF6EE', '#1B2C40', '#FAF6EE']
         });
       }
     } catch (error) {
@@ -327,40 +327,40 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FFFDFD]">
+    <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FAF6EE]">
 
       {/* Dynamic Header Greeting & Interactive Progress Panel */}
       <div className="mb-8 bg-white rounded-3xl border border-rose-100/50 p-6 md:p-8 shadow-sm flex flex-col gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FCEADE]/20 rounded-full blur-2xl"></div>
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-[#F494A2]/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FAF6EE]/20 rounded-full blur-2xl"></div>
+        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-[#F2BFC8]/5 rounded-full blur-3xl"></div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
           <div>
-            <span className="text-[10px] font-bold text-[#F494A2] bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider mb-2.5 inline-block">
+            <span className="text-[10px] font-bold text-[#F2BFC8] bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider mb-2.5 inline-block">
               Tiến Trình Hành Trình
             </span>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#1D3557] mb-1 font-serif">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1B2C40] mb-1 font-serif">
               {greeting.title}
             </h1>
-            <p className="text-xs text-[#1D3557]/70">
+            <p className="text-xs text-[#1B2C40]/70">
               {greeting.desc}
             </p>
           </div>
           <span className="text-xs text-gray-500 font-bold flex items-center gap-1 shrink-0 bg-rose-50/50 px-3 py-1.5 rounded-full border border-rose-100/50">
-            <Trophy className="w-3.5 h-3.5 text-[#F494A2] fill-rose-50" />
+            <Trophy className="w-3.5 h-3.5 text-[#F2BFC8] fill-rose-50" />
             {completedTasksCount}/{totalTasksCount} Nhiệm vụ
           </span>
         </div>
 
         {/* Linear Progress Bar */}
         <div className="w-full relative z-10 space-y-2">
-          <div className="flex justify-between items-center text-xs font-bold text-[#1D3557]">
+          <div className="flex justify-between items-center text-xs font-bold text-[#1B2C40]">
             <span>Tiến độ chuẩn bị của bạn</span>
-            <span className="text-[#F494A2]">{progressPercentage}%</span>
+            <span className="text-[#F2BFC8]">{progressPercentage}%</span>
           </div>
           <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-rose-100/20">
             <div
-              className="h-full bg-gradient-to-r from-[#F494A2] to-orange-400 rounded-full transition-all duration-1000 ease-out"
+              className="h-full bg-gradient-to-r from-[#F2BFC8] to-orange-400 rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
@@ -385,8 +385,8 @@ export default function Dashboard() {
                   key={station.id}
                   onClick={() => setActiveStationId(station.id)}
                   className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-serif font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${isActive
-                      ? 'bg-[#F494A2] text-white shadow-md border-[#F494A2]'
-                      : 'bg-white hover:bg-rose-50/30 text-[#1D3557] border-transparent hover:border-rose-100'
+                      ? 'bg-[#F2BFC8] text-white shadow-md border-[#F2BFC8]'
+                      : 'bg-white hover:bg-rose-50/30 text-[#1B2C40] border-transparent hover:border-rose-100'
                     }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : station.color}`} />
@@ -409,7 +409,7 @@ export default function Dashboard() {
 
             return (
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden transition-all duration-300">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FCEADE]/10 rounded-full blur-2xl"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FAF6EE]/10 rounded-full blur-2xl"></div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-rose-50/50 mb-6">
                   <div className="flex items-center gap-3">
@@ -420,19 +420,19 @@ export default function Dashboard() {
                       <span className={`text-[9px] font-extrabold uppercase tracking-wider ${station.badgeBg} px-2.5 py-0.5 rounded-full`}>
                         {station.category}
                       </span>
-                      <h2 className="text-xl font-bold text-[#1D3557] font-serif mt-1">
+                      <h2 className="text-xl font-bold text-[#1B2C40] font-serif mt-1">
                         {station.name}
                       </h2>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-[#F494A2] border border-rose-100/30'
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-[#F2BFC8] border border-rose-100/30'
                     }`}>
                     {isCompleted ? 'Trạng thái: Đã hoàn thành' : 'Trạng thái: Đang chờ'}
                   </span>
                 </div>
 
                 <div className="space-y-6">
-                  <p className="text-xs text-[#1D3557]/70 leading-relaxed font-medium">
+                  <p className="text-xs text-[#1B2C40]/70 leading-relaxed font-medium">
                     {station.description}
                   </p>
 
@@ -446,13 +446,13 @@ export default function Dashboard() {
                         onClick={() => task && toggleTaskStatus(task)}
                         className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm active:scale-95 ${isCompleted
                             ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-rose-300 hover:border-[#F494A2] bg-white'
+                            : 'border-rose-300 hover:border-[#F2BFC8] bg-white'
                           }`}
                       >
                         {isCompleted && <CheckCircle2 className="w-5 h-5 text-white" />}
                       </button>
                       <div>
-                        <h4 className={`text-sm font-bold ${isCompleted ? 'text-emerald-800' : 'text-[#1D3557]'}`}>
+                        <h4 className={`text-sm font-bold ${isCompleted ? 'text-emerald-800' : 'text-[#1B2C40]'}`}>
                           {task?.name || 'Nhiệm vụ'}
                         </h4>
                         <span className="text-[10px] text-gray-400 font-medium">
@@ -465,18 +465,18 @@ export default function Dashboard() {
                   {/* Station Saved Designs Section */}
                   {station.id !== 'T01' && (
                     <div className="space-y-4 pt-2">
-                      <h4 className="text-xs font-bold uppercase text-[#1D3557] tracking-wider flex items-center gap-1.5">
-                        <Heart className="w-3.5 h-3.5 text-[#F494A2] fill-rose-100" />
+                      <h4 className="text-xs font-bold uppercase text-[#1B2C40] tracking-wider flex items-center gap-1.5">
+                        <Heart className="w-3.5 h-3.5 text-[#F2BFC8] fill-rose-100" />
                         Bản vẽ custom đã lưu tại {station.name}
                       </h4>
 
                       {stationDesigns.length === 0 ? (
                         <div className="border border-dashed border-rose-100 rounded-2xl p-8 text-center bg-rose-50/10">
-                          <Sparkles className="w-6 h-6 mx-auto text-[#F494A2]/70 mb-3 animate-pulse" />
+                          <Sparkles className="w-6 h-6 mx-auto text-[#F2BFC8]/70 mb-3 animate-pulse" />
                           <p className="text-xs text-gray-500 font-medium mb-4">Chưa có thiết kế độc bản nào tại ga này</p>
                           <a
                             href={station.ctaLink}
-                            className="inline-flex items-center px-5 py-2.5 bg-[#F494A2] text-white text-[10px] font-bold rounded-full uppercase tracking-wider hover:bg-rose-400 shadow-md transition-all active:scale-95"
+                            className="inline-flex items-center px-5 py-2.5 bg-[#F2BFC8] text-white text-[10px] font-bold rounded-full uppercase tracking-wider hover:bg-rose-400 shadow-md transition-all active:scale-95"
                           >
                             {station.ctaText}
                             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -490,31 +490,31 @@ export default function Dashboard() {
                               className="bg-white rounded-2xl border border-rose-50 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                             >
                               <div className="flex items-center justify-between mb-3">
-                                <span className="text-[9px] font-extrabold uppercase bg-rose-50 text-[#F494A2] px-2.5 py-1 rounded-full tracking-wider">
+                                <span className="text-[9px] font-extrabold uppercase bg-rose-50 text-[#F2BFC8] px-2.5 py-1 rounded-full tracking-wider">
                                   {design.category}
                                 </span>
                                 <span className="text-[10px] text-gray-400">
                                   {new Date(design.created_at).toLocaleDateString('vi-VN')}
                                 </span>
                               </div>
-                              <h5 className="font-serif font-bold text-sm text-[#1D3557] mb-2 leading-tight">
+                              <h5 className="font-serif font-bold text-sm text-[#1B2C40] mb-2 leading-tight">
                                 Bản vẽ {design.category}
                               </h5>
                               <div className="flex flex-wrap gap-1.5 mb-4">
                                 {design.selections?.slice(0, 4).map((sel: any, idx: number) => (
-                                  <span key={idx} className="text-[9px] bg-rose-50/50 text-[#1D3557]/80 px-2 py-0.5 rounded border border-rose-100/50">
-                                    {sel.option_name}: <strong className="text-[#1D3557]">{sel.value_name}</strong>
+                                  <span key={idx} className="text-[9px] bg-rose-50/50 text-[#1B2C40]/80 px-2 py-0.5 rounded border border-rose-100/50">
+                                    {sel.option_name}: <strong className="text-[#1B2C40]">{sel.value_name}</strong>
                                   </span>
                                 ))}
                               </div>
                               <div className="pt-3 border-t border-rose-50 flex items-center justify-between">
                                 <div className="flex flex-col">
                                   <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Chi phí dự toán</span>
-                                  <span className="text-xs font-extrabold text-[#F494A2]">
+                                  <span className="text-xs font-extrabold text-[#F2BFC8]">
                                     {Number(design.total_price || 0).toLocaleString('vi-VN')} VND
                                   </span>
                                 </div>
-                                <div className="w-7 h-7 rounded-full border border-rose-100 flex items-center justify-center text-[#F494A2] group-hover:scale-105 transition-transform bg-rose-50/20">
+                                <div className="w-7 h-7 rounded-full border border-rose-100 flex items-center justify-center text-[#F2BFC8] group-hover:scale-105 transition-transform bg-rose-50/20">
                                   <Heart className="w-3.5 h-3.5 fill-current" />
                                 </div>
                               </div>
@@ -590,7 +590,7 @@ export default function Dashboard() {
                           </div>
                           <div className="flex-1 relative z-10 pr-2">
                             <span className="text-[9px] font-extrabold text-rose-600 uppercase tracking-widest mb-1 block">Đã Mở Khóa</span>
-                            <h3 className="font-bold text-sm leading-tight text-[#1D3557] font-serif">{voucher.title}</h3>
+                            <h3 className="font-bold text-sm leading-tight text-[#1B2C40] font-serif">{voucher.title}</h3>
                             <p className="text-[10px] text-gray-500 mt-1 font-medium">Áp dụng cho tất cả dịch vụ tương ứng trên phố</p>
                           </div>
                           <button className="ml-2 w-9 h-9 bg-rose-600 text-white rounded-full flex items-center justify-center transition-transform hover:scale-105 hover:bg-rose-500 flex-shrink-0 relative z-10 shadow-md active:scale-95">

@@ -48,9 +48,12 @@ export default function Services() {
           setVendors(mappedVendors);
 
           // Lọc danh mục duy nhất và loại bỏ giá trị null/rỗng
+          const rawCategories = [...new Set(mappedVendors.map(v => v.category).filter(Boolean))];
+          const hasKhac = rawCategories.includes('Khác');
           const uniqueCategories = [
             'Tất Cả',
-            ...new Set(mappedVendors.map(v => v.category).filter(Boolean))
+            ...rawCategories.filter(cat => cat !== 'Khác'),
+            ...(hasKhac ? ['Khác'] : [])
           ];
           setCategories(uniqueCategories as string[]);
         } else {
@@ -69,13 +72,13 @@ export default function Services() {
   const filteredVendors = vendors.filter(v => {
     const matchesCategory = activeCategory === 'Tất Cả' || v.category === activeCategory;
     const matchesSearch = v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (v.category && v.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                          (v.addr && v.addr.toLowerCase().includes(searchTerm.toLowerCase()));
+      (v.category && v.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (v.addr && v.addr.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
   return (
-    <div className="w-full flex flex-col font-sans mb-20 bg-[#FEF6F7] min-h-screen">
+    <div className="w-full flex flex-col font-sans mb-20 bg-[#FAF6EE] min-h-screen">
 
       {/* Header Banner */}
       <div className="relative w-full h-[300px] md:h-[400px] flex items-center justify-center overflow-hidden">
@@ -84,7 +87,7 @@ export default function Services() {
           alt="Wedding Services"
           className="absolute inset-0 w-full h-full object-cover opacity-80"
         />
-        <div className="absolute inset-0 bg-[#1D3557]/40" />
+        <div className="absolute inset-0 bg-[#1B2C40]/40" />
         <div className="relative z-10 text-center px-4 flex flex-col items-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -117,9 +120,9 @@ export default function Services() {
               placeholder="Tìm kiếm dịch vụ, thương hiệu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-32 py-3 rounded-full focus:outline-none text-[#1D3557] bg-transparent"
+              className="w-full pl-14 pr-32 py-3 rounded-full focus:outline-none text-[#1B2C40] bg-transparent"
             />
-            <button className="absolute right-2 top-2 bottom-2 bg-[#F494A2] text-white px-6 md:px-8 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-400 transition-colors">
+            <button className="absolute right-2 top-2 bottom-2 bg-[#F2BFC8] text-white px-6 md:px-8 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-400 transition-colors">
               TÌM KIẾM
             </button>
           </motion.div>
@@ -136,15 +139,15 @@ export default function Services() {
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-widest whitespace-nowrap transition-all uppercase border ${activeCategory === cat
-                  ? 'bg-[#1D3557] text-white border-[#1D3557]'
-                  : 'bg-white text-[#1D3557] border-rose-100 hover:border-[#1D3557]'
+                  ? 'bg-[#1B2C40] text-white border-[#1B2C40]'
+                  : 'bg-white text-[#1B2C40] border-rose-100 hover:border-[#1B2C40]'
                   }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white border border-rose-100 text-[#1D3557] text-xs font-bold tracking-widest uppercase hover:bg-rose-50 transition-colors shrink-0">
+          <button className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white border border-rose-100 text-[#1B2C40] text-xs font-bold tracking-widest uppercase hover:bg-rose-50 transition-colors shrink-0">
             <Filter className="w-4 h-4" /> BỘ LỌC
           </button>
         </div>
@@ -152,7 +155,7 @@ export default function Services() {
         {/* Vendor Grid */}
         {loading ? (
           <div className="w-full flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F494A2]"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F2BFC8]"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -172,13 +175,13 @@ export default function Services() {
                     alt={vendor.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-[#1D3557] uppercase tracking-widest shadow-sm">
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-[#1B2C40] uppercase tracking-widest shadow-sm">
                     {vendor.category}
                   </div>
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-serif font-bold text-lg text-[#1D3557] group-hover:text-[#F494A2] transition-colors leading-tight">{vendor.name}</h3>
+                    <h3 className="font-serif font-bold text-lg text-[#1B2C40] group-hover:text-[#F2BFC8] transition-colors leading-tight">{vendor.name}</h3>
                     <div className="flex items-center bg-rose-50 px-2 py-1 rounded-md text-rose-500 font-bold text-xs shrink-0">
                       <Star className="w-3 h-3 fill-current mr-1" />
                       {vendor.rating || '5.0'}
@@ -186,13 +189,13 @@ export default function Services() {
                   </div>
 
                   {vendor.addr && (
-                    <div className="flex items-center text-[#5D7B9A] text-xs mb-4">
+                    <div className="flex items-center text-[#6B92B4] text-xs mb-4">
                       <MapPin className="w-3.5 h-3.5 mr-1 shrink-0" />
                       <span className="truncate">{vendor.addr}</span>
                     </div>
                   )}
 
-                  <button className="mt-auto w-full py-3 bg-[#FFF5F5] text-[#1D3557] rounded-full font-bold text-[10px] uppercase tracking-widest group-hover:bg-[#F494A2] group-hover:text-white transition-colors border border-rose-50">
+                  <button className="mt-auto w-full py-3 bg-[#FAF6EE] text-[#1B2C40] rounded-full font-bold text-[10px] uppercase tracking-widest group-hover:bg-[#F2BFC8] group-hover:text-white transition-colors border border-rose-50">
                     XEM CHI TIẾT
                   </button>
                 </div>
@@ -206,8 +209,8 @@ export default function Services() {
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 text-rose-300 shadow-sm">
               <Search className="w-8 h-8" />
             </div>
-            <h3 className="text-[#1D3557] font-serif font-bold text-xl mb-2">Không tìm thấy dịch vụ</h3>
-            <p className="text-[#5D7B9A] text-sm max-w-md">Hiện tại chưa có dịch vụ nào trong danh mục này. Vui lòng thử lại sau hoặc chọn danh mục khác.</p>
+            <h3 className="text-[#1B2C40] font-serif font-bold text-xl mb-2">Không tìm thấy dịch vụ</h3>
+            <p className="text-[#6B92B4] text-sm max-w-md">Hiện tại chưa có dịch vụ nào trong danh mục này. Vui lòng thử lại sau hoặc chọn danh mục khác.</p>
           </div>
         )}
       </div>

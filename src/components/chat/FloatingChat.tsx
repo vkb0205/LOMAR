@@ -65,7 +65,7 @@ export default function FloatingChat() {
             className="w-[320px] md:w-[380px] h-[500px] bg-white rounded-[32px] shadow-2xl border border-rose-100 flex flex-col overflow-hidden mb-4 pointer-events-auto"
           >
             {/* Chat Header */}
-            <div className="bg-[#F494A2] p-6 text-white flex items-center justify-between">
+            <div className="bg-[#F2BFC8] p-6 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
                    <Sparkles className="w-5 h-5 text-white" />
@@ -81,7 +81,7 @@ export default function FloatingChat() {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[#FFFDFD]">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[#FAF6EE]">
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
@@ -91,8 +91,8 @@ export default function FloatingChat() {
                 >
                   <div className={`max-w-[85%] p-4 rounded-[22px] text-xs font-medium leading-relaxed shadow-sm border ${
                     msg.isUser 
-                    ? 'bg-[#1D3557] text-white border-[#1D3557] rounded-tr-none' 
-                    : 'bg-white text-[#1D3557] border-rose-100 rounded-tl-none'
+                    ? 'bg-[#1B2C40] text-white border-[#1B2C40] rounded-tr-none' 
+                    : 'bg-white text-[#1B2C40] border-rose-100 rounded-tl-none'
                   }`}>
                     {msg.text}
                   </div>
@@ -110,11 +110,11 @@ export default function FloatingChat() {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Hỏi Bé Song điều gì đó..."
-                  className="w-full bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 pr-12 text-xs focus:outline-none focus:ring-1 focus:ring-[#F494A2] text-[#1D3557]"
+                  className="w-full bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 pr-12 text-xs focus:outline-none focus:ring-1 focus:ring-[#F2BFC8] text-[#1B2C40]"
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-[#F494A2] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-md transition-colors"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-md transition-colors"
                 >
                   <Send className="w-4 h-4 ml-0.5" />
                 </button>
@@ -142,7 +142,7 @@ export default function FloatingChat() {
               animate={{ opacity: isHovered ? 1 : 0, x: -10 }}
               className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white px-4 py-2 rounded-2xl border border-rose-100 shadow-lg whitespace-nowrap hidden md:block"
             >
-              <p className="text-[#1D3557] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song 🧚‍♀️</p>
+              <p className="text-[#1B2C40] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song 🧚‍♀️</p>
               <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 border-t border-r border-rose-100"></div>
             </motion.div>
           )}
@@ -153,7 +153,7 @@ export default function FloatingChat() {
             
             {/* Notification Badge */}
             {!isOpen && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1D3557] text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1B2C40] text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
                 1
               </div>
             )}

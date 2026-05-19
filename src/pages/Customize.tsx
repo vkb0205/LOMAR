@@ -363,14 +363,14 @@ export default function Customize() {
   const currentMainImage = selectedThumb || baseImage;
 
   return (
-    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FEF6F7] min-h-screen">
+    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FAF6EE] min-h-screen">
       <div className="max-w-[1200px] w-full mx-auto mb-6 flex justify-center overflow-x-auto no-scrollbar py-2">
         <div className="flex bg-white rounded-full shadow-sm p-1 border border-rose-100">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab ? 'bg-[#F494A2] text-white shadow-inner' : 'bg-transparent text-[#1D3557] hover:text-[#F494A2]'}`}
+              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab ? 'bg-[#F2BFC8] text-white shadow-inner' : 'bg-transparent text-[#1B2C40] hover:text-[#F2BFC8]'}`}
             >
               {tab}
             </button>
@@ -385,14 +385,14 @@ export default function Customize() {
 
           {/* BỘ CHỌN SẢN PHẨM GỐC - CUSTOM VISUAL DROPDOWN */}
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-rose-100 p-4 shadow-sm mb-2 relative z-20">
-            <label className="block text-[10px] font-bold text-[#F494A2] mb-3 uppercase tracking-widest">
+            <label className="block text-[10px] font-bold text-[#F2BFC8] mb-3 uppercase tracking-widest">
               Chọn Mẫu {activeTab}
             </label>
 
             <div className="relative">
               <button
                 onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                className="w-full bg-white border border-rose-100 text-[#1D3557] rounded-2xl p-3 text-sm font-serif flex items-center justify-between hover:border-[#F494A2] transition-colors shadow-sm"
+                className="w-full bg-white border border-rose-100 text-[#1B2C40] rounded-2xl p-3 text-sm font-serif flex items-center justify-between hover:border-[#F2BFC8] transition-colors shadow-sm"
               >
                 <div className="flex items-center gap-3">
                   {/* TĂNG KÍCH THƯỚC ẢNH VÀ ĐỔI TỶ LỆ DỌC */}
@@ -409,7 +409,7 @@ export default function Customize() {
                     <span className="text-[10px] text-gray-500 font-sans font-medium uppercase mt-1 tracking-wider">Mẫu hiện tại</span>
                   </div>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-[#F494A2] transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#F2BFC8] transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isProductDropdownOpen && (
@@ -444,7 +444,7 @@ export default function Customize() {
                               />
                             </div>
                             <div className="flex flex-col items-start text-left pr-2">
-                              <span className={`text-sm font-bold line-clamp-2 leading-tight ${activeProductId === p.id ? 'text-[#F494A2]' : 'text-[#1D3557]'}`}>
+                              <span className={`text-sm font-bold line-clamp-2 leading-tight ${activeProductId === p.id ? 'text-[#F2BFC8]' : 'text-[#1B2C40]'}`}>
                                 {p.name}
                               </span>
                               <span className="text-[11px] text-gray-500 font-medium mt-1">
@@ -452,7 +452,7 @@ export default function Customize() {
                               </span>
                             </div>
                             {activeProductId === p.id && (
-                              <div className="ml-auto w-2 h-2 rounded-full bg-[#F494A2] shrink-0"></div>
+                              <div className="ml-auto w-2 h-2 rounded-full bg-[#F2BFC8] shrink-0"></div>
                             )}
                           </button>
                         ))
@@ -475,11 +475,11 @@ export default function Customize() {
                 <div key={prop.id} className="flex flex-col bg-white/50 rounded-3xl border border-rose-100 overflow-hidden shadow-sm transition-all">
                   <button
                     onClick={() => setActivePropertyIndex(idx)}
-                    className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx ? 'bg-white text-[#F494A2]' : 'bg-transparent text-[#1D3557] hover:bg-white'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx ? 'bg-white text-[#F2BFC8]' : 'bg-transparent text-[#1B2C40] hover:bg-white'}`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#F494A2]' : 'border-rose-200 text-rose-300'}`}>
-                        {selections[activeTab]?.[prop.id] ? <div className="w-4 h-4 rounded-full bg-[#F494A2]"></div> : <span className="w-4 h-4 rounded-full border border-current"></span>}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#F2BFC8]' : 'border-rose-200 text-rose-300'}`}>
+                        {selections[activeTab]?.[prop.id] ? <div className="w-4 h-4 rounded-full bg-[#F2BFC8]"></div> : <span className="w-4 h-4 rounded-full border border-current"></span>}
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-bold">{prop.title}</span>
@@ -490,7 +490,7 @@ export default function Customize() {
                         )}
                       </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-[#F494A2] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-4 h-4 text-[#F2BFC8] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
                   </button>
 
                   {activePropertyIndex === idx && (
@@ -501,7 +501,7 @@ export default function Customize() {
                           <button
                             key={opt.id}
                             onClick={() => handleOptionSelect(prop.id, opt.id, opt.name)}
-                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected ? 'bg-[#F494A2] text-white border-[#F494A2] shadow-sm' : 'bg-rose-50 text-[#1D3557] border-transparent hover:border-[#F494A2]'}`}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected ? 'bg-[#F2BFC8] text-white border-[#F2BFC8] shadow-sm' : 'bg-rose-50 text-[#1B2C40] border-transparent hover:border-[#F2BFC8]'}`}
                           >
                             {opt.name}
                           </button>
@@ -518,11 +518,11 @@ export default function Customize() {
         {/* Center Canvas */}
         <div className="flex-1 bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 overflow-hidden flex flex-col p-6 min-h-[500px] lg:min-h-0 h-full">
           <div className="mb-4">
-            <h1 className="text-2xl font-serif font-bold text-[#1D3557]">
+            <h1 className="text-2xl font-serif font-bold text-[#1B2C40]">
               {activeProduct?.name || activeTab}
             </h1>
             {vendorInfo && (
-              <p className="text-xs text-[#F494A2] font-bold uppercase tracking-widest mt-1">
+              <p className="text-xs text-[#F2BFC8] font-bold uppercase tracking-widest mt-1">
                 Bởi {vendorInfo.name}
               </p>
             )}
@@ -547,9 +547,14 @@ export default function Customize() {
                     <button
                       key={i}
                       onClick={() => setSelectedThumb(url)}
-                      className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${isSelected ? 'border-[#F494A2] opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                      className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${isSelected ? 'border-[#F2BFC8] opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
                     >
-                      <img src={url} alt="thumb" className="w-full h-full object-cover" />
+                      <img 
+                        src={url} 
+                        alt="thumb" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
+                      />
                     </button>
                   );
                 })}
@@ -557,20 +562,20 @@ export default function Customize() {
             )}
           </div>
 
-          <div className="bg-[#FFFDFD] rounded-2xl p-6 shadow-sm border border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="bg-[#FAF6EE] rounded-2xl p-6 shadow-sm border border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-rose-100 pb-4 md:pb-0 pr-0 md:pr-6">
-              <h3 className="font-bold text-[#1D3557] text-sm mb-2 uppercase tracking-wider">GIỚI THIỆU</h3>
-              <p className="text-xs text-[#1D3557]/70 leading-relaxed line-clamp-3">
+              <h3 className="font-bold text-[#1B2C40] text-sm mb-2 uppercase tracking-wider">GIỚI THIỆU</h3>
+              <p className="text-xs text-[#1B2C40]/70 leading-relaxed line-clamp-3">
                 Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng {vendorInfo?.name || 'Bé Song Hỷ'} tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
               </p>
             </div>
             <div className="flex-1 flex gap-4 lg:gap-8 justify-around px-4">
               {[{ title: 'CHẤT LIỆU CAO CẤP' }, { title: 'THIẾT KẾ ĐỘC QUYỀN' }, { title: 'MAY ĐO THEO SỐ ĐO' }, { title: 'BẢO HÀNH TRỌN ĐỜI' }].map((feat, i) => (
                 <div key={i} className="flex flex-col items-center text-center max-w-[80px]">
-                  <div className="w-10 h-10 rounded-full border border-rose-100 flex items-center justify-center text-[#F494A2] mb-2 shrink-0 bg-white shadow-sm">
+                  <div className="w-10 h-10 rounded-full border border-rose-100 flex items-center justify-center text-[#F2BFC8] mb-2 shrink-0 bg-white shadow-sm">
                     <Heart className="w-4 h-4 fill-current" />
                   </div>
-                  <span className="text-[9px] lg:text-[10px] uppercase font-bold text-[#1D3557] tracking-widest leading-tight">{feat.title}</span>
+                  <span className="text-[9px] lg:text-[10px] uppercase font-bold text-[#1B2C40] tracking-widest leading-tight">{feat.title}</span>
                 </div>
               ))}
             </div>
@@ -580,8 +585,8 @@ export default function Customize() {
         {/* Right Sidebar (Pricing & Chat) */}
         <aside className="lg:w-[350px] flex flex-col gap-6 h-full min-h-0">
           <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-8 flex flex-col items-center">
-            <span className="font-serif text-[#1D3557] font-bold text-lg mb-2 uppercase tracking-widest">Dự Toán Chi Phí</span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#F494A2] mb-6 tracking-tight">
+            <span className="font-serif text-[#1B2C40] font-bold text-lg mb-2 uppercase tracking-widest">Dự Toán Chi Phí</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#F2BFC8] mb-6 tracking-tight">
               {currentPrice.toLocaleString('vi-VN')} <span className="text-xl">VND</span>
             </h2>
 
@@ -589,15 +594,15 @@ export default function Customize() {
               <button
                 onClick={handleSaveDesign}
                 disabled={isSaving}
-                className="flex-1 py-3.5 border border-[#F494A2] text-[#F494A2] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FFF5F5] transition-colors text-center whitespace-nowrap bg-white shadow-sm disabled:opacity-50"
+                className="flex-1 py-3.5 border border-[#F2BFC8] text-[#F2BFC8] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FAF6EE] transition-colors text-center whitespace-nowrap bg-white shadow-sm disabled:opacity-50"
               >
                 {isSaving ? 'ĐANG LƯU...' : 'LƯU THIẾT KẾ'}
               </button>
-              <button className="w-[44px] shrink-0 border border-rose-200 text-[#F494A2] rounded-full flex items-center justify-center hover:bg-[#FFF5F5] bg-white shadow-sm">
+              <button className="w-[44px] shrink-0 border border-rose-200 text-[#F2BFC8] rounded-full flex items-center justify-center hover:bg-[#FAF6EE] bg-white shadow-sm">
                 <Heart className="w-4 h-4 fill-current opacity-80" />
               </button>
             </div>
-            <button className="w-full py-3.5 bg-[#F494A2] text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md">
+            <button className="w-full py-3.5 bg-[#F2BFC8] text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md">
               ĐẶT LỊCH THỬ
             </button>
           </div>
@@ -611,8 +616,8 @@ export default function Customize() {
                 <div
                   key={i}
                   className={`text-xs p-4 rounded-[20px] max-w-[85%] shadow-sm leading-relaxed font-medium ${msg.isUser
-                    ? 'bg-[#FFF5F5] text-[#1D3557] rounded-tr-sm self-end ml-auto border border-rose-100'
-                    : 'bg-white text-[#1D3557] rounded-tl-sm self-start mr-auto border border-rose-100'
+                    ? 'bg-[#FAF6EE] text-[#1B2C40] rounded-tr-sm self-end ml-auto border border-rose-100'
+                    : 'bg-white text-[#1B2C40] rounded-tl-sm self-start mr-auto border border-rose-100'
                     }`}
                 >
                   {msg.text}
@@ -627,11 +632,11 @@ export default function Customize() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Nhập yêu cầu của bạn..."
-                className="w-full bg-white border border-rose-100 rounded-full py-3.5 px-6 pr-14 text-xs font-medium focus:ring-1 focus:ring-[#F494A2] focus:outline-none shadow-sm text-[#1D3557] placeholder:text-gray-400"
+                className="w-full bg-white border border-rose-100 rounded-full py-3.5 px-6 pr-14 text-xs font-medium focus:ring-1 focus:ring-[#F2BFC8] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400"
               />
               <button
                 onClick={handleSendMessage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F494A2] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>
