@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useSpring, useTransform } from 'motion/react';
-import { Send, X, MessageSquare, Heart, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Send, X, Heart, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Database } from '../../types/database';
+import InteractiveMascot from './InteractiveMascot';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 
@@ -13,33 +14,6 @@ export default function FloatingChat() {
   const [inputValue, setInputValue] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
-
-  // Mouse tracking for "Look Around" effect
-  const mouseX = useSpring(0, { stiffness: 150, damping: 20 });
-  const mouseY = useSpring(0, { stiffness: 150, damping: 20 });
-
-  const eyeMoveX = useTransform(mouseX, [-100, 100], [-4, 4]);
-  const eyeMoveY = useTransform(mouseY, [-100, 100], [-3, 3]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (mascotRef.current) {
-        const rect = mascotRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        // Calculate distance from center
-        const dx = e.clientX - centerX;
-        const dy = e.clientY - centerY;
-        
-        // Update eye positions
-        mouseX.set(dx);
-        mouseY.set(dy);
-      }
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [isHovered, mouseX, mouseY]);
 
   // Fetch chat history
   useEffect(() => {
@@ -173,74 +147,9 @@ export default function FloatingChat() {
             </motion.div>
           )}
 
-          {/* Mascot Body (Human-like Cute Avatar) */}
+          {/* Mascot Body (Interactive Cute Avatar) */}
           <div className="relative w-20 h-20 md:w-24 md:h-24 drop-shadow-2xl">
-            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
-              {/* Hair Back */}
-              <circle cx="50" cy="45" r="32" fill="#4A3728" />
-              
-              {/* Neck */}
-              <rect x="45" y="65" width="10" height="10" fill="#FFE0BD" />
-
-              {/* Face */}
-              <circle cx="50" cy="45" r="30" fill="#FFE0BD" />
-              
-              {/* Hair Front/Bangs */}
-              <path d="M20 45 Q20 15 50 15 Q80 15 80 45 Q80 25 50 25 Q20 25 20 45" fill="#4A3728" />
-              <path d="M25 35 Q40 20 55 35" fill="none" stroke="#3A2A1D" strokeWidth="1" opacity="0.3" />
-
-              {/* Eyes Base */}
-              <g>
-                <ellipse cx="35" cy="48" rx="7" ry="8" fill="white" />
-                <ellipse cx="65" cy="48" rx="7" ry="8" fill="white" />
-                
-                {/* Pupils (Tracking Mouse) */}
-                <motion.g style={{ x: eyeMoveX, y: eyeMoveY }}>
-                  <circle cx="35" cy="48" r="4" fill="#333" />
-                  <circle cx="65" cy="48" r="4" fill="#333" />
-                  <circle cx="36.5" cy="46" r="1.5" fill="white" />
-                  <circle cx="66.5" cy="46" r="1.5" fill="white" />
-                </motion.g>
-              </g>
-
-              {/* Cheeks */}
-              <circle cx="28" cy="55" r="4" fill="#F494A2" opacity="0.4" />
-              <circle cx="72" cy="55" r="4" fill="#F494A2" opacity="0.4" />
-
-              {/* Mouth */}
-              <motion.path 
-                d={isOpen ? "M45 60 Q50 65 55 60" : "M44 58 Q50 63 56 58"} 
-                fill="none" 
-                stroke="#4A3728" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-              />
-              
-              {/* Body/Dress */}
-              <path d="M30 75 Q50 65 70 75 L75 95 L25 95 Z" fill="#F494A2" />
-              <path d="M50 75 L50 95" stroke="white" strokeWidth="1" opacity="0.3" />
-              <circle cx="50" cy="72" r="3" fill="white" />
-
-              {/* Waving Arm/Hand */}
-              <motion.g
-                animate={{ rotate: isHovered ? [0, -20, 0] : [0, -10, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                style={{ originX: "70px", originY: "75px" }}
-              >
-                <path d="M70 75 Q85 65 90 55" fill="none" stroke="#FFE0BD" strokeWidth="6" strokeLinecap="round" />
-                {/* Hand/Fingers */}
-                <circle cx="90" cy="55" r="4" fill="#FFE0BD" />
-              </motion.g>
-
-              {/* Floating Sparkles around her */}
-              <motion.g
-                animate={{ opacity: [0.4, 1, 0.4], y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <path d="M15 20 L17 22 M17 20 L15 22" stroke="#F494A2" strokeWidth="1" />
-                <path d="M85 80 L87 82 M87 80 L85 82" stroke="#F494A2" strokeWidth="1" />
-              </motion.g>
-            </svg>
+            <InteractiveMascot className="w-full h-full" />
             
             {/* Notification Badge */}
             {!isOpen && (
