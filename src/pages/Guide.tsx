@@ -50,7 +50,7 @@ export default function Guide() {
   const [activePhase, setActivePhase] = useState(0);
 
   return (
-    <div className="w-full flex flex-col font-sans mb-20 bg-[#FFFFFF] min-h-screen">
+    <div className="w-full flex flex-col font-sans pb-20 bg-[#FFFFFF] min-h-screen">
 
       {/* Hero Section */}
       <div className="relative w-full h-[400px] flex items-center justify-center overflow-hidden bg-[#1B2C40]">

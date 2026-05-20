@@ -363,7 +363,7 @@ export default function Customize() {
   const currentMainImage = selectedThumb || baseImage;
 
   return (
-    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FFFFFF] min-h-screen">
+    <div className="w-full flex flex-col font-sans pb-10 mt-6 px-4 bg-[#FFFFFF] min-h-screen">
       <div className="max-w-[1200px] w-full mx-auto mb-6 flex justify-center overflow-x-auto no-scrollbar py-2">
         <div className="flex bg-white rounded-full shadow-sm p-1 border border-rose-100">
           {tabs.map((tab) => (
