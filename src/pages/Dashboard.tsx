@@ -180,7 +180,7 @@ export default function Dashboard() {
       const dependentVouchers = vouchers.filter(v => v.requiredTaskId === task.taskId);
       for (const voucher of dependentVouchers) {
         const newVoucherStatus = newStatus === 'completed' ? 'unlocked' : 'locked';
-        const dbVoucherStatus = newVoucherStatus === 'completed' ? 'Unlocked' : 'Locked';
+        const dbVoucherStatus = newVoucherStatus === 'unlocked' ? 'Unlocked' : 'Locked';
 
         if (voucher.id.startsWith('mock-')) {
           const { data: newV, error: errV } = await (supabase
@@ -220,7 +220,7 @@ export default function Dashboard() {
           particleCount: 150,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#F2BFC8', '#FAF6EE', '#1B2C40', '#FAF6EE']
+          colors: ['#F2BFC8', '#FFFFFF', '#1B2C40', '#FFFFFF']
         });
       }
     } catch (error) {
@@ -327,11 +327,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FAF6EE]">
+    <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FFFFFF]">
 
       {/* Dynamic Header Greeting & Interactive Progress Panel */}
       <div className="mb-8 bg-white rounded-3xl border border-rose-100/50 p-6 md:p-8 shadow-sm flex flex-col gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FAF6EE]/20 rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFFFFF]/20 rounded-full blur-2xl"></div>
         <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-[#F2BFC8]/5 rounded-full blur-3xl"></div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
@@ -385,8 +385,8 @@ export default function Dashboard() {
                   key={station.id}
                   onClick={() => setActiveStationId(station.id)}
                   className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-serif font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap border ${isActive
-                      ? 'bg-[#F2BFC8] text-white shadow-md border-[#F2BFC8]'
-                      : 'bg-white hover:bg-rose-50/30 text-[#1B2C40] border-transparent hover:border-rose-100'
+                    ? 'bg-[#F2BFC8] text-white shadow-md border-[#F2BFC8]'
+                    : 'bg-white hover:bg-rose-50/30 text-[#1B2C40] border-transparent hover:border-rose-100'
                     }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : station.color}`} />
@@ -409,7 +409,7 @@ export default function Dashboard() {
 
             return (
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden transition-all duration-300">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FAF6EE]/10 rounded-full blur-2xl"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFFFFF]/10 rounded-full blur-2xl"></div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-rose-50/50 mb-6">
                   <div className="flex items-center gap-3">
@@ -438,15 +438,15 @@ export default function Dashboard() {
 
                   {/* Task Card with Big Checkbox */}
                   <div className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${isCompleted
-                      ? 'bg-emerald-50/30 border-emerald-100/50'
-                      : 'bg-rose-50/10 border-rose-100/30'
+                    ? 'bg-emerald-50/30 border-emerald-100/50'
+                    : 'bg-rose-50/10 border-rose-100/30'
                     }`}>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => task && toggleTaskStatus(task)}
                         className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm active:scale-95 ${isCompleted
-                            ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-rose-300 hover:border-[#F2BFC8] bg-white'
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : 'border-rose-300 hover:border-[#F2BFC8] bg-white'
                           }`}
                       >
                         {isCompleted && <CheckCircle2 className="w-5 h-5 text-white" />}

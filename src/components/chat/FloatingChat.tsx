@@ -20,9 +20,9 @@ export default function FloatingChat() {
     async function fetchChat() {
       const { data } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
       if (data && data.length > 0) {
-        setMessages((data as ChatMessageRow[]).map(m => ({ 
-          text: m.content || '', 
-          isUser: m.role === 'user' 
+        setMessages((data as ChatMessageRow[]).map(m => ({
+          text: m.content || '',
+          isUser: m.role === 'user'
         })));
       } else {
         setMessages([
@@ -42,11 +42,11 @@ export default function FloatingChat() {
     const userText = inputValue;
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
-    
+
     await supabase.from('chat_messages').insert({ role: 'user', content: userText } as any);
 
     setTimeout(async () => {
-      const botText = "Cảm ơn bạn đã nhắn tin cho Bé Song nhé! Mình đang tìm kiếm thông tin tốt nhất cho bạn đây...";
+      const botText = "Cảm ơn bạn đã nhắn tin cho Bé Song Hỷ nhé! Mình đang tìm kiếm thông tin tốt nhất cho bạn đây...";
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
       await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
     }, 1000);
@@ -54,7 +54,7 @@ export default function FloatingChat() {
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end pointer-events-none">
-      
+
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
@@ -68,7 +68,7 @@ export default function FloatingChat() {
             <div className="bg-[#F2BFC8] p-6 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
-                   <Sparkles className="w-5 h-5 text-white" />
+                  <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h3 className="font-serif font-bold text-lg leading-tight uppercase tracking-wider">Bé Song Hỷ</h3>
@@ -81,7 +81,7 @@ export default function FloatingChat() {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[#FAF6EE]">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[#FFFFFF]">
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
@@ -89,11 +89,10 @@ export default function FloatingChat() {
                   animate={{ opacity: 1, x: 0 }}
                   className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[85%] p-4 rounded-[22px] text-xs font-medium leading-relaxed shadow-sm border ${
-                    msg.isUser 
-                    ? 'bg-[#1B2C40] text-white border-[#1B2C40] rounded-tr-none' 
+                  <div className={`max-w-[85%] p-4 rounded-[22px] text-xs font-medium leading-relaxed shadow-sm border ${msg.isUser
+                    ? 'bg-[#1B2C40] text-white border-[#1B2C40] rounded-tr-none'
                     : 'bg-white text-[#1B2C40] border-rose-100 rounded-tl-none'
-                  }`}>
+                    }`}>
                     {msg.text}
                   </div>
                 </motion.div>
@@ -112,7 +111,7 @@ export default function FloatingChat() {
                   placeholder="Hỏi Bé Song điều gì đó..."
                   className="w-full bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 pr-12 text-xs focus:outline-none focus:ring-1 focus:ring-[#F2BFC8] text-[#1B2C40]"
                 />
-                <button 
+                <button
                   onClick={handleSendMessage}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-md transition-colors"
                 >
@@ -135,25 +134,44 @@ export default function FloatingChat() {
           whileTap={{ scale: 0.95 }}
           className="relative cursor-pointer group"
         >
-          {/* Tooltip */}
-          {!isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: isHovered ? 1 : 0, x: -10 }}
-              className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white px-4 py-2 rounded-2xl border border-rose-100 shadow-lg whitespace-nowrap hidden md:block"
-            >
-              <p className="text-[#1B2C40] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song 🧚‍♀️</p>
-              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 border-t border-r border-rose-100"></div>
-            </motion.div>
-          )}
+          {/* Tooltip Wrapper (Positioned over the head of the mascot) */}
+          <AnimatePresence>
+            {!isOpen && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Floating / Bobbing animation */}
+                  <motion.div
+                    animate={{
+                      y: [0, -6, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="bg-white px-4 py-2 rounded-2xl border border-rose-100 shadow-lg whitespace-nowrap relative flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#F2BFC8]" />
+                    <p className="text-[#1B2C40] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song Hỷ</p>
+                    <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-b border-r border-rose-100"></div>
+                  </motion.div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
 
           {/* Mascot Body (Interactive Cute Avatar) */}
-          <div className="relative w-20 h-20 md:w-24 md:h-24 drop-shadow-2xl">
+          <div className="relative w-28 h-28 md:w-36 md:h-36 drop-shadow-2xl">
             <InteractiveMascot className="w-full h-full" />
-            
+
             {/* Notification Badge */}
             {!isOpen && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1B2C40] text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+              <div className="absolute top-0 right-0 w-6 h-6 bg-[#1B2C40] text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
                 1
               </div>
             )}

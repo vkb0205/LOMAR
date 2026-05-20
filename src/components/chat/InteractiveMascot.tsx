@@ -69,8 +69,8 @@ export default function InteractiveMascot({ className = '' }: InteractiveMascotP
           style={{
             width: '1034.34%',
             height: '922.52%',
-            left: '-342.42%',
-            top: '-351.35%',
+            left: '-350.42%',
+            top: '-341.35%',
           }}
         />
       </div>

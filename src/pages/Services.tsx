@@ -78,7 +78,7 @@ export default function Services() {
   });
 
   return (
-    <div className="w-full flex flex-col font-sans mb-20 bg-[#FAF6EE] min-h-screen">
+    <div className="w-full flex flex-col font-sans mb-20 bg-[#FFFFFF] min-h-screen">
 
       {/* Header Banner */}
       <div className="relative w-full h-[300px] md:h-[400px] flex items-center justify-center overflow-hidden">

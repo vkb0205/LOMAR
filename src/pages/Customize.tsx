@@ -197,20 +197,20 @@ export default function Customize() {
 
     // Chỉ lưu nếu có thay đổi thực sự
     const prevSaved = customizedServices[activeTab];
-    const isDifferent = !prevSaved || 
-      prevSaved.productId !== activeProductId || 
+    const isDifferent = !prevSaved ||
+      prevSaved.productId !== activeProductId ||
       JSON.stringify(prevSaved.selectedOptions) !== JSON.stringify(selectedOptionDetails);
 
     if (isDifferent) {
       saveCustomizedService(activeTab, currentService);
     }
   }, [
-    activeTab, 
-    activeProductId, 
-    selections, 
-    activeProduct, 
-    currentProperties, 
-    allImages, 
+    activeTab,
+    activeProductId,
+    selections,
+    activeProduct,
+    currentProperties,
+    allImages,
     vendorInfo,
     customizedServices,
     saveCustomizedService
@@ -318,7 +318,7 @@ export default function Customize() {
       const userId = 'U01';
       // Tạo designId ngẫu nhiên
       const designId = Math.random().toString(36).substring(2, 12);
-      
+
       // 1. Insert into user_designs
       const { error: designError } = await supabase
         .from('user_designs')
@@ -363,7 +363,7 @@ export default function Customize() {
   const currentMainImage = selectedThumb || baseImage;
 
   return (
-    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FAF6EE] min-h-screen">
+    <div className="w-full flex flex-col font-sans mb-10 mt-6 px-4 bg-[#FFFFFF] min-h-screen">
       <div className="max-w-[1200px] w-full mx-auto mb-6 flex justify-center overflow-x-auto no-scrollbar py-2">
         <div className="flex bg-white rounded-full shadow-sm p-1 border border-rose-100">
           {tabs.map((tab) => (
@@ -549,10 +549,10 @@ export default function Customize() {
                       onClick={() => setSelectedThumb(url)}
                       className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${isSelected ? 'border-[#F2BFC8] opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
                     >
-                      <img 
-                        src={url} 
-                        alt="thumb" 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={url}
+                        alt="thumb"
+                        className="w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
                       />
                     </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, ChevronDown } from 'lucide-react';
+import logoImg from '../../img/Logo màu.png';
 
 export default function Navbar() {
   const location = useLocation();
@@ -14,27 +15,25 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#FAF6EE]/90 backdrop-blur-md border-b border-rose-50 shadow-sm">
+    <nav className="sticky top-0 z-50 w-full bg-[#181144] border-b border-white/10 shadow-sm">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="p-2">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#1B2C40] group-hover:scale-105 transition-transform duration-300">
-                  <path d="M24 6C16 6 12 14 12 14C12 14 8 20 8 28C8 38 18 42 24 42C30 42 40 38 40 28C40 20 36 14 36 14C36 14 32 6 24 6Z" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <circle cx="24" cy="18" r="4" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <path d="M16 28C16 28 20 34 24 34C28 34 32 28 32 28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </div>
+            <Link to="/" className="flex items-center gap-3 group py-1">
+              <img
+                src={logoImg}
+                alt="Logo Phố Hạnh Phúc Hồ Văn Huê"
+                className="h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
               <div className="flex flex-col justify-center">
-                <span className="font-serif font-bold text-xl leading-tight text-[#1B2C40] tracking-wider uppercase">
+                <span className="font-serif font-bold text-xl leading-tight text-white tracking-wider uppercase">
                   Phố Hạnh Phúc
                 </span>
-                <span className="font-serif font-bold text-xl leading-tight text-[#1B2C40] tracking-wider uppercase">
+                <span className="font-serif font-bold text-xl leading-tight text-white tracking-wider uppercase">
                   Hồ Văn Huê
                 </span>
-                <span className="text-[9px] text-[#3A5E7F] font-medium tracking-widest mt-0.5 uppercase">
+                <span className="text-[9px] text-white/60 font-medium tracking-widest mt-0.5 uppercase">
                   Nơi bắt đầu hành trình hôn nhân
                 </span>
               </div>
@@ -47,12 +46,11 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center text-[12px] font-bold tracking-widest transition-colors uppercase ${
-                  location.pathname === link.path ? 'text-[#1B2C40] border-b-2 border-rose-300 pb-1' : 'text-[#1B2C40] hover:text-rose-400 pt-1.5 pb-1.5'
-                }`}
+                className={`flex items-center text-[12px] font-bold tracking-widest transition-colors uppercase ${location.pathname === link.path ? 'text-white border-b-2 border-rose-400 pb-1' : 'text-white/80 hover:text-rose-400 pt-1.5 pb-1.5'
+                  }`}
               >
                 {link.name}
-                {link.hasChild && <ChevronDown className="w-3 h-3 ml-1 text-gray-400" />}
+                {link.hasChild && <ChevronDown className="w-3 h-3 ml-1 text-white/50" />}
               </Link>
             ))}
           </div>
@@ -65,26 +63,25 @@ export default function Navbar() {
             >
               Hành Trình Của Bạn
             </Link>
-            
+
             <Link
               to="/dashboard"
-              className="w-10 h-10 rounded-full border border-[#1B2C40] text-[#1B2C40] flex items-center justify-center hover:bg-rose-50 transition-colors"
+              className="w-10 h-10 rounded-full border border-white/20 text-white flex items-center justify-center hover:bg-white/10 transition-colors"
             >
               <User className="w-5 h-5" />
             </Link>
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Navigation */}
-      <div className="lg:hidden flex flex-row overflow-x-auto border-t border-rose-50 py-3 px-4 gap-4 no-scrollbar bg-[#FAF6EE]">
+      <div className="lg:hidden flex flex-row overflow-x-auto border-t border-white/10 py-3 px-4 gap-4 no-scrollbar bg-[#181144]">
         {navLinks.map((link) => (
           <Link
             key={link.path}
             to={link.path}
-            className={`flex items-center whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
-              location.pathname === link.path ? 'bg-rose-50 text-rose-500' : 'bg-white text-[#1B2C40] border border-gray-100'
-            }`}
+            className={`flex items-center whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${location.pathname === link.path ? 'bg-rose-400 text-white' : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
+              }`}
           >
             {link.name}
           </Link>
