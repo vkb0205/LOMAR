@@ -1,7 +1,77 @@
 import React from 'react';
-import { ArrowRight, Landmark, Navigation, HeartHandshake, Gift, Heart, MapPin, Search, Bot, Building2, HandHeart, Flower2, Infinity } from 'lucide-react';
+import { ArrowRight, Heart, HeartHandshake, Landmark, Flower2, Building2, HandHeart, Infinity, MapPin, Navigation } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+
+// Khai báo các custom SVG icons để khớp chuẩn với mockup thiết kế
+const DressIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 4V3M10 5.5l2-1.5 2 1.5M12 4l-4 3h8z" />
+    <path d="M8 7v4c0 1.5 1 2.5 4 2.5s4-1 4-2.5V7H8z" />
+    <path d="M8 11.5L4 21h16l-4-9.5" />
+    <path d="M12 13.5V21M9.5 15L8 21M14.5 15l1.5 6" />
+  </svg>
+);
+
+const MakeupIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="5" y="11" width="5" height="10" rx="1" />
+    <path d="M6 11V7l3-1.5V11" />
+    <ellipse cx="17" cy="9" rx="3.5" ry="3.5" />
+    <ellipse cx="17" cy="17" rx="4" ry="2" />
+    <path d="M17 12.5v2.5" />
+    <circle cx="17" cy="17" r="1.5" />
+  </svg>
+);
+
+const CameraIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M14.5 4h-5L8 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-4l-1.5-3z" />
+    <circle cx="12" cy="13" r="4" />
+    <circle cx="12" cy="13" r="1.5" />
+    <circle cx="18.5" cy="9.5" r="0.5" fill="currentColor" />
+  </svg>
+);
+
+const RingsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <ellipse cx="9.5" cy="14.5" rx="5" ry="3" transform="rotate(-15 9.5 14.5)" />
+    <ellipse cx="14.5" cy="11.5" rx="5" ry="3" transform="rotate(15 14.5 11.5)" />
+    <path d="M14.5 6.5l1.5 2-1.5 1.5-1.5-1.5z" />
+  </svg>
+);
+
+const GiftBoxIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="3" y="8" width="18" height="4" rx="1" />
+    <rect x="5" y="12" width="14" height="9" rx="1" />
+    <path d="M12 8v13" />
+    <path d="M12 8c-2-2.5-4.5-2.5-4.5.5 0 2 2.5 1.5 4.5.5 2 1 4.5.5 4.5-0.5 0-3-2.5-3-4.5-0.5" />
+  </svg>
+);
+
+const BouquetIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 21L7 12h10z" />
+    <path d="M10.5 14.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 1 1-3 0" />
+    <path d="M10 15l-2 3M14 15l2 3" />
+    <circle cx="12" cy="7" r="2.5" />
+    <circle cx="9" cy="9.5" r="2.5" />
+    <circle cx="15" cy="9.5" r="2.5" />
+    <circle cx="9.5" cy="6" r="2" />
+    <circle cx="14.5" cy="6" r="2" />
+    <circle cx="12" cy="7" r="0.5" fill="currentColor" />
+    <circle cx="9" cy="9.5" r="0.5" fill="currentColor" />
+    <circle cx="15" cy="9.5" r="0.5" fill="currentColor" />
+  </svg>
+);
+
+const HealthIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <path d="M6 12h3l1.5-3 2 6 1.5-4 1.5 1h2.5" />
+  </svg>
+);
 
 // Khai báo một biến cấu hình animation dùng chung để tái sử dụng cho gọn code
 const fadeBlurVariant = {
@@ -9,12 +79,11 @@ const fadeBlurVariant = {
   visible: { opacity: 1, y: 0, filter: 'blur(0px)' }
 };
 
-import trainImg from '../img/train_marriage.jpeg';
-
+import trainImg from '../img/new_bg.jpeg';
 
 export default function Home() {
   return (
-    <div className="w-full flex flex-col font-sans pb-20 animate-in fade-in duration-500 overflow-hidden relative bg-white">
+    <div className="w-full flex flex-col font-sans pb-20 animate-in fade-in duration-500 overflow-hidden relative bg-[#fffdfa]">
 
       {/* Decorative floral backgrounds - top left and right */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none mix-blend-multiply" />
@@ -22,38 +91,38 @@ export default function Home() {
       {/* =========================================
           1. HERO SECTION 
       ========================================= */}
-      <section className="relative w-full min-h-[600px] lg:h-[700px] flex items-center justify-center pt-10">
+      <section className="relative w-full min-h-[600px] lg:h-[700px] flex items-center justify-center pt-10 bg-gradient-to-b from-[#fffcf8] via-[#fffbf6] to-[#fbfcfe]">
 
-        {/* Background Đoàn Tàu */}
-        <div className="absolute inset-0 flex justify-center items-end pointer-events-none z-0 overflow-hidden">
+        {/* Background Butterfly Illustration */}
+        <div className="absolute inset-0 flex justify-center items-end pointer-events-none z-0 overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(242,191,200,0.2),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(181,217,242,0.2),_transparent_55%)]">
           <img
             src={trainImg}
-            alt="Train Outline"
-            className="w-full h-full object-contain object-bottom opacity-100 mix-blend-multiply scale-115 origin-bottom"
+            alt="Butterfly Background"
+            className="w-full h-full object-cover object-right md:object-cover opacity-95 scale-100 origin-bottom"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-white/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white/50 md:to-white/80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#fffdfa]/50 via-white/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#fffdfa]/40 via-transparent to-transparent" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[1200px] mx-auto px-4 flex flex-col h-full justify-center pb-24 md:pb-32">
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto px-4 flex flex-col h-full justify-center pb-12 md:pb-20">
 
-          <div className="relative flex flex-col items-start lg:text-left mb-8 lg:mb-0 w-full lg:w-2/3 translate-y-15">
+          <div className="relative flex flex-col items-start lg:text-left mb-8 lg:mb-0 w-full lg:w-2/3 translate-y-10">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#1e4696] leading-[1.2] tracking-tight uppercase"
+              className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#12306d] leading-[1.25] tracking-tight uppercase"
             >
               HẠNH PHÚC <br />
-              <span className="font-serif italic text-4xl sm:text-5xl lg:text-5xl text-[#ff9ead] normal-case tracking-normal">
+              <span className="font-serif italic text-4xl sm:text-5xl lg:text-5xl text-[#df9e3a] normal-case tracking-normal font-medium">
                 không phải là đích đến
               </span><br />
               MÀ LÀ HÀNH TRÌNH
             </motion.h1>
 
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-6 w-1/2 md:w-1/3 flex items-center">
-              <div className="h-px bg-[#b5d9f2] flex-1"></div>
-              <Heart className="w-4 h-4 text-[#3e649b] mx-2 fill-current" />
-              <div className="h-px bg-[#b5d9f2] flex-1"></div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-5 w-1/3 md:w-1/4 flex items-center">
+              <div className="h-[1px] bg-[#df9e3a]/80 flex-1"></div>
+              <Heart className="w-3.5 h-3.5 text-[#df9e3a] mx-2 fill-[#df9e3a]" />
+              <div className="h-[1px] bg-[#df9e3a]/80 flex-1"></div>
             </motion.div>
 
             <motion.div
@@ -62,10 +131,10 @@ export default function Home() {
               transition={{ delay: 0.3 }}
               className="mt-8"
             >
-              <Link to="/explore" className="inline-flex items-center gap-3 bg-white text-[#1e4696] border border-rose-200 rounded-full py-3 md:py-4 px-6 md:px-8 text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-[#F2BFC8] hover:text-white hover:border-[#F2BFC8] hover:-translate-y-1 transition-all shadow-sm hover:shadow-md hover:shadow-rose-200 group">
-                Khám phá hành trình của bạn
-                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-rose-50 flex items-center justify-center text-rose-400 group-hover:bg-white group-hover:text-[#F2BFC8] transition-colors">
-                  <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
+              <Link to="/explore" className="inline-flex items-center gap-3 bg-transparent text-[#12306d] border border-[#12306d] rounded-full py-3 md:py-4 px-6 md:px-8 text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-[#12306d]/5 hover:-translate-y-0.5 transition-all shadow-none group">
+                KHÁM PHÁ HÀNH TRÌNH CỦA BẠN
+                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#12306d] flex items-center justify-center text-[#12306d] transition-colors group-hover:bg-[#12306d]/5">
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </Link>
             </motion.div>
@@ -76,48 +145,40 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="mt-20 lg:mt-24 w-full"
+            className="mt-16 lg:mt-24 w-full"
           >
-            <div className="inline-flex items-center justify-between lg:justify-start overflow-x-auto no-scrollbar py-4 px-2 md:py-6 md:px-2">
+            <div className="flex items-center justify-between overflow-x-auto no-scrollbar py-4 px-2 md:py-6 md:px-2 gap-1 md:gap-2">
               {[
-                { title: 'GA\nVĂN MINH', icon: Landmark, to: '/dashboard?station=T01' },
-                { title: 'GA\nHIỆN ĐẠI', icon: Building2, to: '/dashboard?station=T02' },
-                { title: 'GA\nNGHĨA TÌNH', icon: HandHeart, to: '/dashboard?station=T03' },
-                { title: 'GA\nTRI ÂN', icon: Flower2, to: '/dashboard?station=T04' },
-                { title: 'GA\nHẸN VÀ HÔN', icon: Infinity, to: '/dashboard' }
+                { title: 'THỜI TRANG', icon: DressIcon, to: '/explore?category=Váy Cưới' },
+                { title: 'MAKEUP &\nLÀM ĐẸP', icon: MakeupIcon, to: '/explore?category=Make Up' },
+                { title: 'CHỤP ẢNH\nSTUDIO', icon: CameraIcon, to: '/explore?category=Studio' },
+                { title: 'TRANG SỨC', icon: RingsIcon, to: '/explore?category=Trang Sức' },
+                { title: 'QUÀ TẶNG &\nPHỤ KIỆN', icon: GiftBoxIcon, to: '/explore?category=Thiệp Cưới' },
+                { title: 'QUÀ TẶNG &\nPHỤ KIỆN', icon: BouquetIcon, to: '/explore?category=Trang Trí' },
+                { title: 'Y TẾ', icon: HealthIcon, to: '/explore?category=Sức Khỏe' }
               ].map((stop, i, arr) => (
                 <React.Fragment key={i}>
-                  <Link to={stop.to} className="flex flex-col items-center gap-3 group shrink-0 z-10 w-20 md:w-24 hover:-translate-y-2 transition-transform duration-300">
-                    <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-[#3e649b] bg-white border border-[#b5d9f2]/50 shadow-sm rounded-full transition-all group-hover:bg-[#1e4696] group-hover:text-white group-hover:shadow-md group-hover:shadow-[#b5d9f2] group-hover:border-[#1e4696] z-10 relative">
+                  <Link to={stop.to} className="flex flex-col items-center gap-3 group shrink-0 z-10 w-20 md:w-24 hover:-translate-y-1.5 transition-transform duration-300">
+                    <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center text-[#df9e3a] bg-white border border-[#df9e3a]/60 shadow-sm rounded-full transition-all group-hover:bg-[#df9e3a] group-hover:text-white group-hover:shadow-md group-hover:shadow-[#df9e3a]/30 z-10 relative">
                       <stop.icon className="w-6 h-6 md:w-7 md:h-7 stroke-[1.5]" />
                     </div>
-                    <span className="text-[9px] md:text-[11px] font-bold text-[#1e4696] whitespace-pre-line tracking-wide text-center uppercase leading-tight group-hover:text-[#1e4696] transition-colors">
+                    <span className="text-[9px] md:text-[10px] font-bold text-[#df9e3a] whitespace-pre-line tracking-wide text-center uppercase leading-tight group-hover:text-[#df9e3a]/80 transition-colors">
                       {stop.title}
                     </span>
                   </Link>
 
                   {i < arr.length - 1 && (
-                    <div className="flex-1 min-w-[20px] md:min-w-[40px] flex items-center shrink-0 mx-2 md:mx-4 z-0 mb-8 md:mb-10">
-                      <div className="h-[1px] w-full bg-[#5a96c3]/50 relative flex items-center">
-                        <ArrowRight className="absolute -right-1 md:-right-2 w-3 h-3 md:w-4 md:h-4 text-[#3e649b] stroke-[1.5]" />
+                    <div className="flex-1 min-w-[15px] md:min-w-[30px] flex items-center shrink-0 mx-1 md:mx-2 z-0 mb-8 md:mb-10">
+                      <div className="h-[1px] w-full bg-[#df9e3a]/40 relative flex items-center">
+                        <svg viewBox="0 0 24 24" className="absolute -right-1 md:-right-1.5 w-3 h-3 text-[#df9e3a]/60" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </div>
                     </div>
                   )}
                 </React.Fragment>
               ))}
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="mt-4 md:mt-10 flex items-center text-[#3e649b] font-bold text-[10px] md:text-xs tracking-widest uppercase"
-          >
-            <div className="w-6 h-6 rounded-full bg-[#b5d9f2]/30 flex items-center justify-center mr-2">
-              <MapPin className="w-3.5 h-3.5 text-[#3e649b]" />
-            </div>
-            PHƯỜNG ĐỨC NHUẬN, TP. HỒ CHÍ MINH
           </motion.div>
 
         </div>
@@ -286,7 +347,7 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="flex-1 w-full max-w-[800px] bg-white rounded-[32px] overflow-hidden relative shadow-md border border-[#b5d9f2]/50 min-h-[300px] md:min-h-[350px]"
+              className="flex-1 w-full bg-white rounded-[32px] overflow-hidden relative shadow-md border border-[#b5d9f2]/50 min-h-[300px] md:min-h-[350px]"
             >
               <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1200" alt="Phố" className="absolute inset-0 w-full h-full object-cover opacity-70 hover:scale-105 transition-transform duration-1000" />
               <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white/95 via-white/80 to-transparent md:to-transparent" />

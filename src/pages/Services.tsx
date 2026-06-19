@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, MapPin, Star, Filter } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion } from 'motion/react';
 import { Database } from '../types/database';
@@ -24,11 +24,28 @@ interface Vendor {
 
 export default function Services() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category') || 'Tất Cả';
   const [activeCategory, setActiveCategory] = useState('Tất Cả');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<string[]>(['Tất Cả', 'Váy Cưới', 'Chụp Ảnh', 'Địa Điểm', 'Trang Trí', 'Trang Điểm']);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Sync state with URL parameter if it changes (with alias and casing resolution)
+  useEffect(() => {
+    const getMappedCategory = (cat: string) => {
+      const c = cat.toLowerCase().trim();
+      if (c === 'trang điểm') return 'Make Up';
+      if (c === 'chụp ảnh') return 'Studio';
+      if (c === 'sức khỏe' || c === 'y tế') return 'Sức Khỏe';
+      if (c === 'quà tặng') return 'Thiệp Cưới';
+      return cat;
+    };
+    const resolved = getMappedCategory(categoryParam);
+    const matched = categories.find(cat => cat.toLowerCase() === resolved.toLowerCase()) || resolved;
+    setActiveCategory(matched);
+  }, [categoryParam, categories]);
 
   useEffect(() => {
     async function fetchVendors() {
@@ -137,7 +154,7 @@ export default function Services() {
             {categories.map(cat => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => setSearchParams({ category: cat })}
                 className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-widest whitespace-nowrap transition-all uppercase border ${activeCategory === cat
                   ? 'bg-[#1B2C40] text-white border-[#1B2C40]'
                   : 'bg-white text-[#1B2C40] border-rose-100 hover:border-[#1B2C40]'
