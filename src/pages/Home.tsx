@@ -80,6 +80,8 @@ const fadeBlurVariant = {
 };
 
 import trainImg from '../img/new_bg.jpeg';
+import mascotImg from '../img/Mascot.png';
+import logoMainImg from '../img/Asset 20.png';
 
 export default function Home() {
   return (
@@ -352,8 +354,12 @@ export default function Home() {
               <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1200" alt="Phố" className="absolute inset-0 w-full h-full object-cover opacity-70 hover:scale-105 transition-transform duration-1000" />
               <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white/95 via-white/80 to-transparent md:to-transparent" />
               <div className="relative z-10 p-6 sm:p-12 flex flex-col justify-end md:justify-center h-full w-full md:w-2/3 xl:pl-32 items-center text-center md:items-start md:text-left">
-                <div className="inline-block border-y border-[#1e4696] py-2 px-4 md:px-6 mb-4 md:mb-6 self-center md:self-start">
-                  <p className="font-serif text-[#1e4696] font-bold text-xs md:text-sm tracking-widest uppercase leading-tight">PHỐ HẠNH PHÚC<br />HỒ VĂN HUÊ</p>
+                <div className="flex items-center gap-3 mb-4 md:mb-6 self-center md:self-start">
+                  <img src={logoMainImg} alt="Logo" className="h-14 w-auto object-contain" />
+                  <div className="flex flex-col justify-center border-l border-[#1e4696]/30 pl-3">
+                    <span className="font-serif text-[#1e4696] font-bold text-xs md:text-sm tracking-wider uppercase leading-none">PHỐ HẠNH PHÚC</span>
+                    <span className="text-[10px] text-[#df9e3a] font-bold tracking-[0.15em] uppercase mt-1 leading-none">HỒ VĂN HUÊ</span>
+                  </div>
                 </div>
                 <h2 className="font-serif font-bold text-[#1e4696] text-xl md:text-2xl lg:text-3xl uppercase leading-tight mb-6 md:mb-8">
                   CÙNG NHAU KIẾN TẠO<br />NHỮNG KHỞI ĐẦU HẠNH PHÚC

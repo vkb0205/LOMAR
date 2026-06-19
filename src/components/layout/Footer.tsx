@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Mail, MapPin, Phone, Heart } from 'lucide-react';
+import logoMainImg from '../../img/Asset 20.png';
 
 function TiktokIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -29,9 +30,23 @@ export default function Footer() {
           
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
-            <Link to="/" className="flex flex-col">
-               <span className="text-2xl font-serif font-bold text-[#1B2C40] tracking-widest uppercase">PHỐ HẠNH PHÚC</span>
-               <span className="text-[10px] text-[#F2BFC8] font-bold tracking-[0.3em] uppercase">Hồ Văn Huê Wedding Platform</span>
+            <Link to="/" className="flex items-center gap-3 group py-1">
+              <img
+                src={logoMainImg}
+                alt="Logo Phố Hạnh Phúc Hồ Văn Huê"
+                className="h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="flex flex-col justify-center">
+                <span className="text-xl font-serif font-bold text-[#1B2C40] tracking-wider uppercase leading-tight">
+                  PHỐ HẠNH PHÚC
+                </span>
+                <span className="text-[9px] text-[#F2BFC8] font-bold tracking-[0.2em] uppercase mt-0.5 leading-tight">
+                  HỒ VĂN HUÊ
+                </span>
+                <span className="text-[8px] text-[#1B2C40]/60 font-medium tracking-widest mt-0.5 uppercase">
+                  Wedding Platform
+                </span>
+              </div>
             </Link>
             <p className="text-sm text-[#1B2C40]/70 leading-relaxed">
               Hệ sinh thái dịch vụ cưới hỏi hàng đầu tại "Phố Cưới" Hồ Văn Huê. Nơi hiện thực hóa giấc mơ ngày trọng đại của mọi cặp đôi.

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import mascotBody from '../../img/mascot_body.png';
-import mascotEye from '../../img/mascot_eye.png';
+import mascotBody from '../../img/Mascot.png';
+// import mascotEye from '../../img/mascot_eye.png';
 
 interface InteractiveMascotProps {
   className?: string;
@@ -10,6 +10,7 @@ export default function InteractiveMascot({ className = '' }: InteractiveMascotP
   const eyeRef = useRef<HTMLDivElement>(null);
   const pupilRef = useRef<HTMLImageElement>(null);
 
+  /*
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!eyeRef.current || !pupilRef.current) return;
@@ -45,6 +46,7 @@ export default function InteractiveMascot({ className = '' }: InteractiveMascotP
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
+  */
 
   return (
     <div className={`relative select-none ${className}`}>
@@ -56,11 +58,11 @@ export default function InteractiveMascot({ className = '' }: InteractiveMascotP
       />
 
       {/* Eye Socket Container (Calibrated center of the mascot's eye socket) */}
+      {/*
       <div
         ref={eyeRef}
         className="absolute left-[33.125%] top-[37.09%] w-[12%] h-[10.84%] overflow-hidden rounded-full pointer-events-none"
       >
-        {/* Pupil / Tracking Eye (Calibrated scale & offset matching original 1024x1024 canvas) */}
         <img
           ref={pupilRef}
           src={mascotEye}
@@ -74,6 +76,7 @@ export default function InteractiveMascot({ className = '' }: InteractiveMascotP
           }}
         />
       </div>
+      */}
     </div>
   );
 }

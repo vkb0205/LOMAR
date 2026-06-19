@@ -137,7 +137,7 @@ export default function FloatingChat() {
           {/* Tooltip Wrapper (Positioned over the head of the mascot) */}
           <AnimatePresence>
             {!isOpen && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-none">
+              <div className="absolute bottom-[90%] left-1/2 -translate-x-1/2 mb-0 z-50 pointer-events-none">
                 <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -167,11 +167,11 @@ export default function FloatingChat() {
 
           {/* Mascot Body (Interactive Cute Avatar) */}
           <div className="relative w-28 h-28 md:w-36 md:h-36 drop-shadow-2xl">
-            <InteractiveMascot className="w-full h-full" />
+            <InteractiveMascot className="w-full h-full scale-110" />
 
             {/* Notification Badge */}
             {!isOpen && (
-              <div className="absolute top-0 right-0 w-6 h-6 bg-[#1B2C40] text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+              <div className="absolute top-[15%] right-[15%] w-6 h-6 bg-[#1B2C40] text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
                 1
               </div>
             )}

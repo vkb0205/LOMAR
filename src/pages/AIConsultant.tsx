@@ -3,6 +3,7 @@ import { Send, Bot, User, Sparkles, MapPin, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../types/database';
+import { useAppContext } from '../context/AppContext';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 type ProductRow = Database['public']['Tables']['products']['Row'];
@@ -14,9 +15,9 @@ interface Message {
   suggested_product_id?: string | null;
 }
 
-const MOCK_USER_ID = 'user_1';
-
 export default function AIConsultant() {
+  const { user } = useAppContext();
+  const userId = user ? `user_${user.role}_${user.name.replace(/\s+/g, '').toLowerCase()}` : 'user_guest';
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -30,7 +31,7 @@ export default function AIConsultant() {
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
-        .eq('user_id', MOCK_USER_ID)
+        .eq('user_id', userId)
         .order('created_at', { ascending: true });
 
       if (data && data.length > 0) {
@@ -46,13 +47,13 @@ export default function AIConsultant() {
         const defaultMsg: Message = {
           id: 'default',
           role: 'assistant',
-          content: 'Chào bạn! Mình là AI Consultant của Phố Hạnh Phúc. Bạn đang tìm Váy Cưới, Dịch Vụ Khám Sức Khỏe hay Studio Chụp Ảnh?'
+          content: `Chào ${user ? user.name : 'bạn'}! Mình là AI Consultant của Phố Hạnh Phúc. Bạn đang tìm Váy Cưới, Dịch Vụ Khám Sức Khỏe hay Studio Chụp Ảnh?`
         };
         setMessages([defaultMsg]);
       }
     }
     fetchMessages();
-  }, []);
+  }, [userId, user]);
 
   // Effect to fetch the latest suggested product
   useEffect(() => {
@@ -98,7 +99,7 @@ export default function AIConsultant() {
 
     // Save user message to DB
     await supabase.from('chat_messages').insert({
-      user_id: MOCK_USER_ID,
+      user_id: userId,
       role: 'user',
       content: userContent
     } as any);
@@ -153,7 +154,7 @@ export default function AIConsultant() {
 
       // Save assistant message to DB
       await supabase.from('chat_messages').insert({
-        user_id: MOCK_USER_ID,
+        user_id: userId,
         role: 'assistant',
         content: aiResponse,
         suggested_product_id: suggestedProductId

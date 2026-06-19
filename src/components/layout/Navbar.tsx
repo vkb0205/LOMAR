@@ -1,10 +1,32 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { User, ChevronDown } from 'lucide-react';
-import logoImg from '../../img/Logo màu.png';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { User, ChevronDown, LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+import logoImg from '../../img/Asset 24.png';
+import { useAppContext } from '../../context/AppContext';
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAppContext();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setShowDropdown(false);
+    navigate('/');
+  };
 
   const navLinks = [
     { name: 'TRANG CHỦ', path: '/' },
@@ -56,20 +78,80 @@ export default function Navbar() {
           </div>
 
           {/* User Account / Actions */}
-          <div className="flex items-center space-x-4">
-            <Link
-              to="/dashboard"
-              className="hidden lg:flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F2BFC8] text-white hover:bg-[#F2BFC8] shadow-sm uppercase tracking-wider"
-            >
-              Hành Trình Của Bạn
-            </Link>
+          <div className="flex items-center space-x-4 relative" ref={dropdownRef}>
+            {user ? (
+              <>
+                {/* Logged In Navbar Section */}
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/5 transition-all cursor-pointer"
+                >
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    className="w-7 h-7 rounded-full object-cover border border-rose-200"
+                  />
+                  <span className="hidden md:inline text-xs font-bold uppercase tracking-wider">
+                    {user.name.split(' ').pop()}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 opacity-60 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                </button>
 
-            <Link
-              to="/dashboard"
-              className="w-10 h-10 rounded-full border border-white/20 text-white flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-              <User className="w-5 h-5" />
-            </Link>
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-rose-50 overflow-hidden z-[999] py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-2 border-b border-rose-50/50 mb-1">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Tài khoản</p>
+                      <p className="text-xs font-bold text-[#1B2C40] truncate mt-0.5">{user.name}</p>
+                      <p className="text-[9px] text-[#F2BFC8] font-bold uppercase tracking-wider mt-0.5">{user.role === 'bride' ? 'Cô dâu' : 'Chú rể'}</p>
+                    </div>
+
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-rose-50/40 hover:text-[#F2BFC8] transition-colors"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-gray-400" />
+                      Hành Trình Của Bạn
+                    </Link>
+
+                    <Link
+                      to="/ai-consultant"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-rose-50/40 hover:text-[#F2BFC8] transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#F2BFC8]" />
+                      Tư Vấn Viên AI
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-50/50 transition-colors text-left border-t border-rose-50/30 mt-1 cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 text-red-400" />
+                      Đăng Xuất
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Logged Out Navbar Section */}
+                <Link
+                  to="/login"
+                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F2BFC8] text-white hover:bg-rose-400 shadow-sm uppercase tracking-wider"
+                >
+                  Đăng Nhập
+                </Link>
+
+                <Link
+                  to="/login"
+                  className="w-10 h-10 rounded-full border border-white/20 text-white flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
