@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Heart, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
+import { Send, Heart, ChevronRight, ChevronDown, Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../types/database';
 import { useAppContext } from '../context/AppContext';
+import maleMannequin from '../img/male_mannequin.webp';
+import femaleMannequin from '../img/female_mannequin.webp';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 type ProductRow = Database['public']['Tables']['products']['Row'];
@@ -17,6 +19,7 @@ type OptionGroup = {
 const MOCK_USER_ID = 'user_1';
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1000';
+const CUSTOMIZE_TEMP_PREVIEW_KEY = 'lomar_customize_temp_preview';
 
 export default function Customize() {
   const { customizedServices, saveCustomizedService } = useAppContext();
@@ -24,10 +27,13 @@ export default function Customize() {
   const [activePropertyIndex, setActivePropertyIndex] = useState(0);
   const [selections, setSelections] = useState<Record<string, Record<string, string>>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedMannequin, setSelectedMannequin] = useState<'female' | 'male'>('female');
 
   // Chat state
   const [messages, setMessages] = useState<{ text: string, isUser: boolean }[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
 
@@ -216,6 +222,49 @@ export default function Customize() {
     saveCustomizedService
   ]);
 
+  const getTempPreviewKey = (tab = activeTab, productId = activeProductId, mannequin = selectedMannequin) => {
+    return [tab, productId, mannequin].filter(Boolean).join('__');
+  };
+
+  const readTempPreviewMap = () => {
+    if (typeof window === 'undefined') return {} as Record<string, string>;
+
+    try {
+      return JSON.parse(window.localStorage.getItem(CUSTOMIZE_TEMP_PREVIEW_KEY) || '{}') as Record<string, string>;
+    } catch (error) {
+      console.error('Lỗi khi đọc ảnh tạm:', error);
+      return {} as Record<string, string>;
+    }
+  };
+
+  const saveTempPreview = (imageUrl: string) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const tempPreviewMap = readTempPreviewMap();
+      const tempKey = getTempPreviewKey();
+      if (!tempKey) return;
+
+      window.localStorage.setItem(CUSTOMIZE_TEMP_PREVIEW_KEY, JSON.stringify({
+        ...tempPreviewMap,
+        [tempKey]: imageUrl
+      }));
+    } catch (error) {
+      console.error('Lỗi khi lưu ảnh tạm:', error);
+    }
+  };
+
+  useEffect(() => {
+    const tempKey = getTempPreviewKey();
+    if (!tempKey) {
+      setGeneratedPreviewUrl(null);
+      return;
+    }
+
+    const tempPreviewUrl = readTempPreviewMap()[tempKey] || null;
+    setGeneratedPreviewUrl(tempPreviewUrl);
+  }, [activeTab, activeProductId, selectedMannequin]);
+
   // Handle thay đổi sản phẩm (Dropdown)
   const handleProductChange = (newProductId: string) => {
     setActiveProductIds(prev => ({ ...prev, [activeTab]: newProductId }));
@@ -276,25 +325,127 @@ export default function Customize() {
     }, 500);
   };
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    const userText = inputValue;
+  const getTryOnCategory = (categoryName: string) => {
+    const normalized = categoryName.toLowerCase();
+
+    if (normalized.includes('vest')) return 'tops';
+    if (normalized.includes('váy') || normalized.includes('vay') || normalized.includes('dress')) return 'dress';
+
+    return 'clothes';
+  };
+
+  const getImageFileFromUrl = async (url: string, filename: string) => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Could not load ${filename} with status ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const extension = blob.type.split('/')[1] || 'png';
+
+    return new File([blob], `${filename}.${extension}`, { type: blob.type || 'image/png' });
+  };
+
+  const buildGenerationPrompt = (customPrompt: string) => {
+    const activeTabSelections = selections[activeTab] || {};
+    const selectedOptions = currentProperties
+      .map(prop => {
+        const selectedValueId = activeTabSelections[prop.id];
+        const option = prop.options.find(o => o.id === selectedValueId);
+        return option ? `${prop.title}: ${option.name}` : null;
+      })
+      .filter(Boolean)
+      .join(', ');
+
+    return [
+      `Create a premium wedding customization preview for category: ${activeTab}.`,
+      activeProduct?.name ? `Base product: ${activeProduct.name}.` : '',
+      vendorInfo?.name ? `Vendor: ${vendorInfo.name}.` : '',
+      selectedOptions ? `Selected customization options: ${selectedOptions}.` : '',
+      customPrompt ? `User request: ${customPrompt}.` : '',
+      'Style: elegant, realistic, romantic, luxury Vietnamese wedding aesthetic, high quality image preview.'
+    ].filter(Boolean).join(' ');
+  };
+
+  const handleGeneratePreview = async () => {
+    const customPrompt = inputValue.trim();
+    const prompt = buildGenerationPrompt(customPrompt);
+    const userText = customPrompt || 'Tạo ảnh xem trước từ các tùy chọn hiện tại.';
+    const configuredEndpoint = import.meta.env.VITE_VERTEX_AI_ENDPOINT || '/api/vton/test-try-on-upload';
+    const uploadEndpoint = configuredEndpoint.startsWith('/test-')
+      ? `/api/vton${configuredEndpoint}`
+      : configuredEndpoint;
+    const endpoint = uploadEndpoint.replace('/test-try-on-upload', '/test-try-on');
+
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
+    setIsGenerating(true);
+
     await supabase.from('chat_messages').insert({
       user_id: MOCK_USER_ID,
       role: 'user',
       content: userText
     } as any);
-    setTimeout(async () => {
-      const botText = 'Bé Song đang tìm kiếm lựa chọn hoàn hảo nhất cho ý tưởng của bạn...';
-      setMessages(prev => [...prev, { text: botText, isUser: false }]);
+
+    try {
+      if (!endpoint) {
+        throw new Error('Missing VITE_VERTEX_AI_ENDPOINT');
+      }
+
+      if (!activeProduct || !currentMainImage) {
+        throw new Error('Please choose a product before generating a try-on preview.');
+      }
+
+      const bodyUrl = new URL(mannequinImage, window.location.origin).href;
+      const garmentUrl = new URL(currentMainImage, window.location.origin).href;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          body_url: bodyUrl,
+          garment_url: garmentUrl,
+          category: getTryOnCategory(activeTab),
+          prompt
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Vertex AI VTON request failed with status ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const imageUrl = data.imageUrl || data.image_url || data.output?.imageUrl || data.output?.image_url || data.predictions?.[0]?.imageUrl || data.predictions?.[0]?.image_url;
+
+      if (!imageUrl) {
+        throw new Error(`VTON response did not include an image URL: ${JSON.stringify(data)}`);
+      }
+
+      setGeneratedPreviewUrl(imageUrl);
+      saveTempPreview(imageUrl);
+      const aiText = data.message || 'Bé Song đã tạo ảnh thử đồ trên mannequin từ mẫu bạn chọn.';
+
+      setMessages(prev => [...prev, { text: aiText, isUser: false }]);
       await supabase.from('chat_messages').insert({
         user_id: MOCK_USER_ID,
         role: 'assistant',
-        content: botText
+        content: aiText
       } as any);
-    }, 1000);
+    } catch (error) {
+      console.error('Lỗi khi gọi Google Vertex AI:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const fallbackText = `Bé Song chưa thể tạo ảnh thử đồ. Vui lòng kiểm tra backend VTON đang chạy ở cổng 3003. Chi tiết: ${errorMessage}`;
+      setMessages(prev => [...prev, { text: fallbackText, isUser: false }]);
+      await supabase.from('chat_messages').insert({
+        user_id: MOCK_USER_ID,
+        role: 'assistant',
+        content: fallbackText
+      } as any);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // Tính giá động = Giá gốc sản phẩm + Giá các options
@@ -361,6 +512,8 @@ export default function Customize() {
   const productImages = activeProductId ? allImages[activeProductId] : [];
   const baseImage = productImages?.[0] || PLACEHOLDER_IMAGE;
   const currentMainImage = selectedThumb || baseImage;
+  const mannequinImage = selectedMannequin === 'male' ? maleMannequin : femaleMannequin;
+  const previewImage = generatedPreviewUrl || mannequinImage;
 
   return (
     <div className="w-full flex flex-col font-sans pb-10 mt-6 px-4 bg-[#FFFFFF] min-h-screen">
@@ -378,6 +531,25 @@ export default function Customize() {
         </div>
       </div>
 
+      {activeTab === 'Venue' ? (
+        <div className="w-full flex flex-col items-center justify-center py-24 text-center">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#FAF6EE] border border-rose-100 mb-8">
+            <span className="text-4xl">🏛️</span>
+          </div>
+          <h2 className="text-4xl font-serif font-bold text-[#1B2C40] mb-4 tracking-wide">
+            COMING SOON
+          </h2>
+          <p className="text-sm text-gray-500 font-medium max-w-md leading-relaxed">
+            Tính năng tùy chỉnh Venue đang được phát triển.
+            Bé Song sẽ sớm ra mắt trong thời gian tới!
+          </p>
+          <div className="mt-10 flex gap-3">
+            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
+      ) : (
       <div className="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 lg:h-[800px] items-start">
 
         {/* Left Sidebar */}
@@ -517,69 +689,83 @@ export default function Customize() {
 
         {/* Center Canvas */}
         <div className="flex-1 bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 overflow-hidden flex flex-col p-6 min-h-[500px] lg:min-h-0 h-full">
-          <div className="mb-4">
-            <h1 className="text-2xl font-serif font-bold text-[#1B2C40]">
-              {activeProduct?.name || activeTab}
-            </h1>
-            {vendorInfo && (
-              <p className="text-xs text-[#F2BFC8] font-bold uppercase tracking-widest mt-1">
-                Bởi {vendorInfo.name}
-              </p>
-            )}
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-serif font-bold text-[#1B2C40]">
+                {activeProduct?.name || activeTab}
+              </h1>
+              {vendorInfo && (
+                <p className="text-xs text-[#F2BFC8] font-bold uppercase tracking-widest mt-1">
+                  Bởi {vendorInfo.name}
+                </p>
+              )}
+            </div>
+
+            <div className="flex bg-white rounded-full shadow-sm p-1 border border-rose-100 self-start">
+              <button
+                type="button"
+                onClick={() => setSelectedMannequin('female')}
+                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'female' ? 'bg-[#F2BFC8] text-white shadow-inner' : 'text-[#1B2C40] hover:text-[#F2BFC8]'}`}
+              >
+                Female
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMannequin('male')}
+                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'male' ? 'bg-[#F2BFC8] text-white shadow-inner' : 'text-[#1B2C40] hover:text-[#F2BFC8]'}`}
+              >
+                Male
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1 rounded-[24px] overflow-hidden bg-white relative flex mb-6 p-2">
-            <div className="flex-1 w-full h-full relative overflow-hidden bg-white rounded-2xl md:mr-4">
+          <div className="flex-1 rounded-[24px] overflow-hidden bg-white relative flex flex-col mb-6 p-3">
+            <div className="flex-1 min-h-[360px] relative overflow-hidden bg-[#FAF6EE] rounded-2xl border border-rose-50">
               <img
-                src={currentMainImage}
-                alt="Preview"
+                src={previewImage}
+                alt="AI Preview"
                 className="absolute inset-0 w-full h-full object-cover rounded-2xl transition-opacity duration-500"
                 style={{ objectPosition: 'top center' }}
                 onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
               />
-            </div>
-
-            {activeTab !== 'Venue' && productImages && productImages.length > 1 && (
-              <div className="w-20 lg:w-24 flex flex-col gap-3 relative z-10 hidden md:flex overflow-y-auto no-scrollbar py-2 animate-in fade-in slide-in-from-right duration-300">
-                {productImages.map((url, i) => {
-                  const isSelected = selectedThumb === url || (!selectedThumb && i === 0);
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedThumb(url)}
-                      className={`w-full aspect-square bg-white rounded-xl overflow-hidden border-2 transition-colors shadow-sm shrink-0 ${isSelected ? 'border-[#F2BFC8] opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                    >
-                      <img
-                        src={url}
-                        alt="thumb"
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
-                      />
-                    </button>
-                  );
-                })}
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold text-[#F2BFC8] uppercase tracking-widest shadow-sm flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                {generatedPreviewUrl ? 'AI Preview' : `${selectedMannequin} Mannequin`}
               </div>
-            )}
-          </div>
-
-          <div className="bg-[#FAF6EE] rounded-2xl p-6 shadow-sm border border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-rose-100 pb-4 md:pb-0 pr-0 md:pr-6">
-              <h3 className="font-bold text-[#1B2C40] text-sm mb-2 uppercase tracking-wider">GIỚI THIỆU</h3>
-              <p className="text-xs text-[#1B2C40]/70 leading-relaxed line-clamp-3">
-                Thiết kế mang đậm dấu ấn cá nhân của bạn. Cùng {vendorInfo?.name || 'Bé Song Hỷ'} tạo nên những giá trị độc bản cho ngày trọng đại nhất cuộc đời.
-              </p>
-            </div>
-            <div className="flex-1 flex gap-4 lg:gap-8 justify-around px-4">
-              {[{ title: 'CHẤT LIỆU CAO CẤP' }, { title: 'THIẾT KẾ ĐỘC QUYỀN' }, { title: 'MAY ĐO THEO SỐ ĐO' }, { title: 'BẢO HÀNH TRỌN ĐỜI' }].map((feat, i) => (
-                <div key={i} className="flex flex-col items-center text-center max-w-[80px]">
-                  <div className="w-10 h-10 rounded-full border border-rose-100 flex items-center justify-center text-[#F2BFC8] mb-2 shrink-0 bg-white shadow-sm">
-                    <Heart className="w-4 h-4 fill-current" />
-                  </div>
-                  <span className="text-[9px] lg:text-[10px] uppercase font-bold text-[#1B2C40] tracking-widest leading-tight">{feat.title}</span>
+              {isGenerating && (
+                <div className="absolute inset-0 bg-white/65 backdrop-blur-sm flex flex-col items-center justify-center text-[#1B2C40]">
+                  <Loader2 className="w-8 h-8 text-[#F2BFC8] animate-spin mb-3" />
+                  <span className="text-xs font-bold uppercase tracking-widest">Đang tạo ảnh bằng Vertex AI...</span>
                 </div>
-              ))}
+              )}
+            </div>
+
+            <div className="bg-[#FAF6EE] rounded-2xl p-4 border border-rose-50 shadow-sm mt-1">
+              <label className="block text-[10px] font-bold text-[#F2BFC8] mb-3 uppercase tracking-widest">
+                Prompt thiết kế / yêu cầu AI
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGeneratePreview();
+                  }}
+                  placeholder="Nhập ý tưởng của bạn hoặc chọn các tùy chọn bên trái rồi bấm Generate..."
+                  className="flex-1 min-h-[92px] bg-white border border-rose-100 rounded-2xl py-3 px-4 text-xs font-medium focus:ring-1 focus:ring-[#F2BFC8] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400 resize-none"
+                />
+                <button
+                  onClick={handleGeneratePreview}
+                  disabled={isGenerating || !activeProduct}
+                  className="sm:w-[150px] py-3.5 bg-[#F2BFC8] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  Generate
+                </button>
+              </div>
             </div>
           </div>
+ 
         </div>
 
         {/* Right Sidebar (Pricing & Chat) */}
@@ -630,13 +816,14 @@ export default function Customize() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && handleGeneratePreview()}
                 placeholder="Nhập yêu cầu của bạn..."
                 className="w-full bg-white border border-rose-100 rounded-full py-3.5 px-6 pr-14 text-xs font-medium focus:ring-1 focus:ring-[#F2BFC8] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400"
               />
               <button
-                onClick={handleSendMessage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200"
+                onClick={handleGeneratePreview}
+                disabled={isGenerating || !activeProduct}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>
@@ -644,6 +831,7 @@ export default function Customize() {
           </div>
         </aside>
       </div>
+      )}
     </div>
   );
 }

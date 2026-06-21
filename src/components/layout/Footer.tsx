@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Mail, MapPin, Phone, Heart } from 'lucide-react';
-import logoMainImg from '../../img/Asset 20.png';
+import logoMainImg from '../../img/Logo.png';
 
 function TiktokIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (

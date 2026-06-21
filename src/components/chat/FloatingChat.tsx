@@ -53,7 +53,7 @@ export default function FloatingChat() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end pointer-events-none">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] flex flex-col items-end pointer-events-none">
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -62,7 +62,7 @@ export default function FloatingChat() {
             initial={{ opacity: 0, y: 20, scale: 0.95, transformOrigin: 'bottom right' }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="w-[320px] md:w-[380px] h-[500px] bg-white rounded-[32px] shadow-2xl border border-rose-100 flex flex-col overflow-hidden mb-4 pointer-events-auto"
+            className="w-[calc(100vw-2rem)] md:w-[380px] h-[450px] md:h-[500px] bg-white rounded-[32px] shadow-2xl border border-rose-100 flex flex-col overflow-hidden mb-4 pointer-events-auto"
           >
             {/* Chat Header */}
             <div className="bg-[#F2BFC8] p-6 text-white flex items-center justify-between">
@@ -166,7 +166,7 @@ export default function FloatingChat() {
           </AnimatePresence>
 
           {/* Mascot Body (Interactive Cute Avatar) */}
-          <div className="relative w-28 h-28 md:w-36 md:h-36 drop-shadow-2xl">
+          <div className="relative w-20 h-20 md:w-36 md:h-36 drop-shadow-2xl">
             <InteractiveMascot className="w-full h-full scale-110" />
 
             {/* Notification Badge */}

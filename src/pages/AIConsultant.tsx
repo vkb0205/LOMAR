@@ -164,10 +164,10 @@ export default function AIConsultant() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col md:flex-row h-[calc(100vh-4rem)] p-4 md:p-6 gap-6 max-h-[900px]">
+    <div className="w-full flex-1 flex flex-col md:flex-row h-auto md:h-[calc(100vh-6rem)] p-4 md:p-6 gap-6 md:max-h-[900px]">
       
       {/* Left Half: AI Chat Interface */}
-      <div className="w-full md:w-1/2 lg:w-3/5 bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+      <div className="w-full md:w-1/2 lg:w-3/5 h-[500px] md:h-full bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
         {/* Chat Header */}
         <div className="border-b border-gray-100 p-4 px-6 flex items-center bg-gray-50/50">
           <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center mr-3">
@@ -249,10 +249,10 @@ export default function AIConsultant() {
       </div>
 
       {/* Right Half: Suggested For You (Dynamic) */}
-      <div className="w-full md:w-1/2 lg:w-2/5 flex flex-col">
+      <div className="w-full md:w-1/2 lg:w-2/5 flex flex-col mt-4 md:mt-0">
         <h2 className="text-xl font-bold text-gray-900 mb-4 px-2">Đề Xuất Dành Cho Bạn</h2>
         
-        <div className="flex-1 rounded-3xl border-2 border-dashed border-gray-200 p-4 flex items-center justify-center bg-gray-50/50 overflow-hidden relative">
+        <div className="flex-1 min-h-[400px] md:min-h-0 rounded-3xl border-2 border-dashed border-gray-200 p-4 flex items-center justify-center bg-gray-50/50 overflow-hidden relative">
           <AnimatePresence mode="wait">
             {suggestedProduct ? (
               <motion.div

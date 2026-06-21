@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import logoMainImg from '../img/Asset 20.png';
+import logoMainImg from '../img/Logo.png';
 
 export default function Login() {
   const { login, user } = useAppContext();

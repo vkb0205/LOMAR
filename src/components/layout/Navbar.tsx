@@ -42,20 +42,20 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center gap-3 group py-1">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group py-1">
               <img
                 src={logoImg}
                 alt="Logo Phố Hạnh Phúc Hồ Văn Huê"
-                className="h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+                className="h-12 sm:h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
               />
               <div className="flex flex-col justify-center">
-                <span className="font-serif font-bold text-xl leading-tight text-white tracking-wider uppercase">
+                <span className="font-serif font-bold text-sm sm:text-xl leading-tight text-white tracking-wider uppercase">
                   Phố Hạnh Phúc
                 </span>
-                <span className="font-serif font-bold text-xl leading-tight text-white tracking-wider uppercase">
+                <span className="font-serif font-bold text-sm sm:text-xl leading-tight text-white tracking-wider uppercase">
                   Hồ Văn Huê
                 </span>
-                <span className="text-[9px] text-white/60 font-medium tracking-widest mt-0.5 uppercase">
+                <span className="hidden sm:block text-[9px] text-white/60 font-medium tracking-widest mt-0.5 uppercase">
                   Nơi bắt đầu hành trình hôn nhân
                 </span>
               </div>

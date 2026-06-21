@@ -102,9 +102,9 @@ export default function Blog() {
       <div className="max-w-[1440px] w-full flex flex-col lg:flex-row gap-6">
 
         {/* Left Sidebar (Nav & Highlight) */}
-        <aside className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0 h-fit sticky top-28">
+        <aside className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0 h-fit lg:sticky lg:top-28">
 
-          <div className="bg-[#FFFFFF] rounded-[32px] p-6 shadow-sm border border-rose-50 flex flex-col gap-2">
+          <div className="bg-[#FFFFFF] rounded-[24px] lg:rounded-[32px] p-4 lg:p-6 shadow-sm border border-rose-50 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-3 lg:pb-6">
             {[
               { icon: Flame, text: 'Sắp Xếp Theo', active: true },
               { icon: Clock, text: 'Mới Nhất' },
@@ -113,15 +113,15 @@ export default function Blog() {
               { icon: Hash, text: 'Chủ Đề' },
               { icon: Bookmark, text: 'Lưu Bài Viết' },
             ].map((item, i) => (
-              <button key={i} className={`flex items-center gap-4 px-4 py-3 rounded-[20px] transition-colors font-semibold text-xs uppercase tracking-wider ${item.active ? 'bg-[#FFFFFF] text-[#F2BFC8] shadow-sm' : 'text-[#1B2C40] hover:bg-[#FFFFFF] hover:text-[#F2BFC8]'
+              <button key={i} className={`flex items-center gap-2 lg:gap-4 px-4 py-2.5 lg:py-3 rounded-full lg:rounded-[20px] transition-colors font-semibold text-xs uppercase tracking-wider whitespace-nowrap ${item.active ? 'bg-[#FFFFFF] text-[#F2BFC8] shadow-sm border border-rose-100 lg:border-none' : 'text-[#1B2C40] hover:bg-[#FFFFFF] hover:text-[#F2BFC8]'
                 }`}>
-                <item.icon className={`w-5 h-5 ${item.active ? 'text-[#F2BFC8]' : 'text-rose-200'}`} strokeWidth={item.active ? 2.5 : 2} />
+                <item.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${item.active ? 'text-[#F2BFC8]' : 'text-rose-200'}`} strokeWidth={item.active ? 2.5 : 2} />
                 {item.text}
               </button>
             ))}
           </div>
 
-          <div className="bg-[#FFFFFF] rounded-[32px] p-6 shadow-sm border border-rose-50 text-center flex flex-col relative overflow-hidden">
+          <div className="hidden lg:flex bg-[#FFFFFF] rounded-[32px] p-6 shadow-sm border border-rose-50 text-center flex-col relative overflow-hidden">
             <h2 className="font-serif text-4xl font-bold text-[#1B2C40] mb-1 relative z-10 tracking-wider">BLOG</h2>
             <p className="text-sm text-[#F2BFC8] italic mb-4 font-serif relative z-10 flex items-center justify-center gap-2">
               Cảm hứng cho hành trình hạnh phúc

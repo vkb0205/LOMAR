@@ -81,7 +81,7 @@ const fadeBlurVariant = {
 
 import trainImg from '../img/new_bg.jpeg';
 import mascotImg from '../img/Mascot.png';
-import logoMainImg from '../img/Asset 20.png';
+import logoMainImg from '../img/Logo.png';
 
 export default function Home() {
   return (
@@ -112,10 +112,10 @@ export default function Home() {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#12306d] leading-[1.25] tracking-tight uppercase"
+              className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#12306d] leading-[1.25] tracking-tight uppercase"
             >
               HẠNH PHÚC <br />
-              <span className="font-serif italic text-4xl sm:text-5xl lg:text-5xl text-[#df9e3a] normal-case tracking-normal font-medium">
+              <span className="font-serif italic text-2xl sm:text-4xl lg:text-5xl text-[#df9e3a] normal-case tracking-normal font-medium">
                 không phải là đích đến
               </span><br />
               MÀ LÀ HÀNH TRÌNH
@@ -131,11 +131,11 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="mt-8"
+              className="mt-8 w-full sm:w-auto"
             >
-              <Link to="/explore" className="inline-flex items-center gap-3 bg-transparent text-[#12306d] border border-[#12306d] rounded-full py-3 md:py-4 px-6 md:px-8 text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-[#12306d]/5 hover:-translate-y-0.5 transition-all shadow-none group">
-                KHÁM PHÁ HÀNH TRÌNH CỦA BẠN
-                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#12306d] flex items-center justify-center text-[#12306d] transition-colors group-hover:bg-[#12306d]/5">
+              <Link to="/explore" className="inline-flex items-center justify-between sm:justify-start gap-3 bg-transparent text-[#12306d] border border-[#12306d] rounded-full py-2.5 md:py-4 px-4 md:px-8 text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-[#12306d]/5 hover:-translate-y-0.5 transition-all shadow-none group w-full sm:w-auto">
+                <span>KHÁM PHÁ HÀNH TRÌNH CỦA BẠN</span>
+                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#12306d] flex items-center justify-center text-[#12306d] transition-colors group-hover:bg-[#12306d]/5 shrink-0">
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </Link>

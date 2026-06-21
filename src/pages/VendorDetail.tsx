@@ -86,16 +86,16 @@ export default function VendorDetail() {
     <div className="w-full flex flex-col font-sans mb-20 bg-[#FAF6EE] min-h-screen">
       
       {/* Hero Banner Section */}
-      <div className="relative w-full h-[350px] md:h-[450px] overflow-hidden">
+      <div className="relative w-full h-[420px] sm:h-[450px] overflow-hidden">
         <img 
           src={vendor.image_url || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=2000'} 
           alt={vendor.name || 'Vendor'} 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
         
         {/* Back Button */}
-        <div className="absolute top-8 left-4 md:left-8 z-20">
+        <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
           <button 
             onClick={() => navigate(-1)}
             className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-all border border-white/30"
@@ -105,8 +105,8 @@ export default function VendorDetail() {
         </div>
 
         {/* Vendor Header Overlay */}
-        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-10">
-          <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="absolute bottom-0 left-0 w-full p-4 sm:p-6 md:p-12 z-10">
+          <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <span className="bg-[#F2BFC8] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
@@ -117,21 +117,21 @@ export default function VendorDetail() {
                   {Number(vendor.rating) || '5.0'}
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white uppercase tracking-tight leading-tight mb-2">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white uppercase tracking-tight leading-tight mb-2">
                 {vendor.name}
               </h1>
-              <div className="flex items-center text-white/90 text-sm md:text-base">
-                <MapPin className="w-4 h-4 mr-2 text-rose-300" />
+              <div className="flex items-center text-white/90 text-xs sm:text-sm">
+                <MapPin className="w-3.5 h-3.5 mr-1.5 text-rose-300 shrink-0" />
                 {vendor.address || 'Hồ Văn Huê, Phú Nhuận'}
               </div>
             </div>
             
-            <div className="flex gap-3">
-              <button className="flex items-center gap-2 bg-white text-[#1B2C40] px-6 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-50 transition-colors shadow-lg">
+            <div className="flex gap-3 mt-2 md:mt-0">
+              <button className="flex items-center gap-2 bg-white text-[#1B2C40] px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-50 transition-colors shadow-lg">
                 <Phone className="w-4 h-4" /> LIÊN HỆ
               </button>
-              <button className="w-12 h-12 rounded-full bg-[#F2BFC8] text-white flex items-center justify-center hover:bg-rose-400 transition-colors shadow-lg">
-                <Share2 className="w-5 h-5" />
+              <button className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#F2BFC8] text-white flex items-center justify-center hover:bg-rose-400 transition-colors shadow-lg shrink-0">
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
