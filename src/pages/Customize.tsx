@@ -372,11 +372,28 @@ export default function Customize() {
     const customPrompt = inputValue.trim();
     const prompt = buildGenerationPrompt(customPrompt);
     const userText = customPrompt || 'Tạo ảnh xem trước từ các tùy chọn hiện tại.';
-    const configuredEndpoint = import.meta.env.VITE_VERTEX_AI_ENDPOINT || '/api/vton/test-try-on-upload';
-    const uploadEndpoint = configuredEndpoint.startsWith('/test-')
-      ? `/api/vton${configuredEndpoint}`
-      : configuredEndpoint;
-    const endpoint = uploadEndpoint.replace('/test-try-on-upload', '/test-try-on');
+
+    // Build the API endpoint URL:
+    // - In dev mode (localhost), Vite proxies /api/vton -> backend
+    // - In production (GitHub Pages), call Cloud Run directly via VITE_VTON_BACKEND_URL
+    const vtonBackendUrl = (import.meta.env.VITE_VTON_BACKEND_URL || '').replace(/\/+$/, '');
+    const configuredEndpoint = import.meta.env.VITE_VERTEX_AI_ENDPOINT || '/test-try-on-upload';
+    const isProduction = vtonBackendUrl &&
+      !vtonBackendUrl.includes('localhost') &&
+      !vtonBackendUrl.includes('127.0.0.1');
+
+    let endpoint: string;
+    if (isProduction) {
+      // Production: call Cloud Run directly, no /api/vton prefix
+      const endpointPath = configuredEndpoint.startsWith('/') ? configuredEndpoint : `/${configuredEndpoint}`;
+      endpoint = `${vtonBackendUrl}${endpointPath}`.replace('/test-try-on-upload', '/test-try-on');
+    } else {
+      // Development: use Vite's /api/vton proxy
+      const uploadEndpoint = configuredEndpoint.startsWith('/test-')
+        ? `/api/vton${configuredEndpoint}`
+        : configuredEndpoint;
+      endpoint = uploadEndpoint.replace('/test-try-on-upload', '/test-try-on');
+    }
 
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
