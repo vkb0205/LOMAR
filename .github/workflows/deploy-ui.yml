@@ -5,7 +5,11 @@ on:
     branches:
       - main
     paths:
-      - 'LOMAR/**'
+      - 'src/**'
+      - 'backend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
       - '.github/workflows/deploy-ui.yml'
   workflow_dispatch:
 
@@ -21,9 +25,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-env:
-  BUILD_PATH: "LOMAR"
-
 jobs:
   build:
     name: Build
@@ -35,9 +36,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
-          cache-dependency-path: ${{ env.BUILD_PATH }}/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -46,14 +47,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ${{ env.BUILD_PATH }}
 
       - name: Build
         run: npm run build
-        working-directory: ${{ env.BUILD_PATH }}
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
-          # Cloud Run backend URL (hardcoded until backend is deployed)
           VITE_VTON_BACKEND_URL: ${{ vars.VTON_BACKEND_URL || '' }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -62,7 +60,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ env.BUILD_PATH }}/dist
+          path: ./dist
 
   deploy:
     name: Deploy
