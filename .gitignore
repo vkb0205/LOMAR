@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+!**/.env.example
+
+# Backend virtual environment
+backend/vton_env/
+
+# Backend test images
+backend/test_images/

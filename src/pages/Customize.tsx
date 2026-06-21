@@ -382,6 +382,12 @@ export default function Customize() {
       !vtonBackendUrl.includes('localhost') &&
       !vtonBackendUrl.includes('127.0.0.1');
 
+    // If in production but backend URL is not yet configured, show a clear message
+    if (!vtonBackendUrl) {
+      setMessages(prev => [...prev, { text: 'Bé Song chưa thể tạo ảnh thử đồ. Backend chưa được cấu hình. Vui lòng đợi backend được deploy và cập nhật VTON_BACKEND_URL.', isUser: false }]);
+      return;
+    }
+
     let endpoint: string;
     if (isProduction) {
       // Production: call Cloud Run directly, no /api/vton prefix

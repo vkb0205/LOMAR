@@ -44,7 +44,7 @@ VITE_VTON_ENDPOINT="/test-try-on-upload"
 ### 3. Run the backend
 
 ```bash
-cd ../vton_test_ui
+cd backend
 conda activate vton_env
 python test_api.py
 ```
