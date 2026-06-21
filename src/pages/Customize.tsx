@@ -3,8 +3,8 @@ import { Send, Heart, ChevronRight, ChevronDown, Sparkles, Loader2 } from 'lucid
 import { supabase } from '../lib/supabase';
 import { Database } from '../types/database';
 import { useAppContext } from '../context/AppContext';
-import maleMannequin from '../img/male_mannequin.webp';
-import femaleMannequin from '../img/female_mannequin.webp';
+import maleMannequin from '../img/male_mannequin.jpeg';
+import femaleMannequin from '../img/female_mannequin.jpeg';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 type ProductRow = Database['public']['Tables']['products']['Row'];
