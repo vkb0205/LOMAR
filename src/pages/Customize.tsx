@@ -369,11 +369,11 @@ export default function Customize() {
   };
 
   /** Fetch an image URL and return it as a Blob for FormData upload */
-  const _urlToBlob = async (url: string): Promise<Blob> => {
+  const _urlToBlob = async (url: string, label: string): Promise<Blob> => {
     // If the URL is a relative path, resolve it against window.origin first
     const resolvedUrl = url.startsWith('http') || url.startsWith('data:') ? url : new URL(url, window.location.origin).href;
     const resp = await fetch(resolvedUrl);
-    if (!resp.ok) throw new Error(`Cannot fetch image: ${resp.status} ${resp.statusText}`);
+    if (!resp.ok) throw new Error(`Cannot fetch ${label} image (${resp.status} ${resp.statusText}): ${resolvedUrl}`);
     return resp.blob();
   };
 
@@ -429,8 +429,8 @@ export default function Customize() {
 
       // Fetch both images as blobs and send via FormData (upload endpoint)
       const [bodyBlob, garmentBlob] = await Promise.all([
-        _urlToBlob(mannequinImage),
-        _urlToBlob(currentMainImage),
+        _urlToBlob(mannequinImage, 'mannequin'),
+        _urlToBlob(currentMainImage, 'garment'),
       ]);
 
       const formData = new FormData();
@@ -470,7 +470,23 @@ export default function Customize() {
     } catch (error) {
       console.error('Lỗi khi gọi Google Vertex AI:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const fallbackText = `Bé Song chưa thể tạo ảnh thử đồ. Vui lòng kiểm tra backend VTON đang chạy ở cổng 3003. Chi tiết: ${errorMessage}`;
+
+      // Provide a more helpful message based on the error
+      const isNetworkError = errorMessage === 'Failed to fetch' || errorMessage === 'Load failed' || errorMessage === 'NetworkError';
+      const isCorsOrMixedContent = isNetworkError && vtonBackendUrl && window.location.protocol === 'https:' && vtonBackendUrl.startsWith('http:');
+      const isBackendMissing = isNetworkError && isProduction;
+
+      let details = errorMessage;
+
+      if (isProduction) {
+        if (isBackendMissing) {
+          details = `Không thể kết nối backend VTON tại ${vtonBackendUrl}. Backend Cloud Run chưa được deploy hoặc chưa đúng. Chạy ./cloud-run-deploy.sh và cập nhật biến VTON_BACKEND_URL trong GitHub repository settings.`;
+        } else if (isCorsOrMixedContent) {
+          details = `Backend URL (${vtonBackendUrl}) không hỗ trợ HTTPS. Cloud Run backend phải dùng HTTPS.`;
+        }
+      }
+
+      const fallbackText = `Bé Song chưa thể tạo ảnh thử đồ. Chi tiết: ${details}`;
       setMessages(prev => [...prev, { text: fallbackText, isUser: false }]);
       await supabase.from('chat_messages').insert({
         user_id: MOCK_USER_ID,
