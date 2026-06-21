@@ -157,9 +157,26 @@ export default function Customize() {
     return allOptions
       .filter(opt => allowedOptionIds.includes(opt.id))
       .map(opt => {
-        const vals = (opt.customization_values || []).map((v: any) => ({
-          id: v.id, name: v.value_name, price: Number(v.extra_price || 0)
-        }));
+        const vals = (opt.customization_values || []).map((v: any) => {
+          let rawName = v.value_name || '';
+          let translatedName = rawName;
+
+          if (rawName === 'A-Line') translatedName = 'Dáng chữ A';
+          else if (rawName === 'Ball Gown') translatedName = 'Dáng công chúa (Bồng)';
+          else if (rawName === 'Mermaid') translatedName = 'Dáng đuôi cá';
+          else if (rawName === 'Trumpet') translatedName = 'Dáng Trumpet';
+          else if (rawName === 'Slim Fit') translatedName = 'Dáng ôm (Slim Fit)';
+          else if (rawName === 'Regular Fit') translatedName = 'Dáng vừa (Regular Fit)';
+          else if (rawName === 'Classic') translatedName = 'Cổ điển';
+          else if (rawName === 'Ve K (Notch)') translatedName = 'Ve chữ K (Notch)';
+          else if (rawName === '6 Nút (Double Breasted)') translatedName = '6 Nút (Hai hàng khuy)';
+
+          return {
+            id: v.id,
+            name: translatedName,
+            price: Number(v.extra_price || 0)
+          };
+        });
         return { id: opt.id, title: opt.name || 'Tùy chọn', options: vals };
       });
   }, [activeProduct, productOptionMap, allOptions]);
@@ -636,7 +653,7 @@ export default function Customize() {
             <span className="text-4xl">🏛️</span>
           </div>
           <h2 className="text-4xl font-serif font-bold text-[#1B2C40] mb-4 tracking-wide">
-            COMING SOON
+            SẮP RA MẮT
           </h2>
           <p className="text-sm text-gray-500 font-medium max-w-md leading-relaxed">
             Tính năng tùy chỉnh Venue đang được phát triển.
@@ -806,14 +823,14 @@ export default function Customize() {
                 onClick={() => setSelectedMannequin('female')}
                 className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'female' ? 'bg-[#ffe9c9] text-[#1B2C40] shadow-inner' : 'text-[#1B2C40] hover:text-[#ddb983]'}`}
               >
-                Female
+                Nữ
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedMannequin('male')}
                 className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'male' ? 'bg-[#ffe9c9] text-[#1B2C40] shadow-inner' : 'text-[#1B2C40] hover:text-[#ddb983]'}`}
               >
-                Male
+                Nam
               </button>
             </div>
           </div>
@@ -829,7 +846,7 @@ export default function Customize() {
               />
               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold text-[#ddb983] uppercase tracking-widest shadow-sm flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                {generatedPreviewUrl ? 'AI Preview' : `${selectedMannequin} Mannequin`}
+                {generatedPreviewUrl ? 'Xem trước AI' : `Người mẫu ${selectedMannequin === 'female' ? 'Nữ' : 'Nam'}`}
               </div>
               {isGenerating && (
                 <div className="absolute inset-0 bg-white/65 backdrop-blur-sm flex flex-col items-center justify-center text-[#1B2C40]">
@@ -850,7 +867,7 @@ export default function Customize() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGeneratePreview();
                   }}
-                  placeholder="Nhập ý tưởng của bạn hoặc chọn các tùy chọn bên trái rồi bấm Generate..."
+                  placeholder="Nhập ý tưởng của bạn hoặc chọn các tùy chọn bên trái rồi bấm Tạo ảnh..."
                   className="flex-1 min-h-[92px] bg-white border border-rose-100 rounded-2xl py-3 px-4 text-xs font-medium focus:ring-1 focus:ring-[#ffdb9f] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400 resize-none"
                 />
                 <button
@@ -859,7 +876,7 @@ export default function Customize() {
                   className="sm:w-[150px] py-3.5 bg-[#ffe9c9] text-[#1B2C40] rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-[#ffdb9f] transition-colors shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  Generate
+                  Tạo ảnh
                 </button>
               </div>
             </div>
