@@ -52,9 +52,6 @@ export default function Navbar() {
                 <span className="font-serif font-bold text-sm sm:text-xl leading-tight text-white tracking-wider uppercase">
                   Phố Hạnh Phúc
                 </span>
-                <span className="font-serif font-bold text-sm sm:text-xl leading-tight text-white tracking-wider uppercase">
-                  Hồ Văn Huê
-                </span>
                 <span className="hidden sm:block text-[9px] text-white/60 font-medium tracking-widest mt-0.5 uppercase">
                   Nơi bắt đầu hành trình hôn nhân
                 </span>
@@ -68,7 +65,7 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center text-[12px] font-bold tracking-widest transition-colors uppercase ${location.pathname === link.path ? 'text-white border-b-2 border-rose-400 pb-1' : 'text-white/80 hover:text-rose-400 pt-1.5 pb-1.5'
+                className={`flex items-center text-[12px] font-bold tracking-widest transition-colors uppercase ${location.pathname === link.path ? 'text-white border-b-2 border-[#ddb983] pb-1' : 'text-white/80 hover:text-rose-400 pt-1.5 pb-1.5'
                   }`}
               >
                 {link.name}
@@ -139,7 +136,7 @@ export default function Navbar() {
                 {/* Logged Out Navbar Section */}
                 <Link
                   to="/login"
-                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F2BFC8] text-white hover:bg-rose-400 shadow-sm uppercase tracking-wider"
+                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#ffe9c9] text-[#181144] hover:bg-[#ffdb9f] hover:text-[#181144] shadow-sm uppercase tracking-wider"
                 >
                   Đăng Nhập
                 </Link>

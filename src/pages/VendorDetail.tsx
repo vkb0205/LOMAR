@@ -113,7 +113,7 @@ export default function VendorDetail() {
                   {vendor.category || 'Dịch vụ'}
                 </span>
                 <div className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white font-bold text-xs border border-white/20">
-                  <Star className="w-3.5 h-3.5 fill-[#F2BFC8] text-[#F2BFC8] mr-1" />
+                  <Star className="w-3.5 h-3.5 fill-[#ffcc7e] text-[#ffcc7e] mr-1" />
                   {Number(vendor.rating) || '5.0'}
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function VendorDetail() {
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-[#F2BFC8] uppercase tracking-widest">ĐÁNH GIÁ</span>
                     <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-[#F2BFC8] text-[#F2BFC8]" />
+                      <Star className="w-4 h-4 fill-[#ffcc7e] text-[#ffcc7e]" />
                       <span className="text-sm text-[#1B2C40] font-bold">{Number(vendor.rating)}/5.0</span>
                       <span className="text-xs text-gray-400 ml-1">(120+ đánh giá)</span>
                     </div>

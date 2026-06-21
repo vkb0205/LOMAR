@@ -139,7 +139,7 @@ export default function Services() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-14 pr-32 py-3 rounded-full focus:outline-none text-[#1B2C40] bg-transparent"
             />
-            <button className="absolute right-2 top-2 bottom-2 bg-[#F2BFC8] text-white px-6 md:px-8 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-400 transition-colors">
+            <button className="absolute right-2 top-2 bottom-2 bg-[#ffe9c9] text-[#1B2C40] px-6 md:px-8 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-[#ffdb9f] hover:text-[#1B2C40] transition-colors">
               TÌM KIẾM
             </button>
           </motion.div>
@@ -198,8 +198,8 @@ export default function Services() {
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-serif font-bold text-lg text-[#1B2C40] group-hover:text-[#F2BFC8] transition-colors leading-tight">{vendor.name}</h3>
-                    <div className="flex items-center bg-rose-50 px-2 py-1 rounded-md text-rose-500 font-bold text-xs shrink-0">
+                    <h3 className="font-serif font-bold text-lg text-[#1B2C40] group-hover:text-[#314ad0] transition-colors leading-tight">{vendor.name}</h3>
+                    <div className="flex items-center bg-[#ffe9c9] px-2 py-1 rounded-md text-[#ffcc7e] font-bold text-xs shrink-0">
                       <Star className="w-3 h-3 fill-current mr-1" />
                       {vendor.rating || '5.0'}
                     </div>
@@ -212,7 +212,7 @@ export default function Services() {
                     </div>
                   )}
 
-                  <button className="mt-auto w-full py-3 bg-[#FAF6EE] text-[#1B2C40] rounded-full font-bold text-[10px] uppercase tracking-widest group-hover:bg-[#F2BFC8] group-hover:text-white transition-colors border border-rose-50">
+                  <button className="mt-auto w-full py-3 bg-[#FAF6EE] text-[#1B2C40] rounded-full font-bold text-[10px] uppercase tracking-widest group-hover:bg-[#deebff] group-hover:text-[#091e8c] transition-colors border border-transparent">
                     XEM CHI TIẾT
                   </button>
                 </div>

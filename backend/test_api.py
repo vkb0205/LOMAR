@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from google import genai
 from google.genai import types
@@ -243,6 +243,17 @@ async def _run_vton(
         "prompt": user_prompt or "",
         "raw": result["raw"],
     }
+
+
+@app.get("/proxy-image")
+def proxy_image(url: str):
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        content_type = response.headers.get("content-type", "image/png")
+        return Response(content=response.content, media_type=content_type)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Failed to proxy image: {exc}")
 
 
 @app.get("/health")

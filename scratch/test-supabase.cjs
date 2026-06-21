@@ -9,25 +9,13 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function test() {
   try {
-    // 1. Fetch task_dictionary
-    const { data: dict, error: dictE } = await supabase.from('task_dictionary').select('*');
-    console.log('--- task_dictionary ---');
-    console.log(dict);
+    const { data: products, error: prodE } = await supabase.from('products').select('*');
+    console.log('--- products ---');
+    console.log(products?.map(p => ({ id: p.id, name: p.name, category: p.category, image_url: p.image_url })));
 
-    // 2. Fetch vouchers
-    const { data: vouchers, error: vouchersE } = await supabase.from('vouchers').select('*');
-    console.log('--- vouchers ---');
-    console.log(vouchers);
-
-    // 3. Fetch user_journey_tasks for 'U01'
-    const { data: userTasks, error: userTasksE } = await supabase.from('user_journey_tasks').select('*').eq('user_id', 'U01');
-    console.log('--- user_journey_tasks for U01 ---');
-    console.log(userTasks);
-
-    // 4. Fetch user_vouchers for 'U01'
-    const { data: userVouchers, error: userVouchersE } = await supabase.from('user_vouchers').select('*').eq('user_id', 'U01');
-    console.log('--- user_vouchers for U01 ---');
-    console.log(userVouchers);
+    const { data: images, error: imgE } = await supabase.from('product_images').select('*');
+    console.log('--- product_images ---');
+    console.log(images);
   } catch (err) {
     console.error('Unhandled error:', err);
   }

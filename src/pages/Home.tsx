@@ -189,7 +189,7 @@ export default function Home() {
       {/* =========================================
           2. CÂU CHUYỆN CỦA CHÚNG TÔI SECTION 
       ========================================= */}
-      <section className="py-24 px-4 relative z-10 w-full bg-[#f9c0c7]/50">
+      <section className="py-24 px-4 relative z-10 w-full bg-[#ffe9c9]">
         <div className="max-w-[1200px] mx-auto text-center">
 
           <motion.div
@@ -358,7 +358,6 @@ export default function Home() {
                   <img src={logoMainImg} alt="Logo" className="h-14 w-auto object-contain" />
                   <div className="flex flex-col justify-center border-l border-[#1e4696]/30 pl-3">
                     <span className="font-serif text-[#1e4696] font-bold text-xs md:text-sm tracking-wider uppercase leading-none">PHỐ HẠNH PHÚC</span>
-                    <span className="text-[10px] text-[#df9e3a] font-bold tracking-[0.15em] uppercase mt-1 leading-none">HỒ VĂN HUÊ</span>
                   </div>
                 </div>
                 <h2 className="font-serif font-bold text-[#1e4696] text-xl md:text-2xl lg:text-3xl uppercase leading-tight mb-6 md:mb-8">

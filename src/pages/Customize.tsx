@@ -370,8 +370,27 @@ export default function Customize() {
 
   /** Fetch an image URL and return it as a Blob for FormData upload */
   const _urlToBlob = async (url: string, label: string): Promise<Blob> => {
-    // If the URL is a relative path, resolve it against window.origin first
-    const resolvedUrl = url.startsWith('http') || url.startsWith('data:') ? url : new URL(url, window.location.origin).href;
+    const isExternal = url.startsWith('http') || url.startsWith('data:');
+    let resolvedUrl: string;
+
+    if (isExternal) {
+      if (url.startsWith('data:')) {
+        resolvedUrl = url;
+      } else {
+        // Use our backend proxy endpoint to avoid CORS issues with external images
+        const vtonBackendUrl = (import.meta.env.VITE_VTON_BACKEND_URL || '').replace(/\/+$/, '');
+        const isProduction = vtonBackendUrl &&
+          !vtonBackendUrl.includes('localhost') &&
+          !vtonBackendUrl.includes('127.0.0.1');
+        
+        const proxyBaseUrl = isProduction ? vtonBackendUrl : '/api/vton';
+        resolvedUrl = `${proxyBaseUrl}/proxy-image?url=${encodeURIComponent(url)}`;
+      }
+    } else {
+      // Relative paths are resolved against window.location.origin
+      resolvedUrl = new URL(url, window.location.origin).href;
+    }
+
     const resp = await fetch(resolvedUrl);
     if (!resp.ok) throw new Error(`Cannot fetch ${label} image (${resp.status} ${resp.statusText}): ${resolvedUrl}`);
     return resp.blob();
@@ -408,6 +427,16 @@ export default function Customize() {
         : configuredEndpoint;
     }
 
+    if (!endpoint) {
+      setMessages(prev => [...prev, { text: 'Bé Song chưa thể tạo ảnh thử đồ. Thiếu cấu hình endpoint. Vui lòng kiểm tra VITE_VERTEX_AI_ENDPOINT.', isUser: false }]);
+      return;
+    }
+
+    if (!activeProduct || !currentMainImage) {
+      setMessages(prev => [...prev, { text: 'Bé Song cần bạn chọn một sản phẩm trước khi tạo ảnh thử đồ nha!', isUser: false }]);
+      return;
+    }
+
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
     setIsGenerating(true);
@@ -418,21 +447,38 @@ export default function Customize() {
       content: userText
     } as any);
 
+    // --- Step 1: Fetch images as blobs (separate error handling) ---
+    let bodyBlob: Blob;
+    let garmentBlob: Blob;
+
     try {
-      if (!endpoint) {
-        throw new Error('Missing VITE_VERTEX_AI_ENDPOINT');
-      }
-
-      if (!activeProduct || !currentMainImage) {
-        throw new Error('Please choose a product before generating a try-on preview.');
-      }
-
-      // Fetch both images as blobs and send via FormData (upload endpoint)
-      const [bodyBlob, garmentBlob] = await Promise.all([
+      [bodyBlob, garmentBlob] = await Promise.all([
         _urlToBlob(mannequinImage, 'mannequin'),
         _urlToBlob(currentMainImage, 'garment'),
       ]);
+    } catch (imageError) {
+      const imgErrMsg = imageError instanceof Error ? imageError.message : 'Unknown image error';
+      console.error('Lỗi khi tải ảnh:', imgErrMsg);
 
+      let userMsg: string;
+      if (imgErrMsg.includes('Cannot fetch')) {
+        userMsg = `Bé Song không thể tải ảnh sản phẩm hoặc mannequin. Ảnh có thể bị chặn bởi trình duyệt (CORS) hoặc link đã hết hạn. Chi tiết: ${imgErrMsg}`;
+      } else {
+        userMsg = `Bé Song gặp lỗi khi xử lý ảnh: ${imgErrMsg}`;
+      }
+
+      setMessages(prev => [...prev, { text: userMsg, isUser: false }]);
+      await supabase.from('chat_messages').insert({
+        user_id: MOCK_USER_ID,
+        role: 'assistant',
+        content: userMsg
+      } as any);
+      setIsGenerating(false);
+      return;
+    }
+
+    // --- Step 2: Call VTON backend (separate error handling) ---
+    try {
       const formData = new FormData();
       formData.append('body_image', bodyBlob, 'body.png');
       formData.append('garment_image', garmentBlob, 'garment.png');
@@ -447,7 +493,14 @@ export default function Customize() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Vertex AI VTON request failed with status ${response.status}: ${errorText}`);
+        let parsedError: string;
+        try {
+          const errJson = JSON.parse(errorText);
+          parsedError = errJson.detail?.message || errJson.message || errorText;
+        } catch {
+          parsedError = errorText;
+        }
+        throw new Error(`VTON backend error (${response.status}): ${parsedError}`);
       }
 
       const data = await response.json();
@@ -467,23 +520,19 @@ export default function Customize() {
         role: 'assistant',
         content: aiText
       } as any);
-    } catch (error) {
-      console.error('Lỗi khi gọi Google Vertex AI:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (vtonError) {
+      console.error('Lỗi khi gọi VTON backend:', vtonError);
+      const vtonErrMsg = vtonError instanceof Error ? vtonError.message : 'Unknown error';
 
-      // Provide a more helpful message based on the error
-      const isNetworkError = errorMessage === 'Failed to fetch' || errorMessage === 'Load failed' || errorMessage === 'NetworkError';
-      const isCorsOrMixedContent = isNetworkError && vtonBackendUrl && window.location.protocol === 'https:' && vtonBackendUrl.startsWith('http:');
-      const isBackendMissing = isNetworkError && isProduction;
+      const isNetworkError = vtonErrMsg === 'Failed to fetch' || vtonErrMsg === 'Load failed' || vtonErrMsg === 'NetworkError';
 
-      let details = errorMessage;
-
-      if (isProduction) {
-        if (isBackendMissing) {
-          details = `Không thể kết nối backend VTON tại ${vtonBackendUrl}. Backend Cloud Run chưa được deploy hoặc chưa đúng. Chạy ./cloud-run-deploy.sh và cập nhật biến VTON_BACKEND_URL trong GitHub repository settings.`;
-        } else if (isCorsOrMixedContent) {
-          details = `Backend URL (${vtonBackendUrl}) không hỗ trợ HTTPS. Cloud Run backend phải dùng HTTPS.`;
-        }
+      let details: string;
+      if (isNetworkError && isProduction) {
+        details = `Không thể kết nối backend VTON tại ${vtonBackendUrl}. Vui lòng kiểm tra:\n1. Backend Cloud Run đã được deploy chưa? (chạy ./cloud-run-deploy.sh)\n2. Biến VTON_BACKEND_URL đã được cập nhật trong GitHub repository settings chưa?\n3. Backend có đang hoạt động không? (kiểm tra: curl ${vtonBackendUrl}/health)`;
+      } else if (isNetworkError) {
+        details = `Không thể kết nối backend VTON tại ${endpoint}. Backend local (port 3003) có đang chạy không?`;
+      } else {
+        details = vtonErrMsg;
       }
 
       const fallbackText = `Bé Song chưa thể tạo ảnh thử đồ. Chi tiết: ${details}`;
@@ -573,7 +622,7 @@ export default function Customize() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab ? 'bg-[#F2BFC8] text-white shadow-inner' : 'bg-transparent text-[#1B2C40] hover:text-[#F2BFC8]'}`}
+              className={`px-8 py-3 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap uppercase ${activeTab === tab ? 'bg-[#ffe9c9] text-[#1B2C40] shadow-inner' : 'bg-transparent text-[#1B2C40] hover:text-[#ddb983]'}`}
             >
               {tab}
             </button>
@@ -594,9 +643,9 @@ export default function Customize() {
             Bé Song sẽ sớm ra mắt trong thời gian tới!
           </p>
           <div className="mt-10 flex gap-3">
-            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-3 h-3 rounded-full bg-[#F2BFC8] animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-3 h-3 rounded-full bg-[#ffdb9f] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-3 h-3 rounded-full bg-[#ffdb9f] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-3 h-3 rounded-full bg-[#ffdb9f] animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         </div>
       ) : (
@@ -607,14 +656,14 @@ export default function Customize() {
 
           {/* BỘ CHỌN SẢN PHẨM GỐC - CUSTOM VISUAL DROPDOWN */}
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-rose-100 p-4 shadow-sm mb-2 relative z-20">
-            <label className="block text-[10px] font-bold text-[#F2BFC8] mb-3 uppercase tracking-widest">
+            <label className="block text-[10px] font-bold text-[#ddb983] mb-3 uppercase tracking-widest">
               Chọn Mẫu {activeTab}
             </label>
 
             <div className="relative">
               <button
                 onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                className="w-full bg-white border border-rose-100 text-[#1B2C40] rounded-2xl p-3 text-sm font-serif flex items-center justify-between hover:border-[#F2BFC8] transition-colors shadow-sm"
+                className="w-full bg-white border border-rose-100 text-[#1B2C40] rounded-2xl p-3 text-sm font-serif flex items-center justify-between hover:border-[#ffdb9f] transition-colors shadow-sm"
               >
                 <div className="flex items-center gap-3">
                   {/* TĂNG KÍCH THƯỚC ẢNH VÀ ĐỔI TỶ LỆ DỌC */}
@@ -631,7 +680,7 @@ export default function Customize() {
                     <span className="text-[10px] text-gray-500 font-sans font-medium uppercase mt-1 tracking-wider">Mẫu hiện tại</span>
                   </div>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-[#F2BFC8] transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#ffdb9f] transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isProductDropdownOpen && (
@@ -666,7 +715,7 @@ export default function Customize() {
                               />
                             </div>
                             <div className="flex flex-col items-start text-left pr-2">
-                              <span className={`text-sm font-bold line-clamp-2 leading-tight ${activeProductId === p.id ? 'text-[#F2BFC8]' : 'text-[#1B2C40]'}`}>
+                              <span className={`text-sm font-bold line-clamp-2 leading-tight ${activeProductId === p.id ? 'text-[#ddb983]' : 'text-[#1B2C40]'}`}>
                                 {p.name}
                               </span>
                               <span className="text-[11px] text-gray-500 font-medium mt-1">
@@ -674,7 +723,7 @@ export default function Customize() {
                               </span>
                             </div>
                             {activeProductId === p.id && (
-                              <div className="ml-auto w-2 h-2 rounded-full bg-[#F2BFC8] shrink-0"></div>
+                              <div className="ml-auto w-2 h-2 rounded-full bg-[#ffdb9f] shrink-0"></div>
                             )}
                           </button>
                         ))
@@ -697,11 +746,11 @@ export default function Customize() {
                 <div key={prop.id} className="flex flex-col bg-white/50 rounded-3xl border border-rose-100 overflow-hidden shadow-sm transition-all">
                   <button
                     onClick={() => setActivePropertyIndex(idx)}
-                    className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx ? 'bg-white text-[#F2BFC8]' : 'bg-transparent text-[#1B2C40] hover:bg-white'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 font-serif text-lg transition-colors ${activePropertyIndex === idx ? 'bg-white text-[#ddb983]' : 'bg-transparent text-[#1B2C40] hover:bg-white'}`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#F2BFC8]' : 'border-rose-200 text-rose-300'}`}>
-                        {selections[activeTab]?.[prop.id] ? <div className="w-4 h-4 rounded-full bg-[#F2BFC8]"></div> : <span className="w-4 h-4 rounded-full border border-current"></span>}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${activePropertyIndex === idx ? 'border-[#ffdb9f]' : 'border-rose-200 text-rose-300'}`}>
+                        {selections[activeTab]?.[prop.id] ? <div className="w-4 h-4 rounded-full bg-[#ffdb9f]"></div> : <span className="w-4 h-4 rounded-full border border-current"></span>}
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-bold">{prop.title}</span>
@@ -712,7 +761,7 @@ export default function Customize() {
                         )}
                       </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-[#F2BFC8] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-4 h-4 text-[#ffdb9f] transition-transform ${activePropertyIndex === idx ? 'rotate-90' : ''}`} />
                   </button>
 
                   {activePropertyIndex === idx && (
@@ -723,7 +772,7 @@ export default function Customize() {
                           <button
                             key={opt.id}
                             onClick={() => handleOptionSelect(prop.id, opt.id, opt.name)}
-                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected ? 'bg-[#F2BFC8] text-white border-[#F2BFC8] shadow-sm' : 'bg-rose-50 text-[#1B2C40] border-transparent hover:border-[#F2BFC8]'}`}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${isSelected ? 'bg-[#ffe9c9] text-[#1B2C40] border-[#ffdb9f] shadow-sm' : 'bg-rose-50 text-[#1B2C40] border-transparent hover:border-[#ffdb9f]'}`}
                           >
                             {opt.name}
                           </button>
@@ -745,7 +794,7 @@ export default function Customize() {
                 {activeProduct?.name || activeTab}
               </h1>
               {vendorInfo && (
-                <p className="text-xs text-[#F2BFC8] font-bold uppercase tracking-widest mt-1">
+                <p className="text-xs text-[#ddb983] font-bold uppercase tracking-widest mt-1">
                   Bởi {vendorInfo.name}
                 </p>
               )}
@@ -755,14 +804,14 @@ export default function Customize() {
               <button
                 type="button"
                 onClick={() => setSelectedMannequin('female')}
-                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'female' ? 'bg-[#F2BFC8] text-white shadow-inner' : 'text-[#1B2C40] hover:text-[#F2BFC8]'}`}
+                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'female' ? 'bg-[#ffe9c9] text-[#1B2C40] shadow-inner' : 'text-[#1B2C40] hover:text-[#ddb983]'}`}
               >
                 Female
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedMannequin('male')}
-                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'male' ? 'bg-[#F2BFC8] text-white shadow-inner' : 'text-[#1B2C40] hover:text-[#F2BFC8]'}`}
+                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${selectedMannequin === 'male' ? 'bg-[#ffe9c9] text-[#1B2C40] shadow-inner' : 'text-[#1B2C40] hover:text-[#ddb983]'}`}
               >
                 Male
               </button>
@@ -778,20 +827,20 @@ export default function Customize() {
                 style={{ objectPosition: 'top center' }}
                 onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE }}
               />
-              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold text-[#F2BFC8] uppercase tracking-widest shadow-sm flex items-center gap-2">
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold text-[#ddb983] uppercase tracking-widest shadow-sm flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5" />
                 {generatedPreviewUrl ? 'AI Preview' : `${selectedMannequin} Mannequin`}
               </div>
               {isGenerating && (
                 <div className="absolute inset-0 bg-white/65 backdrop-blur-sm flex flex-col items-center justify-center text-[#1B2C40]">
-                  <Loader2 className="w-8 h-8 text-[#F2BFC8] animate-spin mb-3" />
+                  <Loader2 className="w-8 h-8 text-[#ffdb9f] animate-spin mb-3" />
                   <span className="text-xs font-bold uppercase tracking-widest">Đang tạo ảnh bằng Vertex AI...</span>
                 </div>
               )}
             </div>
 
             <div className="bg-[#FAF6EE] rounded-2xl p-4 border border-rose-50 shadow-sm mt-1">
-              <label className="block text-[10px] font-bold text-[#F2BFC8] mb-3 uppercase tracking-widest">
+              <label className="block text-[10px] font-bold text-[#ddb983] mb-3 uppercase tracking-widest">
                 Prompt thiết kế / yêu cầu AI
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -802,12 +851,12 @@ export default function Customize() {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGeneratePreview();
                   }}
                   placeholder="Nhập ý tưởng của bạn hoặc chọn các tùy chọn bên trái rồi bấm Generate..."
-                  className="flex-1 min-h-[92px] bg-white border border-rose-100 rounded-2xl py-3 px-4 text-xs font-medium focus:ring-1 focus:ring-[#F2BFC8] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400 resize-none"
+                  className="flex-1 min-h-[92px] bg-white border border-rose-100 rounded-2xl py-3 px-4 text-xs font-medium focus:ring-1 focus:ring-[#ffdb9f] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400 resize-none"
                 />
                 <button
                   onClick={handleGeneratePreview}
                   disabled={isGenerating || !activeProduct}
-                  className="sm:w-[150px] py-3.5 bg-[#F2BFC8] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="sm:w-[150px] py-3.5 bg-[#ffe9c9] text-[#1B2C40] rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-[#ffdb9f] transition-colors shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Generate
@@ -822,7 +871,7 @@ export default function Customize() {
         <aside className="lg:w-[350px] flex flex-col gap-6 h-full min-h-0">
           <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-8 flex flex-col items-center">
             <span className="font-serif text-[#1B2C40] font-bold text-lg mb-2 uppercase tracking-widest">Dự Toán Chi Phí</span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#F2BFC8] mb-6 tracking-tight">
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#ddb983] mb-6 tracking-tight">
               {currentPrice.toLocaleString('vi-VN')} <span className="text-xl">VND</span>
             </h2>
 
@@ -830,20 +879,20 @@ export default function Customize() {
               <button
                 onClick={handleSaveDesign}
                 disabled={isSaving}
-                className="flex-1 py-3.5 border border-[#F2BFC8] text-[#F2BFC8] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FAF6EE] transition-colors text-center whitespace-nowrap bg-white shadow-sm disabled:opacity-50"
+                className="flex-1 py-3.5 border border-[#ffdb9f] text-[#ddb983] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#FAF6EE] transition-colors text-center whitespace-nowrap bg-white shadow-sm disabled:opacity-50"
               >
                 {isSaving ? 'ĐANG LƯU...' : 'LƯU THIẾT KẾ'}
               </button>
-              <button className="w-[44px] shrink-0 border border-rose-200 text-[#F2BFC8] rounded-full flex items-center justify-center hover:bg-[#FAF6EE] bg-white shadow-sm">
+              <button className="w-[44px] shrink-0 border border-rose-200 text-[#ddb983] rounded-full flex items-center justify-center hover:bg-[#FAF6EE] bg-white shadow-sm">
                 <Heart className="w-4 h-4 fill-current opacity-80" />
               </button>
             </div>
-            <button className="w-full py-3.5 bg-[#F2BFC8] text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-rose-400 transition-colors shadow-md">
+            <button className="w-full py-3.5 bg-[#ffe9c9] text-[#1B2C40] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[#ffdb9f] transition-colors shadow-md">
               ĐẶT LỊCH THỬ
             </button>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-rose-100 p-6 flex-1 flex flex-col relative overflow-hidden h-[325px]">
+          <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-[#ffdb9f]/30 p-6 flex-1 flex flex-col relative overflow-hidden h-[325px]">
             <div
               ref={chatContainerRef}
               className="flex-1 overflow-y-auto no-scrollbar space-y-4 mb-4 relative z-10 flex flex-col pr-2"
@@ -852,8 +901,8 @@ export default function Customize() {
                 <div
                   key={i}
                   className={`text-xs p-4 rounded-[20px] max-w-[85%] shadow-sm leading-relaxed font-medium ${msg.isUser
-                    ? 'bg-[#FAF6EE] text-[#1B2C40] rounded-tr-sm self-end ml-auto border border-rose-100'
-                    : 'bg-white text-[#1B2C40] rounded-tl-sm self-start mr-auto border border-rose-100'
+                    ? 'bg-[#FAF6EE] text-[#1B2C40] rounded-tr-sm self-end ml-auto border border-[#ffdb9f]/30'
+                    : 'bg-white text-[#1B2C40] rounded-tl-sm self-start mr-auto border border-[#ffdb9f]/30'
                     }`}
                 >
                   {msg.text}
@@ -861,19 +910,19 @@ export default function Customize() {
               ))}
             </div>
 
-            <div className="relative z-10 w-full mt-auto pt-4 pb-2 bg-white/50 backdrop-blur-md border-t border-rose-50/50">
+            <div className="relative z-10 w-full mt-auto pt-4 pb-2 bg-white/50 backdrop-blur-md border-t border-[#ffdb9f]/30">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleGeneratePreview()}
                 placeholder="Nhập yêu cầu của bạn..."
-                className="w-full bg-white border border-rose-100 rounded-full py-3.5 px-6 pr-14 text-xs font-medium focus:ring-1 focus:ring-[#F2BFC8] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400"
+                className="w-full bg-white border border-[#ffdb9f]/30 rounded-full py-3.5 px-6 pr-14 text-xs font-medium focus:ring-1 focus:ring-[#ffdb9f] focus:outline-none shadow-sm text-[#1B2C40] placeholder:text-gray-400"
               />
               <button
                 onClick={handleGeneratePreview}
                 disabled={isGenerating || !activeProduct}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#ffe9c9] text-[#1B2C40] rounded-full flex items-center justify-center hover:bg-[#ffdb9f] shadow-sm transition-transform active:scale-95 animate-in zoom-in duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>

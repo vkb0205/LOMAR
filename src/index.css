@@ -3,6 +3,9 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --color-rose-50: #ffe9c9;
+  --color-rose-100: #ffe9c9;
+  --color-rose-200: #ffe9c9;
 }
 
 @layer utilities {

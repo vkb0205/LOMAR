@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import {
   CheckCircle2, Circle, Gift, HeartPulse, Ticket, ArrowRight, Lock, Heart, Sparkles,

@@ -156,7 +156,7 @@ export default function FloatingChat() {
                     }}
                     className="bg-white px-4 py-2 rounded-2xl border border-rose-100 shadow-lg whitespace-nowrap relative flex items-center gap-1.5"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#F2BFC8]" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#ffe9c9] fill-[#ffe9c9]" />
                     <p className="text-[#1B2C40] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song Hỷ</p>
                     <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-b border-r border-rose-100"></div>
                   </motion.div>

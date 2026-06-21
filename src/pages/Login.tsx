@@ -109,7 +109,6 @@ export default function Login() {
               <img src={logoMainImg} alt="Logo" className="h-16 w-auto object-contain" />
               <div className="flex flex-col justify-center border-l border-[#1e4696]/20 pl-3">
                 <span className="font-serif text-[#1B2C40] font-bold text-lg tracking-wider uppercase leading-none">PHỐ HẠNH PHÚC</span>
-                <span className="text-[10px] text-[#F2BFC8] font-bold tracking-[0.15em] uppercase mt-1 leading-none">HỒ VĂN HUÊ</span>
               </div>
             </div>
 
