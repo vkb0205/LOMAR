@@ -130,17 +130,23 @@ def _create_vertex_client() -> genai.Client:
 
 def _extract_generated_image(response: Any) -> Dict[str, Any]:
     raw_parts: List[str] = []
+    finish_reason_str = "UNKNOWN"
 
     if not getattr(response, "candidates", None):
         raise HTTPException(status_code=502, detail={"message": "Nano Banana response did not include candidates"})
 
     for candidate in response.candidates:
+        # Check finish_reason to detect safety refusals / blocked content
+        finish_reason = getattr(candidate, "finish_reason", None)
+        finish_reason_str = str(finish_reason) if finish_reason is not None else "UNKNOWN"
+
         content = getattr(candidate, "content", None)
         parts = getattr(content, "parts", None) if content else None
         if not parts:
             continue
 
         for part in parts:
+            # --- Try inline_data first (generated image) ---
             inline_data = getattr(part, "inline_data", None)
             if inline_data and getattr(inline_data, "data", None):
                 mime_type = getattr(inline_data, "mime_type", "image/png") or "image/png"
@@ -149,11 +155,40 @@ def _extract_generated_image(response: Any) -> Dict[str, Any]:
                     image_bytes = base64.b64decode(image_bytes)
                 return {"image_url": _bytes_to_data_url(image_bytes, mime_type), "raw": raw_parts or None}
 
+            # --- Try part.as_image() as a fallback for newer Gemini SDK ---
+            try:
+                as_image = part.as_image()
+                if as_image is not None:
+                    image_bytes = as_image
+                    if isinstance(image_bytes, str):
+                        image_bytes = base64.b64decode(image_bytes)
+                    return {"image_url": _bytes_to_data_url(image_bytes, "image/png"), "raw": raw_parts or None}
+            except Exception:
+                pass
+
+            # --- Collect text parts for diagnostics ---
             text = getattr(part, "text", None)
             if text:
                 raw_parts.append(text)
 
-    raise HTTPException(status_code=502, detail={"message": "No image found in Nano Banana response", "text_parts": raw_parts})
+    # Build detailed error including finish_reason and any safety ratings
+    safety_info = None
+    for candidate in response.candidates:
+        sr = getattr(candidate, "safety_ratings", None)
+        if sr:
+            try:
+                safety_info = [{"category": str(getattr(r, "category", "")), "probability": str(getattr(r, "probability", ""))} for r in sr]
+            except Exception:
+                safety_info = str(sr)
+            break
+
+    error_detail = {
+        "message": "No image found in Nano Banana response",
+        "text_parts": raw_parts,
+        "finish_reason": finish_reason_str,
+        "safety_ratings": safety_info,
+    }
+    raise HTTPException(status_code=502, detail=error_detail)
 
 
 async def _run_vton(
@@ -165,6 +200,16 @@ async def _run_vton(
 ) -> Dict[str, Any]:
     try:
         client = _create_vertex_client()
+
+        # Disable all safety filters for the VTON fashion use case.
+        # The model may otherwise block mannequin/clothing edits as "dangerous".
+        safety_settings = [
+            types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+            types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+            types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+            types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HARASSMENT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+        ]
+
         response = client.models.generate_content(
             model=NANO_BANANA_MODEL,
             contents=[
@@ -172,7 +217,10 @@ async def _run_vton(
                 types.Part.from_bytes(data=body_image["bytes"], mime_type=body_image["mime_type"]),
                 types.Part.from_bytes(data=garment_image["bytes"], mime_type=garment_image["mime_type"]),
             ],
-            config=types.GenerateContentConfig(response_modalities=["IMAGE"]),
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                safety_settings=safety_settings,
+            ),
         )
     except HTTPException:
         raise

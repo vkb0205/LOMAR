@@ -368,6 +368,15 @@ export default function Customize() {
     ].filter(Boolean).join(' ');
   };
 
+  /** Fetch an image URL and return it as a Blob for FormData upload */
+  const _urlToBlob = async (url: string): Promise<Blob> => {
+    // If the URL is a relative path, resolve it against window.origin first
+    const resolvedUrl = url.startsWith('http') || url.startsWith('data:') ? url : new URL(url, window.location.origin).href;
+    const resp = await fetch(resolvedUrl);
+    if (!resp.ok) throw new Error(`Cannot fetch image: ${resp.status} ${resp.statusText}`);
+    return resp.blob();
+  };
+
   const handleGeneratePreview = async () => {
     const customPrompt = inputValue.trim();
     const prompt = buildGenerationPrompt(customPrompt);
@@ -388,17 +397,15 @@ export default function Customize() {
       return;
     }
 
+    // Always use the upload endpoint so images are sent as files (avoids URL download issues)
     let endpoint: string;
     if (isProduction) {
-      // Production: call Cloud Run directly, no /api/vton prefix
       const endpointPath = configuredEndpoint.startsWith('/') ? configuredEndpoint : `/${configuredEndpoint}`;
-      endpoint = `${vtonBackendUrl}${endpointPath}`.replace('/test-try-on-upload', '/test-try-on');
+      endpoint = `${vtonBackendUrl}${endpointPath}`;
     } else {
-      // Development: use Vite's /api/vton proxy
-      const uploadEndpoint = configuredEndpoint.startsWith('/test-')
+      endpoint = configuredEndpoint.startsWith('/test-')
         ? `/api/vton${configuredEndpoint}`
         : configuredEndpoint;
-      endpoint = uploadEndpoint.replace('/test-try-on-upload', '/test-try-on');
     }
 
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
@@ -420,18 +427,22 @@ export default function Customize() {
         throw new Error('Please choose a product before generating a try-on preview.');
       }
 
-      const bodyUrl = new URL(mannequinImage, window.location.origin).href;
-      const garmentUrl = new URL(currentMainImage, window.location.origin).href;
+      // Fetch both images as blobs and send via FormData (upload endpoint)
+      const [bodyBlob, garmentBlob] = await Promise.all([
+        _urlToBlob(mannequinImage),
+        _urlToBlob(currentMainImage),
+      ]);
+
+      const formData = new FormData();
+      formData.append('body_image', bodyBlob, 'body.png');
+      formData.append('garment_image', garmentBlob, 'garment.png');
+      formData.append('category', getTryOnCategory(activeTab));
+      formData.append('prompt', prompt);
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          body_url: bodyUrl,
-          garment_url: garmentUrl,
-          category: getTryOnCategory(activeTab),
-          prompt
-        })
+        // Do NOT set Content-Type header — browser sets it with boundary for FormData
+        body: formData,
       });
 
       if (!response.ok) {
