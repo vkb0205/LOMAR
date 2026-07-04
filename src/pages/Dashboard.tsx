@@ -9,8 +9,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
 
-const MOCK_USER_ID = 'U01';
-
 interface Task {
   taskId: string;
   name: string;
@@ -27,9 +25,10 @@ interface Voucher {
 }
 
 export default function Dashboard() {
-  const { healthCheckCompleted, setHealthCheckCompleted, user, login } = useAppContext();
+  const { healthCheckCompleted, setHealthCheckCompleted, user, signIn } = useAppContext();
   const [searchParams] = useSearchParams();
-  const userId = user?.id || 'U01';
+  // Identity comes from the authenticated Supabase session (real UUID).
+  const userId = user?.id ?? null;
   const stationParam = searchParams.get('station');
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -46,6 +45,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchDashboardData() {
+      // No authenticated user → nothing user-owned to fetch (login gate renders).
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
 
@@ -326,13 +330,13 @@ export default function Dashboard() {
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => login('quynhanh.bride@demo.com', 'Cô dâu Quỳnh Anh', 'bride')}
+                  onClick={() => void signIn('quynhanh.bride@demo.com', 'demo-password')}
                   className="py-2.5 px-3 rounded-xl border border-pink-100 bg-pink-50/30 hover:bg-pink-50 hover:shadow-sm text-[10px] font-bold text-[#1B2C40] transition-all cursor-pointer"
                 >
                   Cô dâu Quỳnh Anh
                 </button>
                 <button
-                  onClick={() => login('giabao.groom@demo.com', 'Chú rể Gia Bảo', 'groom')}
+                  onClick={() => void signIn('giabao.groom@demo.com', 'demo-password')}
                   className="py-2.5 px-3 rounded-xl border border-blue-100 bg-blue-50/30 hover:bg-blue-50 hover:shadow-sm text-[10px] font-bold text-[#1B2C40] transition-all cursor-pointer"
                 >
                   Chú rể Gia Bảo

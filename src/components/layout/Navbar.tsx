@@ -7,7 +7,7 @@ import { useAppContext } from '../../context/AppContext';
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAppContext();
+  const { user, signOut } = useAppContext();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -22,8 +22,8 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     setShowDropdown(false);
     navigate('/');
   };

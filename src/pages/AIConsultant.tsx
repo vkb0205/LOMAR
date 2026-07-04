@@ -19,7 +19,8 @@ interface Message {
 
 export default function AIConsultant() {
   const { user } = useAppContext();
-  const userId = user ? `user_${user.role}_${user.name.replace(/\s+/g, '').toLowerCase()}` : 'user_guest';
+  // User-owned chat rows are keyed by the authenticated Supabase UUID (auth.uid()).
+  const userId = user?.id ?? null;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -29,6 +30,16 @@ export default function AIConsultant() {
 
   useEffect(() => {
     async function fetchMessages() {
+      if (!userId) {
+        setMessages([
+          {
+            id: 'default',
+            role: 'assistant',
+            content: `Chào bạn! Mình là AI Consultant của Phố Hạnh Phúc. Bạn đang tìm Váy Cưới, Dịch Vụ Khám Sức Khỏe hay Studio Chụp Ảnh?`,
+          },
+        ]);
+        return;
+      }
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -83,12 +94,14 @@ export default function AIConsultant() {
     setInput('');
     setIsTyping(true);
 
-    await supabase.from('chat_messages').insert({
-      thread_id: MOCK_THREAD_ID,
-      user_id: userId,
-      role: 'user',
-      content: userContent
-    } as any);
+    if (userId) {
+      await supabase.from('chat_messages').insert({
+        thread_id: MOCK_THREAD_ID,
+        user_id: userId,
+        role: 'user',
+        content: userContent
+      } as any);
+    }
 
     setTimeout(async () => {
       let aiResponse = 'Rất tuyệt vời! Phố Hạnh Phúc có rất nhiều dịch vụ phù hợp với yêu cầu của bạn.';
@@ -128,13 +141,15 @@ export default function AIConsultant() {
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
 
-      await supabase.from('chat_messages').insert({
-        thread_id: MOCK_THREAD_ID,
-        user_id: userId,
-        role: 'assistant',
-        content: aiResponse,
-        suggested_service_id: suggestedServiceId
-      } as any);
+      if (userId) {
+        await supabase.from('chat_messages').insert({
+          thread_id: MOCK_THREAD_ID,
+          user_id: userId,
+          role: 'assistant',
+          content: aiResponse,
+          suggested_service_id: suggestedServiceId
+        } as any);
+      }
     }, 1500);
   };
 

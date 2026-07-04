@@ -3,14 +3,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, X, Heart, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Database } from '../../types/database';
+import { useAppContext } from '../../context/AppContext';
 import InteractiveMascot from './InteractiveMascot';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 
-const MOCK_USER_ID = 'user_1';
 const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
 
 export default function FloatingChat() {
+  const { user } = useAppContext();
+  // User-owned chat rows are keyed by the authenticated Supabase UUID (auth.uid()).
+  const userId = user?.id ?? null;
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [messages, setMessages] = useState<{ text: string, isUser: boolean }[]>([]);
@@ -40,9 +43,10 @@ export default function FloatingChat() {
   }, [messages, isOpen]);
 
   const insertChatMessage = async (role: string, content: string) => {
+    if (!userId) return;
     await supabase.from('chat_messages').insert({
       thread_id: MOCK_THREAD_ID,
-      user_id: MOCK_USER_ID,
+      user_id: userId,
       role,
       content
     } as any);

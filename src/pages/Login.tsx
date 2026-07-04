@@ -6,7 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import logoMainImg from '../img/Logo.png';
 
 export default function Login() {
-  const { login, user } = useAppContext();
+  const { signIn, signUp, user } = useAppContext();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/dashboard';
@@ -27,17 +27,21 @@ export default function Login() {
     }
   }, [user, navigate, redirectPath]);
 
-  const handleDemoLogin = async (demoEmail: string, name: string, userRole: 'bride' | 'groom') => {
+  const handleDemoLogin = async (demoEmail: string, _name: string, _userRole: 'bride' | 'groom') => {
     setLoading(true);
     setError('');
-    
-    // Simulate loading for realistic UX
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    
-    login(demoEmail, name, userRole);
+
+    // Demo accounts must exist in Supabase Auth with this shared password.
+    const { error: signInError } = await signIn(demoEmail, 'demo-password');
+
+    if (signInError) {
+      setError('Không thể đăng nhập tài khoản demo. Vui lòng thử lại.');
+      setLoading(false);
+      return;
+    }
+
     setSuccess(true);
     setLoading(false);
-    
     setTimeout(() => {
       navigate(redirectPath);
     }, 500);
@@ -53,14 +57,17 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    // Simulate database lookup/creation
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     try {
-      const displayName = isLoginTab ? email.split('@')[0] : fullName;
-      login(email, displayName, role);
+      const { error: authError } = isLoginTab
+        ? await signIn(email, password)
+        : await signUp(email, password, fullName, role);
+
+      if (authError) {
+        setError(authError);
+        return;
+      }
+
       setSuccess(true);
-      
       setTimeout(() => {
         navigate(redirectPath);
       }, 500);

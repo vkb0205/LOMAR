@@ -10,14 +10,15 @@ type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 type ServiceRow = Database['public']['Tables']['services']['Row'];
 type VendorRow = Database['public']['Tables']['vendors']['Row'];
 
-const MOCK_USER_ID = 'user_1';
 const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1000';
 const CUSTOMIZE_TEMP_PREVIEW_KEY = 'lomar_customize_temp_preview';
 
 export default function Customize() {
-  const { customizedServices, saveCustomizedService } = useAppContext();
+  const { customizedServices, saveCustomizedService, user } = useAppContext();
+  // User-owned rows are keyed by the authenticated Supabase UUID (auth.uid()).
+  const userId = user?.id ?? null;
   const [activeTab, setActiveTab] = useState('');
   const [activePropertyIndex, setActivePropertyIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -196,10 +197,11 @@ export default function Customize() {
   // Fetch chat history from Supabase
   useEffect(() => {
     async function fetchChat() {
+      if (!userId) return;
       const { data } = await supabase
         .from('chat_messages')
         .select('*')
-        .eq('user_id', MOCK_USER_ID)
+        .eq('user_id', userId)
         .order('created_at', { ascending: true });
 
       if (data && data.length > 0) {
@@ -207,7 +209,7 @@ export default function Customize() {
       }
     }
     fetchChat();
-  }, []);
+  }, [userId]);
 
   // Update chat greeting when tab changes
   useEffect(() => {
@@ -228,8 +230,9 @@ export default function Customize() {
   }, [messages]);
 
   const insertChatMessage = async (role: string, content: string) => {
+    if (!userId) return;
     await supabase.from('chat_messages').insert({
-      user_id: MOCK_USER_ID,
+      user_id: userId,
       role,
       content,
       thread_id: MOCK_THREAD_ID
@@ -368,12 +371,16 @@ export default function Customize() {
 
   const handleSaveDesign = async () => {
     if (!activeService) return;
+    if (!userId) {
+      alert('Vui lòng đăng nhập để lưu thiết kế.');
+      return;
+    }
     setIsSaving(true);
     try {
       const { error } = await supabase
         .from('ai_design_projects')
         .insert({
-          user_id: MOCK_USER_ID,
+          user_id: userId,
           category: activeTab,
           service_id: activeService.id,
           title: activeService.name || 'Untitled design',

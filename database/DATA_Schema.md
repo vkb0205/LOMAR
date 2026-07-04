@@ -479,6 +479,44 @@ Minimum policies:
 - Public can read active vendors/services/posts
 - Only owners/admins can modify vendors/services
 
+### RLS coverage status (Stage 4 — complete)
+Full CRUD policy coverage is implemented in `migrate_to_v2.sql` (Section 6 for
+the baseline public reads / own-profile, and **Section 6b** for the complete
+authenticated CRUD set). All policies use `auth.uid()` and are replay-safe
+(`drop policy if exists ...; create policy ...`). Ownership model:
+`profiles.id == auth.uid()`; every user-owned table carries a `user_id`
+referencing `profiles(id)`.
+
+| Table | Owner column | Access model |
+|-------|--------------|--------------|
+| `profiles` | `id` (= `auth.uid()`) | Own SELECT/INSERT/UPDATE/DELETE |
+| `vendors` | `owner_id` | Public SELECT active; owner CRUD |
+| `services` | via `vendors.owner_id` | Public SELECT active; vendor-owner CRUD |
+| `service_images` | via `services`→`vendors.owner_id` | Public SELECT (active service); vendor-owner CRUD |
+| `user_favorite_services` | `user_id` | Owner CRUD (private) |
+| `reviews` | `user_id` | Public SELECT published; owner CRUD |
+| `journey_tasks` | — (dictionary) | Public SELECT; writes via service_role/admin |
+| `user_journey_tasks` | `user_id` | Owner CRUD (private) |
+| `vouchers` | via `vendors.owner_id` | Public SELECT active; vendor-owner CRUD |
+| `user_vouchers` | `user_id` | Owner CRUD (private) |
+| `posts` | `user_id` | Public SELECT published; author CRUD |
+| `post_comments` | `user_id` | Public SELECT published; owner CRUD |
+| `post_likes` | `user_id` | Public SELECT; owner INSERT/DELETE |
+| `tags` | — (dictionary) | Public SELECT; writes via service_role/admin |
+| `post_tags` | via `posts.user_id` | Public SELECT (published post); author INSERT/DELETE |
+| `chat_threads` | `user_id` | Owner CRUD (private) |
+| `chat_messages` | `user_id` | Owner CRUD (private) |
+| `ai_design_projects` | `user_id` | Owner CRUD (private) |
+| `ai_design_generations` | `user_id` | Owner CRUD (private) |
+| `ai_design_assets` | `user_id` | Owner CRUD (private) |
+| `service_requests` | `user_id` | Requester CRUD; vendor-owner SELECT of incoming |
+
+Reference/dictionary tables (`journey_tasks`, `tags`) expose public SELECT only;
+mutations are expected via the `service_role` key (admin tooling), not the
+anon/authenticated app client, so no permissive authenticated write policy is
+granted (least privilege). Platform-level vouchers (`vendor_id is null`) are
+likewise managed via `service_role`.
+
 ## Storage Buckets
 Recommended Supabase Storage buckets:
 - `avatars`

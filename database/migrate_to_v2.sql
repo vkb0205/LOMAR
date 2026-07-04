@@ -739,6 +739,436 @@ create policy "Public can view published posts" on posts
   for select using (status = 'published');
 
 -- ============================================================================
+-- SECTION 6b: Complete CRUD policies (Stage 4 — fix/supabase-auth-rls)
+-- ============================================================================
+-- Ownership model:
+--   * profiles.id == auth.uid() (profiles PK is the auth user UUID).
+--   * All user-owned tables carry a user_id uuid REFERENCES profiles(id),
+--     so ownership is enforced with: auth.uid() = user_id.
+--   * Vendor-scoped tables (services, service_images, vouchers) resolve the
+--     owner through vendors.owner_id via an EXISTS sub-select.
+-- Every statement is replay-safe: drop policy if exists ... ; create policy ...
+-- RLS is (re)asserted below; Section 5 already enabled it, this is idempotent.
+-- Least privilege: public SELECT only for public-facing content; all writes
+-- are scoped to the owning auth.uid(). Reference/dictionary tables are public
+-- read with no authenticated write path (managed via service_role/admin).
+-- Existing Section 6 policies are preserved (permissive policies are OR'd).
+
+-- Ensure RLS remains enabled on every table touched here (idempotent).
+alter table if exists profiles enable row level security;
+alter table if exists vendors enable row level security;
+alter table if exists services enable row level security;
+alter table if exists service_images enable row level security;
+alter table if exists user_favorite_services enable row level security;
+alter table if exists reviews enable row level security;
+alter table if exists journey_tasks enable row level security;
+alter table if exists user_journey_tasks enable row level security;
+alter table if exists vouchers enable row level security;
+alter table if exists user_vouchers enable row level security;
+alter table if exists posts enable row level security;
+alter table if exists post_comments enable row level security;
+alter table if exists post_likes enable row level security;
+alter table if exists tags enable row level security;
+alter table if exists post_tags enable row level security;
+alter table if exists chat_threads enable row level security;
+alter table if exists chat_messages enable row level security;
+alter table if exists ai_design_projects enable row level security;
+alter table if exists ai_design_generations enable row level security;
+alter table if exists ai_design_assets enable row level security;
+alter table if exists service_requests enable row level security;
+
+-- ----------------------------------------------------------------------------
+-- profiles (owner column: id == auth.uid())
+-- Section 6 already grants own SELECT + own UPDATE. Add own INSERT (needed by
+-- the app's just-in-time profile provisioning) and own DELETE.
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can insert own profile" on profiles;
+create policy "Users can insert own profile" on profiles
+  for insert with check (auth.uid() = id);
+drop policy if exists "Users can delete own profile" on profiles;
+create policy "Users can delete own profile" on profiles
+  for delete using (auth.uid() = id);
+
+-- ----------------------------------------------------------------------------
+-- vendors (owner column: owner_id) — public read active (Section 6) + owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Owners can view own vendor" on vendors;
+create policy "Owners can view own vendor" on vendors
+  for select using (auth.uid() = owner_id);
+drop policy if exists "Owners can insert own vendor" on vendors;
+create policy "Owners can insert own vendor" on vendors
+  for insert with check (auth.uid() = owner_id);
+drop policy if exists "Owners can update own vendor" on vendors;
+create policy "Owners can update own vendor" on vendors
+  for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+drop policy if exists "Owners can delete own vendor" on vendors;
+create policy "Owners can delete own vendor" on vendors
+  for delete using (auth.uid() = owner_id);
+
+-- ----------------------------------------------------------------------------
+-- services (owner via vendors.owner_id) — public read active (Section 6) + owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Vendor owners can view own services" on services;
+create policy "Vendor owners can view own services" on services
+  for select using (
+    exists (select 1 from vendors v where v.id = services.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can insert services" on services;
+create policy "Vendor owners can insert services" on services
+  for insert with check (
+    exists (select 1 from vendors v where v.id = services.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can update services" on services;
+create policy "Vendor owners can update services" on services
+  for update using (
+    exists (select 1 from vendors v where v.id = services.vendor_id and v.owner_id = auth.uid())
+  ) with check (
+    exists (select 1 from vendors v where v.id = services.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can delete services" on services;
+create policy "Vendor owners can delete services" on services
+  for delete using (
+    exists (select 1 from vendors v where v.id = services.vendor_id and v.owner_id = auth.uid())
+  );
+
+-- ----------------------------------------------------------------------------
+-- service_images (owner via services -> vendors.owner_id)
+-- Public can view images belonging to active services; vendor owners manage.
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view active service images" on service_images;
+create policy "Public can view active service images" on service_images
+  for select using (
+    exists (select 1 from services s where s.id = service_images.service_id and s.status = 'active')
+  );
+drop policy if exists "Vendor owners can view own service images" on service_images;
+create policy "Vendor owners can view own service images" on service_images
+  for select using (
+    exists (
+      select 1 from services s
+      join vendors v on v.id = s.vendor_id
+      where s.id = service_images.service_id and v.owner_id = auth.uid()
+    )
+  );
+drop policy if exists "Vendor owners can insert service images" on service_images;
+create policy "Vendor owners can insert service images" on service_images
+  for insert with check (
+    exists (
+      select 1 from services s
+      join vendors v on v.id = s.vendor_id
+      where s.id = service_images.service_id and v.owner_id = auth.uid()
+    )
+  );
+drop policy if exists "Vendor owners can update service images" on service_images;
+create policy "Vendor owners can update service images" on service_images
+  for update using (
+    exists (
+      select 1 from services s
+      join vendors v on v.id = s.vendor_id
+      where s.id = service_images.service_id and v.owner_id = auth.uid()
+    )
+  ) with check (
+    exists (
+      select 1 from services s
+      join vendors v on v.id = s.vendor_id
+      where s.id = service_images.service_id and v.owner_id = auth.uid()
+    )
+  );
+drop policy if exists "Vendor owners can delete service images" on service_images;
+create policy "Vendor owners can delete service images" on service_images
+  for delete using (
+    exists (
+      select 1 from services s
+      join vendors v on v.id = s.vendor_id
+      where s.id = service_images.service_id and v.owner_id = auth.uid()
+    )
+  );
+
+-- ----------------------------------------------------------------------------
+-- user_favorite_services (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own favorites" on user_favorite_services;
+create policy "Users can view own favorites" on user_favorite_services
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own favorites" on user_favorite_services;
+create policy "Users can insert own favorites" on user_favorite_services
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own favorites" on user_favorite_services;
+create policy "Users can update own favorites" on user_favorite_services
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own favorites" on user_favorite_services;
+create policy "Users can delete own favorites" on user_favorite_services
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- reviews (owner column: user_id) — public read published + owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view published reviews" on reviews;
+create policy "Public can view published reviews" on reviews
+  for select using (status = 'published');
+drop policy if exists "Users can view own reviews" on reviews;
+create policy "Users can view own reviews" on reviews
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own reviews" on reviews;
+create policy "Users can insert own reviews" on reviews
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own reviews" on reviews;
+create policy "Users can update own reviews" on reviews
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own reviews" on reviews;
+create policy "Users can delete own reviews" on reviews
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- journey_tasks (reference/dictionary) — public read; no authenticated writes
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view journey tasks" on journey_tasks;
+create policy "Public can view journey tasks" on journey_tasks
+  for select using (true);
+
+-- ----------------------------------------------------------------------------
+-- user_journey_tasks (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own journey progress" on user_journey_tasks;
+create policy "Users can view own journey progress" on user_journey_tasks
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own journey progress" on user_journey_tasks;
+create policy "Users can insert own journey progress" on user_journey_tasks
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own journey progress" on user_journey_tasks;
+create policy "Users can update own journey progress" on user_journey_tasks
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own journey progress" on user_journey_tasks;
+create policy "Users can delete own journey progress" on user_journey_tasks
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- vouchers (owner via vendors.owner_id) — public read active + vendor-owner CRUD
+-- (vouchers with null vendor_id are platform-managed via service_role/admin.)
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view active vouchers" on vouchers;
+create policy "Public can view active vouchers" on vouchers
+  for select using (active = true);
+drop policy if exists "Vendor owners can view own vouchers" on vouchers;
+create policy "Vendor owners can view own vouchers" on vouchers
+  for select using (
+    exists (select 1 from vendors v where v.id = vouchers.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can insert vouchers" on vouchers;
+create policy "Vendor owners can insert vouchers" on vouchers
+  for insert with check (
+    exists (select 1 from vendors v where v.id = vouchers.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can update vouchers" on vouchers;
+create policy "Vendor owners can update vouchers" on vouchers
+  for update using (
+    exists (select 1 from vendors v where v.id = vouchers.vendor_id and v.owner_id = auth.uid())
+  ) with check (
+    exists (select 1 from vendors v where v.id = vouchers.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Vendor owners can delete vouchers" on vouchers;
+create policy "Vendor owners can delete vouchers" on vouchers
+  for delete using (
+    exists (select 1 from vendors v where v.id = vouchers.vendor_id and v.owner_id = auth.uid())
+  );
+
+-- ----------------------------------------------------------------------------
+-- user_vouchers (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own vouchers" on user_vouchers;
+create policy "Users can view own vouchers" on user_vouchers
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own vouchers" on user_vouchers;
+create policy "Users can insert own vouchers" on user_vouchers
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own vouchers" on user_vouchers;
+create policy "Users can update own vouchers" on user_vouchers
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own vouchers" on user_vouchers;
+create policy "Users can delete own vouchers" on user_vouchers
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- posts (owner column: user_id) — public read published (Section 6) + owner CRUD
+-- Owner SELECT lets authors also see their own drafts/hidden posts.
+-- ----------------------------------------------------------------------------
+drop policy if exists "Authors can view own posts" on posts;
+create policy "Authors can view own posts" on posts
+  for select using (auth.uid() = user_id);
+drop policy if exists "Authors can insert own posts" on posts;
+create policy "Authors can insert own posts" on posts
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Authors can update own posts" on posts;
+create policy "Authors can update own posts" on posts
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Authors can delete own posts" on posts;
+create policy "Authors can delete own posts" on posts
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- post_comments (owner column: user_id) — public read published + owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view published comments" on post_comments;
+create policy "Public can view published comments" on post_comments
+  for select using (status = 'published');
+drop policy if exists "Users can view own comments" on post_comments;
+create policy "Users can view own comments" on post_comments
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own comments" on post_comments;
+create policy "Users can insert own comments" on post_comments
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own comments" on post_comments;
+create policy "Users can update own comments" on post_comments
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own comments" on post_comments;
+create policy "Users can delete own comments" on post_comments
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- post_likes (owner column: user_id) — public read (like counts) + owner write
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view post likes" on post_likes;
+create policy "Public can view post likes" on post_likes
+  for select using (true);
+drop policy if exists "Users can insert own likes" on post_likes;
+create policy "Users can insert own likes" on post_likes
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own likes" on post_likes;
+create policy "Users can delete own likes" on post_likes
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- tags (reference/dictionary) — public read; no authenticated writes
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view tags" on tags;
+create policy "Public can view tags" on tags
+  for select using (true);
+
+-- ----------------------------------------------------------------------------
+-- post_tags (junction) — readable with published posts; managed by post author
+-- ----------------------------------------------------------------------------
+drop policy if exists "Public can view tags of published posts" on post_tags;
+create policy "Public can view tags of published posts" on post_tags
+  for select using (
+    exists (select 1 from posts p where p.id = post_tags.post_id and p.status = 'published')
+  );
+drop policy if exists "Authors can view own post tags" on post_tags;
+create policy "Authors can view own post tags" on post_tags
+  for select using (
+    exists (select 1 from posts p where p.id = post_tags.post_id and p.user_id = auth.uid())
+  );
+drop policy if exists "Authors can insert own post tags" on post_tags;
+create policy "Authors can insert own post tags" on post_tags
+  for insert with check (
+    exists (select 1 from posts p where p.id = post_tags.post_id and p.user_id = auth.uid())
+  );
+drop policy if exists "Authors can delete own post tags" on post_tags;
+create policy "Authors can delete own post tags" on post_tags
+  for delete using (
+    exists (select 1 from posts p where p.id = post_tags.post_id and p.user_id = auth.uid())
+  );
+
+-- ----------------------------------------------------------------------------
+-- chat_threads (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own chat threads" on chat_threads;
+create policy "Users can view own chat threads" on chat_threads
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own chat threads" on chat_threads;
+create policy "Users can insert own chat threads" on chat_threads
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own chat threads" on chat_threads;
+create policy "Users can update own chat threads" on chat_threads
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own chat threads" on chat_threads;
+create policy "Users can delete own chat threads" on chat_threads
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- chat_messages (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own chat messages" on chat_messages;
+create policy "Users can view own chat messages" on chat_messages
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own chat messages" on chat_messages;
+create policy "Users can insert own chat messages" on chat_messages
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own chat messages" on chat_messages;
+create policy "Users can update own chat messages" on chat_messages
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own chat messages" on chat_messages;
+create policy "Users can delete own chat messages" on chat_messages
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- ai_design_projects (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own design projects" on ai_design_projects;
+create policy "Users can view own design projects" on ai_design_projects
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own design projects" on ai_design_projects;
+create policy "Users can insert own design projects" on ai_design_projects
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own design projects" on ai_design_projects;
+create policy "Users can update own design projects" on ai_design_projects
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own design projects" on ai_design_projects;
+create policy "Users can delete own design projects" on ai_design_projects
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- ai_design_generations (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own generations" on ai_design_generations;
+create policy "Users can view own generations" on ai_design_generations
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own generations" on ai_design_generations;
+create policy "Users can insert own generations" on ai_design_generations
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own generations" on ai_design_generations;
+create policy "Users can update own generations" on ai_design_generations
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own generations" on ai_design_generations;
+create policy "Users can delete own generations" on ai_design_generations
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- ai_design_assets (owner column: user_id) — private, owner CRUD
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own design assets" on ai_design_assets;
+create policy "Users can view own design assets" on ai_design_assets
+  for select using (auth.uid() = user_id);
+drop policy if exists "Users can insert own design assets" on ai_design_assets;
+create policy "Users can insert own design assets" on ai_design_assets
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own design assets" on ai_design_assets;
+create policy "Users can update own design assets" on ai_design_assets
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own design assets" on ai_design_assets;
+create policy "Users can delete own design assets" on ai_design_assets
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- service_requests (owner column: user_id) — requester CRUD + vendor-owner read
+-- ----------------------------------------------------------------------------
+drop policy if exists "Users can view own service requests" on service_requests;
+create policy "Users can view own service requests" on service_requests
+  for select using (auth.uid() = user_id);
+drop policy if exists "Vendor owners can view incoming requests" on service_requests;
+create policy "Vendor owners can view incoming requests" on service_requests
+  for select using (
+    exists (select 1 from vendors v where v.id = service_requests.vendor_id and v.owner_id = auth.uid())
+  );
+drop policy if exists "Users can insert own service requests" on service_requests;
+create policy "Users can insert own service requests" on service_requests
+  for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own service requests" on service_requests;
+create policy "Users can update own service requests" on service_requests
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own service requests" on service_requests;
+create policy "Users can delete own service requests" on service_requests
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================================
 -- SECTION 7: Verification queries (run separately to check)
 -- ============================================================================
 SELECT table_name FROM information_schema.tables
