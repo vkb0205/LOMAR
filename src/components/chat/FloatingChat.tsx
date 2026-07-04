@@ -7,6 +7,9 @@ import InteractiveMascot from './InteractiveMascot';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 
+const MOCK_USER_ID = 'user_1';
+const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
+
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -15,7 +18,6 @@ export default function FloatingChat() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
 
-  // Fetch chat history
   useEffect(() => {
     async function fetchChat() {
       const { data } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
@@ -37,147 +39,124 @@ export default function FloatingChat() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
+  const insertChatMessage = async (role: string, content: string) => {
+    await supabase.from('chat_messages').insert({
+      thread_id: MOCK_THREAD_ID,
+      user_id: MOCK_USER_ID,
+      role,
+      content
+    } as any);
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     const userText = inputValue;
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
 
-    await supabase.from('chat_messages').insert({ role: 'user', content: userText } as any);
+    await insertChatMessage('user', userText);
 
     setTimeout(async () => {
       const botText = "Cảm ơn bạn đã nhắn tin cho Bé Song Hỷ nhé! Mình đang tìm kiếm thông tin tốt nhất cho bạn đây...";
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
-      await supabase.from('chat_messages').insert({ role: 'assistant', content: botText } as any);
+      await insertChatMessage('assistant', botText);
     }, 1000);
   };
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] flex flex-col items-end pointer-events-none">
-
-      {/* Chat Window */}
-      <AnimatePresence>
-        {isOpen && (
+    <>
+      {!isOpen && (
+        <AnimatePresence>
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95, transformOrigin: 'bottom right' }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="w-[calc(100vw-2rem)] md:w-[380px] h-[450px] md:h-[500px] bg-white rounded-[32px] shadow-2xl border border-rose-100 flex flex-col overflow-hidden mb-4 pointer-events-auto"
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-6 right-6 z-50 cursor-pointer flex items-center gap-2 bg-white rounded-full shadow-lg border border-[#ffdb9f]/30 p-1.5 pr-4 hover:shadow-xl transition-all group"
           >
-            {/* Chat Header */}
-            <div className="bg-[#F2BFC8] p-6 text-white flex items-center justify-between">
+            <div className="relative w-10 h-10" ref={mascotRef}>
+              <InteractiveMascot isHovered={isHovered} isOpen={isOpen} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif font-bold text-xs text-[#1B2C40] uppercase tracking-wider">Bé Song Hỷ</span>
+              <span className="text-[9px] text-[#ddb983] font-medium flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" /> Trợ lý AI của bạn
+              </span>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      {isOpen && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[95vw] h-[520px] max-h-[85vh] bg-white rounded-[32px] shadow-2xl border border-[#ffdb9f]/30 flex flex-col overflow-hidden"
+          >
+            <div className="p-4 border-b border-[#ffdb9f]/20 flex items-center justify-between bg-white/80 backdrop-blur-sm shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="relative w-10 h-10" ref={mascotRef}>
+                  <InteractiveMascot isHovered={false} isOpen={true} />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-lg leading-tight uppercase tracking-wider">Bé Song Hỷ</h3>
-                  <p className="text-[10px] text-white/80 font-medium tracking-widest uppercase">Trợ lý ảo thông minh</p>
+                  <h3 className="font-serif font-bold text-sm text-[#1B2C40]">Bé Song Hỷ</h3>
+                  <p className="text-[9px] text-[#ddb983] flex items-center gap-1">
+                    <Heart className="w-2 h-2 fill-current" /> Đồng hành cùng bạn
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform">
-                <X className="w-6 h-6" />
+              <button onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-rose-50 flex items-center justify-center text-rose-300 hover:text-rose-500 transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[#FFFFFF]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF6EE]/50">
               {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: msg.isUser ? 20 : -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[85%] p-4 rounded-[22px] text-xs font-medium leading-relaxed shadow-sm border ${msg.isUser
-                    ? 'bg-[#1B2C40] text-white border-[#1B2C40] rounded-tr-none'
-                    : 'bg-white text-[#1B2C40] border-rose-100 rounded-tl-none'
-                    }`}>
+                <div key={i} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
+                  {!msg.isUser && (
+                    <div className="w-8 h-8 rounded-full bg-[#ffe9c9] flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                      <Sparkles className="w-4 h-4 text-[#ddb983]" />
+                    </div>
+                  )}
+                  <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed font-medium ${
+                    msg.isUser
+                      ? 'bg-[#ffe9c9] text-[#1B2C40] rounded-br-sm'
+                      : 'bg-white text-[#1B2C40] rounded-bl-sm border border-[#ffdb9f]/20 shadow-sm'
+                  }`}>
                     {msg.text}
                   </div>
-                </motion.div>
+                </div>
               ))}
               <div ref={chatEndRef} />
             </div>
 
-            {/* Input Area */}
-            <div className="p-4 bg-white border-t border-rose-50">
-              <div className="relative">
+            <div className="p-3 border-t border-[#ffdb9f]/20 bg-white shrink-0">
+              <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Hỏi Bé Song điều gì đó..."
-                  className="w-full bg-rose-50/50 border border-rose-100 rounded-full py-3 px-5 pr-12 text-xs focus:outline-none focus:ring-1 focus:ring-[#F2BFC8] text-[#1B2C40]"
+                  placeholder="Nhắn tin với Bé Song..."
+                  className="flex-1 bg-[#FAF6EE] rounded-full py-2.5 px-4 text-xs outline-none focus:ring-1 focus:ring-[#ffdb9f] placeholder:text-gray-400"
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-[#F2BFC8] text-white rounded-full flex items-center justify-center hover:bg-rose-400 shadow-md transition-colors"
+                  disabled={!inputValue.trim()}
+                  className="w-10 h-10 bg-[#ffe9c9] text-[#1B2C40] rounded-full flex items-center justify-center hover:bg-[#ffdb9f] transition-colors disabled:opacity-50"
                 >
-                  <Send className="w-4 h-4 ml-0.5" />
+                  <Send className="w-4 h-4" />
                 </button>
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Mascot Launcher */}
-      <div className="relative flex flex-col items-center pointer-events-auto">
-        <motion.div
-          ref={mascotRef}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative cursor-pointer group"
-        >
-          {/* Tooltip Wrapper (Positioned over the head of the mascot) */}
-          <AnimatePresence>
-            {!isOpen && (
-              <div className="absolute bottom-[90%] left-1/2 -translate-x-1/2 mb-0 z-50 pointer-events-none">
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* Floating / Bobbing animation */}
-                  <motion.div
-                    animate={{
-                      y: [0, -6, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="bg-white px-4 py-2 rounded-2xl border border-rose-100 shadow-lg whitespace-nowrap relative flex items-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#ffe9c9] fill-[#ffe9c9]" />
-                    <p className="text-[#1B2C40] text-[10px] font-bold uppercase tracking-widest">Chat với Bé Song Hỷ</p>
-                    <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-b border-r border-rose-100"></div>
-                  </motion.div>
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
-
-          {/* Mascot Body (Interactive Cute Avatar) */}
-          <div className="relative w-20 h-20 md:w-36 md:h-36 drop-shadow-2xl">
-            <InteractiveMascot className="w-full h-full scale-110" />
-
-            {/* Notification Badge */}
-            {!isOpen && (
-              <div className="absolute top-[15%] right-[15%] w-6 h-6 bg-[#1B2C40] text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white animate-bounce">
-                1
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </div>
+        </AnimatePresence>
+      )}
+    </>
   );
 }

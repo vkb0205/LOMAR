@@ -9,70 +9,449 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      chat_messages: {
+      profiles: {
         Row: {
-          id: number
-          user_id: string | null
-          role: string | null
-          content: string | null
-          suggested_product_id: string | null
-          created_at: string | null
+          id: string
+          username: string | null
+          full_name: string | null
+          email: string | null
+          avatar_url: string | null
+          role: string
+          onboarding_status: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: number
-          user_id?: string | null
-          role?: string | null
-          content?: string | null
-          suggested_product_id?: string | null
-          created_at?: string | null
+          id?: string
+          username?: string | null
+          full_name?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          role?: string
+          onboarding_status?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          id?: number
-          user_id?: string | null
-          role?: string | null
-          content?: string | null
-          suggested_product_id?: string | null
-          created_at?: string | null
+          id?: string
+          username?: string | null
+          full_name?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          role?: string
+          onboarding_status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      vendors: {
+        Row: {
+          id: string
+          owner_id: string | null
+          name: string
+          slug: string
+          category: string
+          description: string | null
+          address: string | null
+          city: string | null
+          phone: string | null
+          email: string | null
+          website_url: string | null
+          image_url: string | null
+          rating_avg: number
+          rating_count: number
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id?: string | null
+          name: string
+          slug: string
+          category: string
+          description?: string | null
+          address?: string | null
+          city?: string | null
+          phone?: string | null
+          email?: string | null
+          website_url?: string | null
+          image_url?: string | null
+          rating_avg?: number
+          rating_count?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string | null
+          name?: string
+          slug?: string
+          category?: string
+          description?: string | null
+          address?: string | null
+          city?: string | null
+          phone?: string | null
+          email?: string | null
+          website_url?: string | null
+          image_url?: string | null
+          rating_avg?: number
+          rating_count?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      services: {
+        Row: {
+          id: string
+          vendor_id: string
+          category: string
+          name: string
+          description: string | null
+          base_price: number
+          currency: string
+          thumbnail_url: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          vendor_id: string
+          category: string
+          name: string
+          description?: string | null
+          base_price: number
+          currency?: string
+          thumbnail_url?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          vendor_id?: string
+          category?: string
+          name?: string
+          description?: string | null
+          base_price?: number
+          currency?: string
+          thumbnail_url?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      service_images: {
+        Row: {
+          id: string
+          service_id: string
+          image_url: string
+          alt_text: string | null
+          is_main: boolean
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          service_id: string
+          image_url: string
+          alt_text?: string | null
+          is_main?: boolean
+          display_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          service_id?: string
+          image_url?: string
+          alt_text?: string | null
+          is_main?: boolean
+          display_order?: number
+          created_at?: string
+        }
+      }
+      user_favorite_services: {
+        Row: {
+          user_id: string
+          service_id: string
+          saved_at: string
+        }
+        Insert: {
+          user_id: string
+          service_id: string
+          saved_at?: string
+        }
+        Update: {
+          user_id?: string
+          service_id?: string
+          saved_at?: string
+        }
+      }
+      reviews: {
+        Row: {
+          id: string
+          user_id: string
+          vendor_id: string | null
+          service_id: string | null
+          rating: number
+          comment: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          vendor_id?: string | null
+          service_id?: string | null
+          rating: number
+          comment?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          vendor_id?: string | null
+          service_id?: string | null
+          rating?: number
+          comment?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      journey_tasks: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          description: string | null
+          is_mandatory: boolean
+          display_order: number
+          active: boolean
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          description?: string | null
+          is_mandatory?: boolean
+          display_order?: number
+          active?: boolean
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          description?: string | null
+          is_mandatory?: boolean
+          display_order?: number
+          active?: boolean
+        }
+      }
+      user_journey_tasks: {
+        Row: {
+          user_id: string
+          task_id: string
+          status: string
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          task_id: string
+          status?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          task_id?: string
+          status?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      vouchers: {
+        Row: {
+          id: string
+          vendor_id: string | null
+          code: string
+          title: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          min_order_value: number | null
+          required_task_id: string | null
+          starts_at: string | null
+          expires_at: string | null
+          max_redemptions: number | null
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          vendor_id?: string | null
+          code: string
+          title: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          min_order_value?: number | null
+          required_task_id?: string | null
+          starts_at?: string | null
+          expires_at?: string | null
+          max_redemptions?: number | null
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          vendor_id?: string | null
+          code?: string
+          title?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          min_order_value?: number | null
+          required_task_id?: string | null
+          starts_at?: string | null
+          expires_at?: string | null
+          max_redemptions?: number | null
+          active?: boolean
+          created_at?: string
+        }
+      }
+      user_vouchers: {
+        Row: {
+          user_id: string
+          voucher_id: string
+          status: string
+          unlocked_at: string | null
+          redeemed_at: string | null
+        }
+        Insert: {
+          user_id: string
+          voucher_id: string
+          status?: string
+          unlocked_at?: string | null
+          redeemed_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          voucher_id?: string
+          status?: string
+          unlocked_at?: string | null
+          redeemed_at?: string | null
+        }
+      }
+      posts: {
+        Row: {
+          id: string
+          user_id: string
+          title: string | null
+          content: string
+          cover_image_url: string | null
+          views_count: number
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title?: string | null
+          content: string
+          cover_image_url?: string | null
+          views_count?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string | null
+          content?: string
+          cover_image_url?: string | null
+          views_count?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
       }
       post_comments: {
         Row: {
-          id: number
-          post_id: string | null
-          user_id: string | null
-          content: string | null
-          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+          parent_comment_id: string | null
+          content: string
+          status: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: number
-          post_id?: string | null
-          user_id?: string | null
-          content?: string | null
-          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+          parent_comment_id?: string | null
+          content: string
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          id?: number
-          post_id?: string | null
-          user_id?: string | null
-          content?: string | null
-          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+          parent_comment_id?: string | null
+          content?: string
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
       }
       post_likes: {
         Row: {
           post_id: string
           user_id: string
-          created_at: string | null
+          created_at: string
         }
         Insert: {
           post_id: string
           user_id: string
-          created_at?: string | null
+          created_at?: string
         }
         Update: {
           post_id?: string
           user_id?: string
-          created_at?: string | null
+          created_at?: string
+        }
+      }
+      tags: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
         }
       }
       post_tags: {
@@ -89,248 +468,250 @@ export interface Database {
           tag_id?: string
         }
       }
-      posts: {
+      chat_threads: {
         Row: {
           id: string
-          user_id: string | null
-          content: string | null
-          views_count: number | null
-          created_at: string | null
-        }
-        Insert: {
-          id: string
-          user_id?: string | null
-          content?: string | null
-          views_count?: number | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          content?: string | null
-          views_count?: number | null
-          created_at?: string | null
-        }
-      }
-      products: {
-        Row: {
-          id: string
+          user_id: string
+          title: string | null
+          context_type: string
+          design_project_id: string | null
+          service_id: string | null
           vendor_id: string | null
-          category: string | null
-          name: string | null
-          price: number | null
-          image_url: string | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id: string
+          id?: string
+          user_id: string
+          title?: string | null
+          context_type?: string
+          design_project_id?: string | null
+          service_id?: string | null
           vendor_id?: string | null
-          category?: string | null
-          name?: string | null
-          price?: number | null
-          image_url?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
+          user_id?: string
+          title?: string | null
+          context_type?: string
+          design_project_id?: string | null
+          service_id?: string | null
           vendor_id?: string | null
-          category?: string | null
-          name?: string | null
-          price?: number | null
-          image_url?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
-      reviews: {
-        Row: {
-          id: number
-          user_id: string | null
-          product_id: string | null
-          rating: number | null
-          comment: string | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: number
-          user_id?: string | null
-          product_id?: string | null
-          rating?: number | null
-          comment?: string | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: number
-          user_id?: string | null
-          product_id?: string | null
-          rating?: number | null
-          comment?: string | null
-          created_at?: string | null
-        }
-      }
-      tags: {
+      chat_messages: {
         Row: {
           id: string
-          name: string | null
+          thread_id: string
+          user_id: string
+          role: string
+          content: string
+          suggested_service_id: string | null
+          metadata: Json
+          created_at: string
         }
         Insert: {
-          id: string
-          name?: string | null
+          id?: string
+          thread_id: string
+          user_id: string
+          role: string
+          content: string
+          suggested_service_id?: string | null
+          metadata?: Json
+          created_at?: string
         }
         Update: {
           id?: string
-          name?: string | null
+          thread_id?: string
+          user_id?: string
+          role?: string
+          content?: string
+          suggested_service_id?: string | null
+          metadata?: Json
+          created_at?: string
         }
       }
-      task_dictionary: {
+      ai_design_projects: {
         Row: {
           id: string
-          name: string | null
-          is_mandatory: boolean | null
+          user_id: string
+          service_id: string | null
+          title: string
+          category: string
+          bride_image_url: string | null
+          groom_image_url: string | null
+          reference_image_url: string | null
+          selected_generation_id: string | null
+          status: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id: string
-          name?: string | null
-          is_mandatory?: boolean | null
+          id?: string
+          user_id: string
+          service_id?: string | null
+          title?: string
+          category: string
+          bride_image_url?: string | null
+          groom_image_url?: string | null
+          reference_image_url?: string | null
+          selected_generation_id?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          name?: string | null
-          is_mandatory?: boolean | null
+          user_id?: string
+          service_id?: string | null
+          title?: string
+          category?: string
+          bride_image_url?: string | null
+          groom_image_url?: string | null
+          reference_image_url?: string | null
+          selected_generation_id?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
       }
-      user_favorite_products: {
+      ai_design_generations: {
         Row: {
-          id: number
-          user_id: string | null
-          product_id: string | null
-          saved_at: string | null
-        }
-        Insert: {
-          id?: number
-          user_id?: string | null
-          product_id?: string | null
-          saved_at?: string | null
-        }
-        Update: {
-          id?: number
-          user_id?: string | null
-          product_id?: string | null
-          saved_at?: string | null
-        }
-      }
-      user_journey_tasks: {
-        Row: {
-          id: number
-          user_id: string | null
-          task_id: string | null
-          status: string | null
+          id: string
+          project_id: string
+          user_id: string
+          prompt: string
+          negative_prompt: string | null
+          model_name: string
+          input_payload: Json
+          output_image_url: string | null
+          output_metadata: Json
+          status: string
+          error_message: string | null
+          cost_estimate: number | null
+          created_at: string
           completed_at: string | null
         }
         Insert: {
-          id?: number
-          user_id?: string | null
-          task_id?: string | null
-          status?: string | null
+          id?: string
+          project_id: string
+          user_id: string
+          prompt: string
+          negative_prompt?: string | null
+          model_name: string
+          input_payload?: Json
+          output_image_url?: string | null
+          output_metadata?: Json
+          status?: string
+          error_message?: string | null
+          cost_estimate?: number | null
+          created_at?: string
           completed_at?: string | null
         }
         Update: {
-          id?: number
-          user_id?: string | null
-          task_id?: string | null
-          status?: string | null
+          id?: string
+          project_id?: string
+          user_id?: string
+          prompt?: string
+          negative_prompt?: string | null
+          model_name?: string
+          input_payload?: Json
+          output_image_url?: string | null
+          output_metadata?: Json
+          status?: string
+          error_message?: string | null
+          cost_estimate?: number | null
+          created_at?: string
           completed_at?: string | null
         }
       }
-      user_vouchers: {
-        Row: {
-          id: number
-          user_id: string | null
-          voucher_id: string | null
-          status: string | null
-          unlocked_at: string | null
-        }
-        Insert: {
-          id?: number
-          user_id?: string | null
-          voucher_id?: string | null
-          status?: string | null
-          unlocked_at?: string | null
-        }
-        Update: {
-          id?: number
-          user_id?: string | null
-          voucher_id?: string | null
-          status?: string | null
-          unlocked_at?: string | null
-        }
-      }
-      users: {
+      ai_design_assets: {
         Row: {
           id: string
-          username: string | null
-          email: string | null
-          avatar_url: string | null
-          is_new: boolean | null
+          project_id: string
+          generation_id: string | null
+          user_id: string
+          asset_type: string
+          file_url: string
+          mime_type: string | null
+          width: number | null
+          height: number | null
+          size_bytes: number | null
+          created_at: string
         }
         Insert: {
-          id: string
-          username?: string | null
-          email?: string | null
-          avatar_url?: string | null
-          is_new?: boolean | null
+          id?: string
+          project_id: string
+          generation_id?: string | null
+          user_id: string
+          asset_type: string
+          file_url: string
+          mime_type?: string | null
+          width?: number | null
+          height?: number | null
+          size_bytes?: number | null
+          created_at?: string
         }
         Update: {
           id?: string
-          username?: string | null
-          email?: string | null
-          avatar_url?: string | null
-          is_new?: boolean | null
+          project_id?: string
+          generation_id?: string | null
+          user_id?: string
+          asset_type?: string
+          file_url?: string
+          mime_type?: string | null
+          width?: number | null
+          height?: number | null
+          size_bytes?: number | null
+          created_at?: string
         }
       }
-      vendors: {
+      service_requests: {
         Row: {
           id: string
-          name: string | null
-          category: string | null
-          address: string | null
-          rating: number | null
-          image_url: string | null
+          user_id: string
+          vendor_id: string
+          service_id: string | null
+          design_project_id: string | null
+          event_date: string | null
+          budget_min: number | null
+          budget_max: number | null
+          message: string | null
+          status: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id: string
-          name?: string | null
-          category?: string | null
-          address?: string | null
-          rating?: number | null
-          image_url?: string | null
+          id?: string
+          user_id: string
+          vendor_id: string
+          service_id?: string | null
+          design_project_id?: string | null
+          event_date?: string | null
+          budget_min?: number | null
+          budget_max?: number | null
+          message?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          name?: string | null
-          category?: string | null
-          address?: string | null
-          rating?: number | null
-          image_url?: string | null
-        }
-      }
-      vouchers: {
-        Row: {
-          id: string
-          vendor_id: string | null
-          required_task_id: string | null
-          title: string | null
-          discount_value: string | null
-        }
-        Insert: {
-          id: string
-          vendor_id?: string | null
-          required_task_id?: string | null
-          title?: string | null
-          discount_value?: string | null
-        }
-        Update: {
-          id?: string
-          vendor_id?: string | null
-          required_task_id?: string | null
-          title?: string | null
-          discount_value?: string | null
+          user_id?: string
+          vendor_id?: string
+          service_id?: string | null
+          design_project_id?: string | null
+          event_date?: string | null
+          budget_min?: number | null
+          budget_max?: number | null
+          message?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
       }
     }

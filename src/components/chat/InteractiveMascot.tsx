@@ -4,9 +4,11 @@ import mascotBody from '../../img/Mascot.png';
 
 interface InteractiveMascotProps {
   className?: string;
+  isHovered?: boolean;
+  isOpen?: boolean;
 }
 
-export default function InteractiveMascot({ className = '' }: InteractiveMascotProps) {
+export default function InteractiveMascot({ className = '', isHovered, isOpen }: InteractiveMascotProps) {
   const eyeRef = useRef<HTMLDivElement>(null);
   const pupilRef = useRef<HTMLImageElement>(null);
 

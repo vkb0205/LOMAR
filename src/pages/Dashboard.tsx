@@ -12,7 +12,6 @@ import confetti from 'canvas-confetti';
 const MOCK_USER_ID = 'U01';
 
 interface Task {
-  id: string; // user_journey_tasks.id
   taskId: string;
   name: string;
   isMandatory: boolean;
@@ -20,7 +19,7 @@ interface Task {
 }
 
 interface Voucher {
-  id: string; // user_vouchers.id
+  voucherId: string;
   title: string;
   discountValue: string;
   status: string;
@@ -50,12 +49,12 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        // Fetch ALL tasks from task_dictionary
+        // Fetch ALL tasks from journey_tasks (renamed from task_dictionary)
         const { data: dictData } = await supabase
-          .from('task_dictionary')
+          .from('journey_tasks')
           .select('*');
 
-        // Fetch user tasks progress
+        // Fetch user tasks progress (v2: composite PK user_id+task_id, no 'id' column)
         const { data: userTasksData } = await supabase
           .from('user_journey_tasks')
           .select('*')
@@ -67,7 +66,6 @@ export default function Dashboard() {
           mergedTasks = (dictData as any[]).map(dict => {
             const progress = (userTasksData as any[])?.find(ut => ut.task_id === dict.id);
             return {
-              id: progress ? progress.id.toString() : `mock-${dict.id}`,
               taskId: dict.id,
               name: dict.name || 'Nhiệm vụ',
               isMandatory: dict.is_mandatory || false,
@@ -100,9 +98,9 @@ export default function Dashboard() {
           mergedVouchers = (allVouchersData as any[]).map(vDict => {
             const userV = (userVouchersData as any[])?.find(uv => uv.voucher_id === vDict.id);
             return {
-              id: userV ? userV.id.toString() : `mock-${vDict.id}`,
+              voucherId: vDict.id,
               title: vDict.title || 'Voucher',
-              discountValue: vDict.discount_value || '',
+              discountValue: vDict.discount_value?.toString() || '',
               status: userV ? userV.status?.toLowerCase() : 'locked',
               requiredTaskId: vDict.required_task_id || null
             };
@@ -110,10 +108,10 @@ export default function Dashboard() {
         }
         setVouchers(mergedVouchers);
 
-        // Fetch saved designs from view v_dashboard_saved_designs
+        // Fetch saved designs from ai_design_projects (replaces user_designs)
         const { data: savedDesignsData } = await supabase
-          .from('v_dashboard_saved_designs')
-          .select('*')
+          .from('ai_design_projects')
+          .select('id, title, category, status, created_at')
           .eq('user_id', userId);
 
         if (savedDesignsData) {
@@ -133,10 +131,10 @@ export default function Dashboard() {
   const toggleTaskStatus = async (task: Task) => {
     const isCompleted = task.status === 'completed';
     const newStatus = isCompleted ? 'pending' : 'completed';
-    const dbStatus = newStatus === 'completed' ? 'Completed' : 'Pending';
+    const dbStatus = newStatus === 'completed' ? 'completed' : 'pending';
 
     // Update local state immediately for fast UI response
-    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
+    setTasks(prev => prev.map(t => t.taskId === task.taskId ? { ...t, status: newStatus } : t));
 
     // Sync context if it's the health check task
     if (task.taskId === 'T01' || task.name.toLowerCase().includes('sức khỏe')) {
@@ -144,74 +142,36 @@ export default function Dashboard() {
     }
 
     try {
-      let taskDbId = task.id;
-      if (task.id.startsWith('mock-')) {
-        // Insert new task progress row
-        const { data, error } = await (supabase
-          .from('user_journey_tasks') as any)
-          .insert({
-            user_id: userId,
-            task_id: task.taskId,
-            status: dbStatus,
-            completed_at: newStatus === 'completed' ? new Date().toISOString() : null
-          })
-          .select('id')
-          .single();
+      // v2: user_journey_tasks uses composite PK (user_id, task_id)
+      // Upsert approach: try to insert, update if conflict
+      const { error } = await (supabase
+        .from('user_journey_tasks') as any)
+        .upsert({
+          user_id: userId,
+          task_id: task.taskId,
+          status: dbStatus,
+          completed_at: newStatus === 'completed' ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,task_id' });
 
-        if (error) throw error;
-        if (data) {
-          taskDbId = data.id.toString();
-          // Update the task ID locally
-          setTasks(prev => prev.map(t => t.taskId === task.taskId ? { ...t, id: taskDbId } : t));
-        }
-      } else {
-        // Update existing row
-        const { error } = await (supabase
-          .from('user_journey_tasks') as any)
-          .update({
-            status: dbStatus,
-            completed_at: newStatus === 'completed' ? new Date().toISOString() : null
-          })
-          .eq('id', parseInt(task.id));
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       // Update vouchers that depend on this task
       const dependentVouchers = vouchers.filter(v => v.requiredTaskId === task.taskId);
       for (const voucher of dependentVouchers) {
         const newVoucherStatus = newStatus === 'completed' ? 'unlocked' : 'locked';
-        const dbVoucherStatus = newVoucherStatus === 'unlocked' ? 'Unlocked' : 'Locked';
 
-        if (voucher.id.startsWith('mock-')) {
-          const { data: newV, error: errV } = await (supabase
-            .from('user_vouchers') as any)
-            .insert({
-              user_id: userId,
-              voucher_id: voucher.id.replace('mock-', ''),
-              status: dbVoucherStatus,
-              unlocked_at: newStatus === 'completed' ? new Date().toISOString() : null
-            })
-            .select('id')
-            .single();
+        const { error: errV } = await (supabase
+          .from('user_vouchers') as any)
+          .upsert({
+            user_id: userId,
+            voucher_id: voucher.voucherId,
+            status: newVoucherStatus,
+            unlocked_at: newStatus === 'completed' ? new Date().toISOString() : null
+          }, { onConflict: 'user_id,voucher_id' });
 
-          if (newV) {
-            setVouchers(prev => prev.map(v => v.id === voucher.id ? {
-              ...v,
-              id: newV.id.toString(),
-              status: newVoucherStatus
-            } : v));
-          }
-        } else {
-          await (supabase
-            .from('user_vouchers') as any)
-            .update({
-              status: dbVoucherStatus,
-              unlocked_at: newStatus === 'completed' ? new Date().toISOString() : null
-            })
-            .eq('id', parseInt(voucher.id));
-
-          setVouchers(prev => prev.map(v => v.id === voucher.id ? { ...v, status: newVoucherStatus } : v));
+        if (!errV) {
+          setVouchers(prev => prev.map(v => v.voucherId === voucher.voucherId ? { ...v, status: newVoucherStatus } : v));
         }
       }
 
@@ -613,7 +573,7 @@ export default function Dashboard() {
                   if (voucher.requiredTaskId && !isUnlocked) {
                     return (
                       <motion.div
-                        key={voucher.id}
+                        key={voucher.voucherId}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
@@ -634,7 +594,7 @@ export default function Dashboard() {
 
                   return (
                     <motion.div
-                      key={voucher.id}
+                      key={voucher.voucherId}
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ type: 'spring', bounce: 0.5 }}
