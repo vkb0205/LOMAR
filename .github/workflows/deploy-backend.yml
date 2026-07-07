@@ -56,7 +56,21 @@ jobs:
             --region us-central1 \
             --allow-unauthenticated \
             --port 8080 \
-            --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_CLOUD_LOCATION=global,NANO_BANANA_MODEL=gemini-3.1-flash-image,API_HOST=0.0.0.0,API_PORT=8080"
+            --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_CLOUD_LOCATION=global,NANO_BANANA_MODEL=gemini-3.1-flash-image,GOOGLE_TEXT_MODEL=${{ vars.GOOGLE_TEXT_MODEL || 'gemini-2.5-flash' }},API_HOST=0.0.0.0,API_PORT=8080,ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }},ENABLE_AUTH=${{ vars.ENABLE_AUTH || 'false' }}"
+
+      # --- Auth + CORS secrets (Item 16 / finding F1/F3) ---
+      # SUPABASE_JWT_SECRET must NOT be passed via --set-env-vars (it would be
+      # visible in the Cloud Run UI). Use a Secret Manager secret instead:
+      #   1. Create secret `SUPABASE_JWT_SECRET` in Secret Manager.
+      #   2. Grant the Cloud Run runtime service account Secret Accessor on it.
+      #   3. Uncomment the --update-secrets line below.
+      # --update-secrets=SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest
+      #
+      # Set these as GitHub repo VARIABLES (Settings -> Secrets and variables ->
+      # Actions -> Variables) so they are injected above without encryption:
+      #   ALLOWED_ORIGINS  e.g. https://<user>.github.io
+      #   ENABLE_AUTH      true once SUPABASE_JWT_SECRET is wired
+      #   GOOGLE_TEXT_MODEL (optional, defaults to gemini-2.5-flash)
         
       - name: Get Service URL
         id: service-url

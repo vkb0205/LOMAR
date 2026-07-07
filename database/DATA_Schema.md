@@ -434,6 +434,38 @@ Optional but recommended for marketplace lead generation. Converts app from demo
 
 ---
 
+## Table `follows`
+
+Social graph. A follow edge points from the authenticated follower to either
+another user (profile) or a vendor. Added by `database/add_follows.sql` (a
+standalone add-on migration run after `migrate_to_v2.sql`).
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary default `gen_random_uuid()` |
+| `follower_id` | `uuid` | Not null (references `profiles(id)` on delete cascade) |
+| `followee_type` | `text` | Not null check (`followee_type` in `('user','vendor')`) |
+| `followee_user_id` | `uuid` | Nullable (references `profiles(id)` on delete cascade) |
+| `followee_vendor_id` | `uuid` | Nullable (references `vendors(id)` on delete cascade) |
+| `created_at` | `timestamptz` | Not null default `now()` |
+
+### Constraints
+
+- `follows_single_target_chk`: exactly one target populated, consistent with `followee_type`.
+- `follows_no_self_follow_chk`: a user cannot follow themselves.
+
+### Indexes
+
+- Unique partial `follows_user_unique_idx` on `follows(follower_id, followee_user_id)` where `followee_user_id is not null`
+- Unique partial `follows_vendor_unique_idx` on `follows(follower_id, followee_vendor_id)` where `followee_vendor_id is not null`
+- `follows_followee_user_idx` on `follows(followee_user_id)`
+- `follows_followee_vendor_idx` on `follows(followee_vendor_id)`
+- `follows_follower_idx` on `follows(follower_id)`
+
+---
+
 # Old → New Mapping Reference
 
 | Old Table | Action | New Table |
@@ -510,6 +542,7 @@ referencing `profiles(id)`.
 | `ai_design_generations` | `user_id` | Owner CRUD (private) |
 | `ai_design_assets` | `user_id` | Owner CRUD (private) |
 | `service_requests` | `user_id` | Requester CRUD; vendor-owner SELECT of incoming |
+| `follows` | `follower_id` | Public SELECT (counts); follower INSERT/DELETE |
 
 Reference/dictionary tables (`journey_tasks`, `tags`) expose public SELECT only;
 mutations are expected via the `service_role` key (admin tooling), not the

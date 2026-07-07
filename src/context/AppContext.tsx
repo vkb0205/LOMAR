@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { Database } from '../types/database';
 
 interface SelectedOptionDetail {
   optionGroupId: string;
@@ -25,12 +26,18 @@ interface CustomizedService {
 // account-type role: 'customer' | 'vendor_admin' | 'admin').
 export type WeddingRole = 'bride' | 'groom' | 'planner';
 
+// DB account-type role, sourced from profiles.role. Governs platform-level
+// authority (admin dashboard access), independent of the wedding-facing role.
+export type AccountRole = 'customer' | 'vendor_admin' | 'admin';
+
 export interface UserProfile {
   /** Real Supabase Auth user UUID (auth.uid()); also the profiles PK. */
   id: string;
   name: string;
   email: string;
   role: WeddingRole;
+  /** DB account-type role from profiles.role (authority gating). */
+  accountRole: AccountRole;
   avatarUrl?: string;
 }
 
@@ -88,6 +95,12 @@ function normalizeWeddingRole(value: unknown): WeddingRole {
     : 'bride';
 }
 
+function normalizeAccountRole(value: unknown): AccountRole {
+  return value === 'admin' || value === 'vendor_admin' || value === 'customer'
+    ? value
+    : 'customer';
+}
+
 /**
  * Build the app-facing UserProfile from the authenticated session and the
  * (optional) profiles row. Identity always comes from the session UUID.
@@ -106,6 +119,9 @@ function mapUser(session: Session, profile: ProfileRow | null): UserProfile {
     name,
     email,
     role,
+    // Authority gating comes from the DB account role (profiles.role); default
+    // to 'customer' when there is no profile row yet (session-only identity).
+    accountRole: normalizeAccountRole(profile?.role),
     avatarUrl:
       profile?.avatar_url ||
       (typeof metadata.avatar_url === 'string' ? metadata.avatar_url : '') ||
@@ -154,20 +170,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // No profile row yet — try to create one keyed by the auth UUID.
     const metadata = activeSession.user.user_metadata ?? {};
-    const insertPayload = {
+    // Item 13: typed insert payload (no `as any`). The explicit <Insert> generic
+    // is required for this @supabase/supabase-js version (the generated Database
+    // type now declares Relationships/Views/Functions so the schema conforms to
+    // postgrest-js's GenericSchema).
+    const insertPayload: Database['public']['Tables']['profiles']['Insert'] = {
       id: uid,
       email: activeSession.user.email ?? null,
       full_name:
         typeof metadata.full_name === 'string' ? metadata.full_name : null,
     };
 
-    // NOTE: this project's @supabase/supabase-js version resolves typed
-    // write payloads to `never` (see the same `as any` upsert idiom in
-    // Dashboard.tsx). Broad typing of writes is Stage 5 scope; we mirror the
-    // established idiom for this single provisioning insert only.
-    const { data: created, error: insertError } = await (supabase
-      .from('profiles') as any)
-      .insert(insertPayload)
+    const { data: created, error: insertError } = await supabase
+      .from('profiles')
+      .insert<Database['public']['Tables']['profiles']['Insert']>(insertPayload)
       .select('*')
       .maybeSingle();
 

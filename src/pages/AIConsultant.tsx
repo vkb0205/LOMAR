@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, MapPin, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase } from '../lib/supabase';
+import { supabase, withAuthHeaders } from '../lib/supabase';
 import { Database } from '../types/database';
 import { useAppContext } from '../context/AppContext';
 
@@ -95,18 +95,58 @@ export default function AIConsultant() {
     setIsTyping(true);
 
     if (userId) {
-      await supabase.from('chat_messages').insert({
+      // Item 13: typed insert payload (no `as any`). Explicit <Insert> generic
+      // is required for this @supabase/supabase-js version.
+      const userPayload: Database['public']['Tables']['chat_messages']['Insert'] = {
         thread_id: MOCK_THREAD_ID,
         user_id: userId,
         role: 'user',
-        content: userContent
-      } as any);
+        content: userContent,
+      };
+      await supabase
+        .from('chat_messages')
+        .insert<Database['public']['Tables']['chat_messages']['Insert']>(userPayload);
     }
 
-    setTimeout(async () => {
-      let aiResponse = 'Rất tuyệt vời! Phố Hạnh Phúc có rất nhiều dịch vụ phù hợp với yêu cầu của bạn.';
-      let suggestedServiceId: string | null = null;
+    // --- Item 23: real LLM consult via the backend /consult endpoint ---
+    // Mirrors Customize.tsx URL resolution: in local dev we go through the
+    // vite proxy (/api/vton), in production we hit VITE_VTON_BACKEND_URL directly.
+    // The service-suggestion Supabase lookup below stays a separate concern so the
+    // assistant can still surface a concrete service card alongside the LLM text.
+    const resolveConsultUrl = () => {
+      const vtonBackendUrl = (import.meta.env.VITE_VTON_BACKEND_URL || '').replace(/\/+$/, '');
+      const isProduction =
+        vtonBackendUrl && !vtonBackendUrl.includes('localhost') && !vtonBackendUrl.includes('127.0.0.1');
+      return isProduction ? `${vtonBackendUrl}/consult` : '/api/vton/consult';
+    };
 
+    try {
+      const consultResponse = await fetch(resolveConsultUrl(), {
+        method: 'POST',
+        // Item 16: attach the Supabase access token when a session exists so
+        // the call works against a backend running with ENABLE_AUTH=true.
+        headers: await withAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ message: userContent }),
+      });
+
+      let aiResponse: string;
+      if (consultResponse.ok) {
+        const json = (await consultResponse.json()) as { reply?: string };
+        aiResponse = json.reply?.trim() || '';
+      } else {
+        // Non-2xx from the backend — surface a graceful fallback rather than crash.
+        console.error('Consult endpoint returned non-OK status', consultResponse.status);
+        aiResponse = '';
+      }
+
+      if (!aiResponse) {
+        aiResponse =
+          'Mình xin lỗi, hiện tại chưa thể trả lời câu hỏi của bạn. Vui lòng thử lại sau hoặc duyệt danh mục dịch vụ của Phố Hạnh Phúc nhé!';
+      }
+
+      // Separate concern: keep the keyword-based service suggestion lookup so the
+      // assistant can still recommend a concrete service card from Supabase.
+      let suggestedServiceId: string | null = null;
       const lowerInput = userContent.toLowerCase();
       try {
         let queryCategory = '';
@@ -124,7 +164,6 @@ export default function AIConsultant() {
             .single();
           if (data) {
             const typedSvc = data as ServiceRow;
-            aiResponse = `Dựa vào yêu cầu của bạn, mình đề xuất dịch vụ "${typedSvc.name}" đang rất được ưa chuộng hiện nay!`;
             suggestedServiceId = typedSvc.id;
           }
         }
@@ -136,21 +175,36 @@ export default function AIConsultant() {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: aiResponse,
-        suggested_service_id: suggestedServiceId
+        suggested_service_id: suggestedServiceId,
       };
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
 
+      // Persist the real LLM reply to chat_messages (typed insert per Item 13).
       if (userId) {
-        await supabase.from('chat_messages').insert({
+        const assistantPayload: Database['public']['Tables']['chat_messages']['Insert'] = {
           thread_id: MOCK_THREAD_ID,
           user_id: userId,
           role: 'assistant',
           content: aiResponse,
-          suggested_service_id: suggestedServiceId
-        } as any);
+          suggested_service_id: suggestedServiceId,
+        };
+        await supabase
+          .from('chat_messages')
+          .insert<Database['public']['Tables']['chat_messages']['Insert']>(assistantPayload);
       }
-    }, 1500);
+    } catch (err) {
+      // Network/transport failure (backend down, CORS, offline, etc.).
+      console.error('Consult request failed', err);
+      setIsTyping(false);
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content:
+          'Mình xin lỗi, hiện tại chưa thể kết nối tới trợ lý AI. Vui lòng thử lại sau hoặc duyệt danh mục dịch vụ của Phố Hạnh Phúc nhé!',
+      };
+      setMessages(prev => [...prev, fallbackMessage]);
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Heart, ChevronRight, ChevronDown, Sparkles, Loader2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, withAuthHeaders } from '../lib/supabase';
 import { Database } from '../types/database';
 import { useAppContext } from '../context/AppContext';
 import maleMannequin from '../img/male_mannequin.jpeg';
@@ -231,12 +231,21 @@ export default function Customize() {
 
   const insertChatMessage = async (role: string, content: string) => {
     if (!userId) return;
-    await supabase.from('chat_messages').insert({
+    // Typed insert payload (Database Insert shape). The explicit type argument
+    // to insert<...>() is required because supabase-js's insert() generic
+    // (`Row extends Insert`) cannot infer `Row` from a pre-typed payload — the
+    // RejectExcessProperties wrapper makes the inference site circular, so
+    // `Row` would otherwise fall back to `never`. This is NOT an `as any` cast;
+    // it supplies the real Insert type to the builder.
+    const payload: Database['public']['Tables']['chat_messages']['Insert'] = {
+      thread_id: MOCK_THREAD_ID,
       user_id: userId,
       role,
       content,
-      thread_id: MOCK_THREAD_ID
-    } as any);
+    };
+    await supabase
+      .from('chat_messages')
+      .insert<Database['public']['Tables']['chat_messages']['Insert']>(payload);
   };
 
   const getTryOnCategory = (categoryName: string) => {
@@ -282,7 +291,7 @@ export default function Customize() {
     const userText = customPrompt || 'Tạo ảnh xem trước từ các tùy chọn hiện tại.';
 
     const vtonBackendUrl = (import.meta.env.VITE_VTON_BACKEND_URL || '').replace(/\/+$/, '');
-    const configuredEndpoint = import.meta.env.VITE_VERTEX_AI_ENDPOINT || '/test-try-on-upload';
+    const configuredEndpoint = import.meta.env.VITE_VTON_ENDPOINT || '/test-try-on-upload';
     const isProduction = vtonBackendUrl && !vtonBackendUrl.includes('localhost') && !vtonBackendUrl.includes('127.0.0.1');
 
     if (!vtonBackendUrl) {
@@ -339,7 +348,16 @@ export default function Customize() {
       formData.append('category', getTryOnCategory(activeTab));
       formData.append('prompt', prompt);
 
-      const response = await fetch(endpoint, { method: 'POST', body: formData });
+      // Item 16: attach the Supabase access token when a session exists so the
+      // call works against a backend running with ENABLE_AUTH=true. FormData
+      // requests must NOT set Content-Type manually (the browser sets the
+      // multipart boundary); withAuthHeaders returns {} here, so the merge is
+      // safe and only adds Authorization when a token is present.
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: await withAuthHeaders({}),
+        body: formData,
+      });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`VTON backend error (${response.status}): ${errorText}`);
@@ -377,15 +395,18 @@ export default function Customize() {
     }
     setIsSaving(true);
     try {
+      const designPayload: Database['public']['Tables']['ai_design_projects']['Insert'] = {
+        user_id: userId,
+        category: activeTab,
+        service_id: activeService.id,
+        title: activeService.name || 'Untitled design',
+        status: 'draft',
+      };
+      // Explicit type argument for the same supabase-js generic-inference
+      // reason called out in insertChatMessage above (not an `as any` cast).
       const { error } = await supabase
         .from('ai_design_projects')
-        .insert({
-          user_id: userId,
-          category: activeTab,
-          service_id: activeService.id,
-          title: activeService.name || 'Untitled design',
-          status: 'draft'
-        } as any);
+        .insert<Database['public']['Tables']['ai_design_projects']['Insert']>(designPayload);
 
       if (error) throw error;
       alert('Lưu thiết kế thành công!');

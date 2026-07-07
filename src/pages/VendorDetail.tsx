@@ -4,6 +4,7 @@ import { MapPin, Star, ArrowLeft, Heart, ShoppingBag, Phone, Share2, Filter } fr
 import { supabase } from '../lib/supabase';
 import { motion } from 'motion/react';
 import { Database } from '../types/database';
+import FollowButton from '../components/social/FollowButton';
 
 type Vendor = Database['public']['Tables']['vendors']['Row'];
 type Service = Database['public']['Tables']['services']['Row'];
@@ -97,7 +98,8 @@ export default function VendorDetail() {
                 {vendor.address || 'Hồ Văn Huê, Phú Nhuận'}
               </div>
             </div>
-            <div className="flex gap-3 mt-2 md:mt-0">
+            <div className="flex flex-wrap items-center gap-3 mt-2 md:mt-0">
+              <FollowButton type="vendor" targetId={vendor.id} size="md" showCount={false} />
               <button className="flex items-center gap-2 bg-white text-[#1B2C40] px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-50 transition-colors shadow-lg">
                 <Phone className="w-4 h-4" /> LIÊN HỆ
               </button>

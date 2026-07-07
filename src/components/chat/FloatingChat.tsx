@@ -23,7 +23,20 @@ export default function FloatingChat() {
 
   useEffect(() => {
     async function fetchChat() {
-      const { data } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
+      // Item 22: scope reads by user_id and skip the fetch entirely when there
+      // is no authenticated user (RLS would return nothing anyway). Falls back
+      // to the default greeting without hitting the network.
+      if (!userId) {
+        setMessages([
+          { text: "Chào bạn! Mình là Bé Song Hỷ. Mình có thể giúp gì cho ngày trọng đại của bạn không?", isUser: false }
+        ]);
+        return;
+      }
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
       if (data && data.length > 0) {
         setMessages((data as ChatMessageRow[]).map(m => ({
           text: m.content || '',
@@ -36,7 +49,7 @@ export default function FloatingChat() {
       }
     }
     fetchChat();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,12 +57,18 @@ export default function FloatingChat() {
 
   const insertChatMessage = async (role: string, content: string) => {
     if (!userId) return;
-    await supabase.from('chat_messages').insert({
+    // Item 13: typed insert payload instead of `as any`. The explicit
+    // <Insert> generic is required for this @supabase/supabase-js version
+    // (see src/types/database.ts for the schema conformance notes).
+    const payload: Database['public']['Tables']['chat_messages']['Insert'] = {
       thread_id: MOCK_THREAD_ID,
       user_id: userId,
       role,
-      content
-    } as any);
+      content,
+    };
+    await supabase
+      .from('chat_messages')
+      .insert<Database['public']['Tables']['chat_messages']['Insert']>(payload);
   };
 
   const handleSendMessage = async () => {

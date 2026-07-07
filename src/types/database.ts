@@ -43,6 +43,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       vendors: {
         Row: {
@@ -102,6 +103,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       services: {
         Row: {
@@ -143,6 +145,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       service_images: {
         Row: {
@@ -172,6 +175,7 @@ export interface Database {
           display_order?: number
           created_at?: string
         }
+        Relationships: []
       }
       user_favorite_services: {
         Row: {
@@ -189,6 +193,7 @@ export interface Database {
           service_id?: string
           saved_at?: string
         }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -224,6 +229,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       journey_tasks: {
         Row: {
@@ -253,6 +259,7 @@ export interface Database {
           display_order?: number
           active?: boolean
         }
+        Relationships: []
       }
       user_journey_tasks: {
         Row: {
@@ -279,6 +286,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       vouchers: {
         Row: {
@@ -329,6 +337,7 @@ export interface Database {
           active?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       user_vouchers: {
         Row: {
@@ -352,6 +361,7 @@ export interface Database {
           unlocked_at?: string | null
           redeemed_at?: string | null
         }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -387,6 +397,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       post_comments: {
         Row: {
@@ -419,6 +430,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       post_likes: {
         Row: {
@@ -436,6 +448,7 @@ export interface Database {
           user_id?: string
           created_at?: string
         }
+        Relationships: []
       }
       tags: {
         Row: {
@@ -453,6 +466,7 @@ export interface Database {
           name?: string
           slug?: string
         }
+        Relationships: []
       }
       post_tags: {
         Row: {
@@ -467,6 +481,34 @@ export interface Database {
           post_id?: string
           tag_id?: string
         }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          id: string
+          follower_id: string
+          followee_type: string
+          followee_user_id: string | null
+          followee_vendor_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          followee_type: string
+          followee_user_id?: string | null
+          followee_vendor_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          followee_type?: string
+          followee_user_id?: string | null
+          followee_vendor_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
       }
       chat_threads: {
         Row: {
@@ -502,6 +544,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       chat_messages: {
         Row: {
@@ -534,6 +577,7 @@ export interface Database {
           metadata?: Json
           created_at?: string
         }
+        Relationships: []
       }
       ai_design_projects: {
         Row: {
@@ -578,6 +622,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       ai_design_generations: {
         Row: {
@@ -628,6 +673,7 @@ export interface Database {
           created_at?: string
           completed_at?: string | null
         }
+        Relationships: []
       }
       ai_design_assets: {
         Row: {
@@ -669,6 +715,7 @@ export interface Database {
           size_bytes?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       service_requests: {
         Row: {
@@ -713,6 +760,19 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+    }
+    Views: {
+      [key: string]: {
+        Row: Record<string, unknown>
+        Relationships: []
+      }
+    }
+    Functions: {
+      [key: string]: {
+        Args: Record<string, unknown>
+        Returns: unknown
       }
     }
   }

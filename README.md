@@ -30,13 +30,14 @@ npm install
 
 ### 2. Configure environment variables
 
-Edit [`.env.local`](.env.local):
+Copy your own Supabase project URL and anon key from the Supabase dashboard
+(**Project Settings → API**), then edit [`.env.local`](.env.local):
 
 ```env
 GEMINI_API_KEY=""
 APP_URL="http://localhost:3000"
-VITE_SUPABASE_URL="https://kenjmgrmgysqvefkepel.supabase.co"
-VITE_SUPABASE_ANON_KEY="sb_publishable_zwyQ4s1ClP7EhTKC74jUEA_ilqtu7cy"
+VITE_SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
+VITE_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 VITE_VTON_BACKEND_URL="http://localhost:3003"
 VITE_VTON_ENDPOINT="/test-try-on-upload"
 ```
@@ -108,20 +109,6 @@ The workflow [`.github/workflows/deploy-backend.yml`](.github/workflows/deploy-b
 - Build the Docker image
 - Push to Artifact Registry
 - Deploy to Cloud Run
-
-### Option B: Manual deployment script
-
-```bash
-chmod +x cloud-run-deploy.sh
-./cloud-run-deploy.sh lomar-500117 global
-```
-
-This will:
-- Enable required APIs
-- Create Artifact Registry
-- Build and push Docker image
-- Deploy to Cloud Run
-- Output the service URL
 
 ### Required environment variables
 

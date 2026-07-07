@@ -6,9 +6,11 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   
-  // Determine the base path for GitHub Pages
-  // Can be overridden via VITE_BASE_PATH environment variable
-  const basePath = env.VITE_BASE_PATH || '/LOMAR/';
+  // Base path for the built app. Defaults to root ("/") so an unconfigured
+  // deployment serves correctly from a domain root. The GitHub Pages workflow
+  // (.github/workflows/deploy-ui.yml) sets VITE_BASE_PATH to "/<repo-name>/"
+  // explicitly, so Pages deployments are unaffected by this default.
+  const basePath = env.VITE_BASE_PATH || '/';
   
   // Determine the backend API URL
   // For production (GitHub Pages), set VITE_VTON_BACKEND_URL to your Cloud Run URL
@@ -17,9 +19,6 @@ export default defineConfig(({ mode }) => {
   return {
     base: basePath,
     plugins: [react(), tailwindcss()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

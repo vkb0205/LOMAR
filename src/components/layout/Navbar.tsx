@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, ChevronDown, LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+import { User, ChevronDown, LogOut, LayoutDashboard, Sparkles, ShieldCheck } from 'lucide-react';
 import logoImg from '../../img/Asset 24.png';
 import { useAppContext } from '../../context/AppContext';
 
@@ -102,6 +102,17 @@ export default function Navbar() {
                       <p className="text-xs font-bold text-[#1B2C40] truncate mt-0.5">{user.name}</p>
                       <p className="text-[9px] text-[#F2BFC8] font-bold uppercase tracking-wider mt-0.5">{user.role === 'bride' ? 'Cô dâu' : 'Chú rể'}</p>
                     </div>
+
+                    {user.accountRole === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50/60 transition-colors"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-indigo-500" />
+                        Quản Trị Hệ Thống
+                      </Link>
+                    )}
 
                     <Link
                       to="/dashboard"

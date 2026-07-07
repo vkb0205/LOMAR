@@ -11,6 +11,13 @@
 -- ============================================================================
 
 -- ============================================================================
+-- Extensions (enabled FIRST so gen_random_uuid() / gen_random_bytes() are
+-- available to table defaults in SECTION 1 and data migration in SECTION 3)
+-- ============================================================================
+create extension if not exists "uuid-ossp";
+create extension if not exists pgcrypto;
+
+-- ============================================================================
 -- SECTION 1: Create NEW _v2 tables (all FKs point to _v2 or new tables)
 -- ============================================================================
 
@@ -317,7 +324,9 @@ create table if not exists service_requests (
 -- ============================================================================
 -- SECTION 2: Enable UUID extension
 -- ============================================================================
-create extension if not exists "uuid-ossp";
+-- NOTE: Extension creation was moved to the TOP of this file (before SECTION 1)
+--       so that gen_random_uuid() and gen_random_bytes() are available to table
+--       defaults (SECTION 1) and data migration (SECTION 3) on a clean DB replay.
 
 -- ============================================================================
 -- SECTION 3: MIGRATE DATA from old tables to _v2 tables
@@ -1184,27 +1193,28 @@ UNION ALL SELECT 'posts', count(*) FROM posts;
 -- ============================================================================
 -- SECTION 8: UNCOMMENT to drop old tables (only after verifying migration)
 -- ============================================================================
-drop table if exists user_design_selections cascade;
-drop table if exists user_designs cascade;
-drop table if exists product_options cascade;
-drop table if exists customization_values cascade;
-drop table if exists customization_options cascade;
-drop table if exists post_tags_old cascade;
-drop table if exists post_likes_old cascade;
-drop table if exists post_comments_old cascade;
-drop table if exists posts_old cascade;
-drop table if exists chat_messages_old cascade;
-drop table if exists user_vouchers_old cascade;
-drop table if exists vouchers_old cascade;
-drop table if exists user_journey_tasks_old cascade;
-drop table if exists task_dictionary_old cascade;
-drop table if exists reviews_old cascade;
-drop table if exists user_favorite_products_old cascade;
-drop table if exists product_images_old cascade;
-drop table if exists products_old cascade;
-drop table if exists vendors_old cascade;
-drop table if exists tags_old cascade;
-drop table if exists users_old cascade;
+-- drop table if exists user_design_selections cascade;
+-- drop table if exists user_designs cascade;
+-- drop table if exists product_options cascade;
+-- drop table if exists customization_values cascade;
+-- drop table if exists customization_options cascade;
+-- drop table if exists post_tags_old cascade;
+-- drop table if exists post_likes_old cascade;
+-- drop table if exists post_comments_old cascade;
+-- drop table if exists posts_old cascade;
+-- drop table if exists chat_messages_old cascade;
+-- drop table if exists user_vouchers_old cascade;
+-- drop table if exists vouchers_old cascade;
+-- drop table if exists user_journey_tasks_old cascade;
+-- drop table if exists task_dictionary_old cascade;
+-- drop table if exists reviews_old cascade;
+-- drop table if exists user_favorite_products_old cascade;
+-- drop table if exists product_images_old cascade;
+-- drop table if exists products_old cascade;
+-- drop table if exists vendors_old cascade;
+-- drop table if exists tags_old cascade;
+-- drop table if exists users_old cascade;
+-- To drop old tables, uncomment the statements above and run manually after verifying data migration.
 
 -- ============================================================================
 -- END OF MIGRATION

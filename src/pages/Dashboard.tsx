@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
+import { Database } from '../types/database';
 import confetti from 'canvas-confetti';
 
 interface Task {
@@ -145,18 +146,27 @@ export default function Dashboard() {
       setHealthCheckCompleted(newStatus === 'completed');
     }
 
+    // Without an authenticated user there is no user_id to write, so the typed
+    // upserts below are skipped (local state above already reflects the toggle).
+    if (!userId) return;
+
     try {
       // v2: user_journey_tasks uses composite PK (user_id, task_id)
-      // Upsert approach: try to insert, update if conflict
-      const { error } = await (supabase
-        .from('user_journey_tasks') as any)
-        .upsert({
-          user_id: userId,
-          task_id: task.taskId,
-          status: dbStatus,
-          completed_at: newStatus === 'completed' ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id,task_id' });
+      // Item 13: typed upsert payload (no `as any`). Explicit <Insert> generic
+      // is required for this @supabase/supabase-js version; onConflict is preserved.
+      const taskPayload: Database['public']['Tables']['user_journey_tasks']['Insert'] = {
+        user_id: userId,
+        task_id: task.taskId,
+        status: dbStatus,
+        completed_at: newStatus === 'completed' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await supabase
+        .from('user_journey_tasks')
+        .upsert<Database['public']['Tables']['user_journey_tasks']['Insert']>(
+          taskPayload,
+          { onConflict: 'user_id,task_id' }
+        );
 
       if (error) throw error;
 
@@ -165,14 +175,19 @@ export default function Dashboard() {
       for (const voucher of dependentVouchers) {
         const newVoucherStatus = newStatus === 'completed' ? 'unlocked' : 'locked';
 
-        const { error: errV } = await (supabase
-          .from('user_vouchers') as any)
-          .upsert({
-            user_id: userId,
-            voucher_id: voucher.voucherId,
-            status: newVoucherStatus,
-            unlocked_at: newStatus === 'completed' ? new Date().toISOString() : null
-          }, { onConflict: 'user_id,voucher_id' });
+        // Item 13: typed upsert payload (no `as any`); onConflict preserved.
+        const voucherPayload: Database['public']['Tables']['user_vouchers']['Insert'] = {
+          user_id: userId,
+          voucher_id: voucher.voucherId,
+          status: newVoucherStatus,
+          unlocked_at: newStatus === 'completed' ? new Date().toISOString() : null,
+        };
+        const { error: errV } = await supabase
+          .from('user_vouchers')
+          .upsert<Database['public']['Tables']['user_vouchers']['Insert']>(
+            voucherPayload,
+            { onConflict: 'user_id,voucher_id' }
+          );
 
         if (!errV) {
           setVouchers(prev => prev.map(v => v.voucherId === voucher.voucherId ? { ...v, status: newVoucherStatus } : v));
