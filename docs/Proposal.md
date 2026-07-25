@@ -26,7 +26,7 @@ We are seeking investment to **(a) harden the platform for an uncontrolled publi
 
 | Headline | Claim | Evidence |
 |---|---|---|
-| Product is real, not a mock | Live VTON generation, real LLM consultant, real Supabase Auth, typed DB | [`backend/test_api.py:474`](../backend/test_api.py:474), [`src/context/AppContext.tsx:233`](../src/context/AppContext.tsx:233), [`src/types/database.ts`](../src/types/database.ts:1) |
+| Product is real, not a mock | Live VTON generation, real LLM consultant, real Supabase Auth, typed DB | [`backend/test_api.py:474`](../backend/test_api.py:474), [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`src/types/database.ts`](../src/types/database.ts:1) |
 | Deployment is automated | Push-to-deploy for both frontend (GitHub Pages) and backend (Cloud Run) | [`.github/workflows/deploy-ui.yml`](../.github/workflows/deploy-ui.yml:1), [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml:1) |
 | Engineering is disciplined | Strict TypeScript, no `as any` DB casts, security-hardened backend, 23/26 audit items resolved | [`PROGRESS_management.md:11`](../PROGRESS_management.md:11) |
 | Differentiated by AI | Virtual try-on + LLM consultant on one stack | [`SPEC.md:5`](../SPEC.md:5), [`backend/test_api.py`](../backend/test_api.py:1) |
@@ -75,7 +75,7 @@ flowchart TD
 | **Blog** | Community feed; batched query architecture (no N+1) | [`src/pages/Blog.tsx:44`](../src/pages/Blog.tsx:44) |
 | **Guide** | Phase-based wedding preparation checklist (9–12 / 6–8 / 3–5 / 1–2 months out) | [`src/pages/Guide.tsx`](../src/pages/Guide.tsx:1) |
 | **Floating Chat** | Global mascot assistant; user-scoped chat history | [`src/components/chat/FloatingChat.tsx:38`](../src/components/chat/FloatingChat.tsx:38) |
-| **Auth** | Real Supabase Auth (signInWithPassword / signUp / onAuthStateChange), UUID-backed identity | [`src/context/AppContext.tsx:233`](../src/context/AppContext.tsx:233) |
+| **Auth** | Real Supabase Auth (signInWithPassword / signUp / onAuthStateChange), UUID-backed identity | [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`authService.ts`](../src/features/auth/services/authService.ts:1) |
 
 ### 3.2 Why this wins
 
@@ -166,7 +166,7 @@ The backend is **not** a demo-quality API. The following are live in the codebas
 | Async I/O — sync calls off the event loop via `asyncio.to_thread` | [`backend/test_api.py:355`](../backend/test_api.py:355) |
 | Rate limiting (slowapi, 10/min per IP on heavy endpoints) | [`backend/test_api.py:54`](../backend/test_api.py:54) |
 | 2-stage Docker build with `HEALTHCHECK` and non-root-ready path | [`backend/Dockerfile`](../backend/Dockerfile:1) |
-| Real Supabase Auth + UUID identity (no localStorage demo auth) | [`src/context/AppContext.tsx:233`](../src/context/AppContext.tsx:233) |
+| Real Supabase Auth + UUID identity (no localStorage demo auth) | [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`profileService.ts`](../src/features/auth/services/profileService.ts:1) |
 | Full RLS ownership model across all user-owned tables | [`database/migrate_to_v2.sql:741`](../database/migrate_to_v2.sql:741) |
 | Strict TypeScript, `tsc --noEmit` exits 0, no `as any` DB casts | [`tsconfig.json:13`](../tsconfig.json:13), [`PROGRESS_management.md:171`](../PROGRESS_management.md:171) |
 | Secret hygiene — `GEMINI_API_KEY` removed from client bundle; Supabase creds redacted from docs | [`vite.config.ts`](../vite.config.ts:1), [`README.md:39`](../README.md:39) |

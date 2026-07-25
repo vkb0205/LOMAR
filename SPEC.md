@@ -177,21 +177,24 @@ The `Layout` component wraps routed pages with navbar, footer, and floating assi
 
 ## 8. Global State and Persistence
 
-### 8.1 App Context
+### 8.1 Focused Contexts
 
-Global context exposes:
+`AuthProvider` exposes:
 
-- `healthCheckCompleted`: boolean journey task flag.
-- `setHealthCheckCompleted`: setter for health task status.
+- `user`: the application profile mapped from the Supabase session and `profiles` row.
+- `session`: the current Supabase session.
+- `authLoading`: initial session bootstrap state.
+- `signIn`, `signUp`, and `signOut`: Supabase authentication operations.
+
+`CustomizationProvider` exposes:
+
 - `customizedServices`: map keyed by category containing selected product, selected options, price, vendor, and image data.
 - `saveCustomizedService`: persists customized services into localStorage.
-- `user`: current demo user profile.
-- `login`: creates a demo user and persists it to localStorage.
-- `logout`: clears demo user state.
+
+Consumers use `useAuth` or `useCustomization` directly. There is no combined application-context adapter.
 
 ### 8.2 LocalStorage Keys
 
-- `authUser`: demo authenticated user.
 - `customizedServices`: current category customization selections and totals.
 - `lomar_customize_temp_preview`: generated VTON preview image cache keyed by category/product/mannequin.
 
@@ -372,7 +375,7 @@ Capabilities:
 
 ### 10.8 Login
 
-Login is a demo authentication UI.
+Login uses Supabase Auth and also offers pre-seeded demo accounts.
 
 Capabilities:
 
@@ -382,11 +385,11 @@ Capabilities:
 - Quick demo login accounts:
   - Cô dâu Quỳnh Anh
   - Chú rể Gia Bảo
-- Simulated loading and success states.
-- Stores demo auth profile in localStorage through `AppContext`.
+- Loading and success states driven by the authentication request.
+- Session bootstrap and refresh through `AuthProvider`.
 - Redirects to requested `redirect` query path or `/dashboard`.
 
-Security note: this is not real authentication and must not be used as production identity without replacing with Supabase Auth or an equivalent secure system.
+Identity is the real Supabase Auth UUID. Wedding role metadata remains separate from the platform authority stored in `profiles.role`.
 
 ### 10.9 Blog
 

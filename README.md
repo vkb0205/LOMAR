@@ -8,9 +8,24 @@ React + Vite frontend with a FastAPI virtual try-on backend powered by Google Ve
 
 ## Architecture
 
-- **Frontend**: React + Vite + TypeScript, deployable to GitHub Pages
-- **Backend**: FastAPI + Python, containerized with Docker and deployable to Google Cloud Run
+- **Frontend**: React + Vite + TypeScript organized as compact feature modules
+- **Backend**: FastAPI + Python in the sibling `../LOMAR_backend` project
 - **AI Provider**: Google Vertex AI Nano Banana / Gemini image model
+
+Frontend routes are owned by their feature. A feature keeps its page, components,
+hooks, data access, and types together. Cross-feature infrastructure lives in
+`src/shared`.
+
+```text
+src/
+  app/          # Application composition and router
+  features/     # admin, auth, blog, consultant, customize, dashboard, ...
+  shared/       # API clients, route config, layout, generated database types
+  assets/
+  main.tsx
+```
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the dependency rules and full tree.
 
 ## Run Locally
 
@@ -45,7 +60,7 @@ VITE_VTON_ENDPOINT="/test-try-on-upload"
 ### 3. Run the backend
 
 ```bash
-cd backend
+cd ../LOMAR_backend
 conda activate vton_env
 python test_api.py
 ```

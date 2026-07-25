@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "dev:backend": "cd backend && python test_api.py",
+    "dev:backend": "cd ../LOMAR_backend && python test_api.py",
     "dev:full": "concurrently \"npm:dev:backend\" \"npm:dev\"",
     "build": "vite build",
     "preview": "vite preview",
@@ -25,7 +25,8 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.14.2",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
