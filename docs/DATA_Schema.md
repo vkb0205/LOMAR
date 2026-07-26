@@ -1,13 +1,16 @@
 ## Table `profiles`
 
-Replaces old `users` table. Linked to Supabase Auth (`auth.users`) as source of identity.
+Replaces old `users` table. Supabase Auth (`auth.users`) is the source of
+identity. Migration `20260726000100_link_profiles_to_auth.sql` in
+`supabase/migrations/` backfills existing Auth accounts and installs the
+new-user profile trigger.
 
 ### Columns
 
 | Name | Type | Constraints |
 |------|------|-------------|
-| `id` | `uuid` | Primary (references `auth.users.id` on delete cascade) |
-| `username` | `text` | Unique |
+| `id` | `uuid` | Primary (references `auth.users(id)` on delete cascade) |
+| `username` | `text` | Nullable Unique |
 | `full_name` | `text` | Nullable |
 | `email` | `text` | Nullable |
 | `avatar_url` | `text` | Nullable |
@@ -437,8 +440,8 @@ Optional but recommended for marketplace lead generation. Converts app from demo
 ## Table `follows`
 
 Social graph. A follow edge points from the authenticated follower to either
-another user (profile) or a vendor. Added by `database/add_follows.sql` (a
-standalone add-on migration run after `migrate_to_v2.sql`).
+another user (profile) or a vendor. Originally added by the historical
+`supabase/legacy/add_follows.sql` bootstrap script.
 
 ### Columns
 
@@ -463,6 +466,43 @@ standalone add-on migration run after `migrate_to_v2.sql`).
 - `follows_followee_user_idx` on `follows(followee_user_id)`
 - `follows_followee_vendor_idx` on `follows(followee_vendor_id)`
 - `follows_follower_idx` on `follows(follower_id)`
+
+---
+
+## Table `analytics_page_views`
+
+Privacy-minimal website analytics originally added by
+`supabase/legacy/add_website_analytics.sql`.
+Visitors write through narrow RPC functions; only admins can read analytics rows.
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary; supplied by the caller |
+| `session_id` | `uuid` | Not null |
+| `visitor_id` | `uuid` | Not null |
+| `user_id` | `uuid` | Nullable (references `auth.users(id)` on delete set null) |
+| `page_path` | `text` | Not null check (length between 1 and 500) |
+| `page_title` | `text` | Nullable check (length <= 300) |
+| `referrer_host` | `text` | Nullable check (length <= 255) |
+| `duration_seconds` | `int` | Not null default `0` check (`duration_seconds` between 0 and 86400) |
+| `max_scroll_percent` | `smallint` | Not null default `0` check (`max_scroll_percent` between 0 and 100) |
+| `occurred_at` | `timestamptz` | Not null default `now()` |
+| `updated_at` | `timestamptz` | Not null default `now()` |
+
+### Indexes
+
+- `analytics_page_views_occurred_at_idx` on `analytics_page_views(occurred_at desc)`
+- `analytics_page_views_page_path_idx` on `analytics_page_views(page_path, occurred_at desc)`
+- `analytics_page_views_session_idx` on `analytics_page_views(session_id, occurred_at)`
+- `analytics_page_views_visitor_idx` on `analytics_page_views(visitor_id, occurred_at)`
+
+### Functions
+
+- `record_page_view(p_id uuid, p_session_id uuid, p_visitor_id uuid, p_page_path text, p_page_title text default null, p_referrer_host text default null) returns uuid`
+- `record_page_engagement(p_id uuid, p_session_id uuid, p_visitor_id uuid, p_duration_seconds integer, p_max_scroll_percent integer) returns void`
+- `get_admin_website_analytics(p_days integer default 30) returns jsonb`
 
 ---
 
@@ -495,12 +535,15 @@ standalone add-on migration run after `migrate_to_v2.sql`).
 # Design Principles
 
 ## UUIDs
-All app-level IDs use `uuid default gen_random_uuid()`. Exception: `profiles.id` equals `auth.users.id`.
+App-level entity IDs use UUIDs. Most tables generate IDs with
+`gen_random_uuid()`; `analytics_page_views.id` is supplied by the caller so that
+analytics writes are idempotent. `profiles.id` is supplied by Supabase Auth and
+equals `auth.users.id`.
 
 ## Timestamps
-Every business table includes:
-- `created_at timestamptz not null default now()`
-- `updated_at timestamptz not null default now()`
+Entity tables include `created_at timestamptz not null default now()`.
+Mutable entities also include `updated_at`; immutable join/edge tables and
+dictionary tables may omit it.
 
 ## Row-Level Security (RLS)
 Minimum policies:
@@ -510,9 +553,27 @@ Minimum policies:
 - Users can manage own favorites, journey tasks, vouchers
 - Public can read active vendors/services/posts
 - Only owners/admins can modify vendors/services
+- Visitors record page analytics through RPCs; only admins can read analytics
+
+### Auth profile provisioning
+
+- `profiles.id` is a foreign key to `auth.users.id` with `ON DELETE CASCADE`.
+- `handle_new_auth_user()` inserts a profile after a row is added to
+  `auth.users`.
+- Existing Auth users without profiles are backfilled when
+  `20260726000100_link_profiles_to_auth.sql` runs.
+- Legacy profiles without an Auth identity are preserved under a `NOT VALID`
+  foreign key; the FK still protects all new/updated rows until legacy cleanup
+  allows full validation.
+- The linked production project completed legacy cleanup in migration
+  `20260726000400_validate_profiles_auth_fk.sql`; `profiles_id_fkey` is fully
+  validated there.
+- Client-side profile INSERT/DELETE is not allowed; Auth owns identity
+  lifecycle, while users may update their own profile fields.
 
 ### RLS coverage status (Stage 4 — complete)
-Full CRUD policy coverage is implemented in `migrate_to_v2.sql` (Section 6 for
+Full CRUD policy coverage was bootstrapped by
+`supabase/legacy/migrate_to_v2.sql` (Section 6 for
 the baseline public reads / own-profile, and **Section 6b** for the complete
 authenticated CRUD set). All policies use `auth.uid()` and are replay-safe
 (`drop policy if exists ...; create policy ...`). Ownership model:
@@ -521,7 +582,7 @@ referencing `profiles(id)`.
 
 | Table | Owner column | Access model |
 |-------|--------------|--------------|
-| `profiles` | `id` (= `auth.uid()`) | Own SELECT/INSERT/UPDATE/DELETE |
+| `profiles` | `id` (= `auth.uid()`) | Own SELECT/UPDATE; INSERT and DELETE are managed by Auth |
 | `vendors` | `owner_id` | Public SELECT active; owner CRUD |
 | `services` | via `vendors.owner_id` | Public SELECT active; vendor-owner CRUD |
 | `service_images` | via `services`→`vendors.owner_id` | Public SELECT (active service); vendor-owner CRUD |

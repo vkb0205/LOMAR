@@ -1,5 +1,5 @@
 -- ============================================================================
--- LOMAR — Admin (authority) foundation: is_admin() helper + admin RLS overrides
+-- Historical bootstrap: admin authority foundation and RLS overrides.
 -- ============================================================================
 -- Purpose
 --   Grant platform authorities (profiles.role = 'admin') full read/moderation

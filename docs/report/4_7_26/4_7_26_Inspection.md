@@ -31,7 +31,7 @@ Result: no existing branch or worktree currently alleviates any problem below. E
 | 10 | Completed migration is not safely reproducible from source | `migrate_to_v2.sql` uses `gen_random_uuid()` / `gen_random_bytes()` before enabling required extension | Current DB may be migrated, but a clean/staging DB replay can fail | None found |
 | 11 | Migration script keeps active destructive drops | `drop table if exists ... cascade` statements are active despite comment saying “UNCOMMENT” | Re-running or adapting script can cause accidental data loss | None found |
 | 12 | Post-migration RLS coverage is incomplete | Policies cover selected reads/own profile; many user-owned tables lack full CRUD policies | Authenticated app flows may fail or be over/under-permissive | None found |
-| 13 | Code relies heavily on `as any` around DB access | `Customize.tsx`, `Dashboard.tsx`, `AIConsultant.tsx`, `FloatingChat.tsx` | Type safety from `src/types/database.ts` is mostly bypassed | None found |
+| 13 | Code relies heavily on `as any` around DB access | `Customize.tsx`, `Dashboard.tsx`, `AIConsultant.tsx`, `FloatingChat.tsx` | Type safety from `src/shared/types/database.ts` is mostly bypassed | None found |
 | 14 | TypeScript strictness is weak | `tsconfig.json`: `allowJs: true`, no `strict: true`, `skipLibCheck: true` | Bugs survive compile; schema drift easier | None found |
 | 15 | Backend CORS is open | `backend/test_api.py`: `allow_origins=["*"]`, all methods/headers | Any site can call VTON API | None found |
 | 16 | Backend has no auth, quota, or rate limiting | VTON endpoints accept public requests | Abuse/cost exhaustion risk | None found |

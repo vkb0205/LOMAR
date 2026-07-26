@@ -2,7 +2,7 @@ import { supabase } from '../../../shared/api/supabaseClient';
 import { Database } from '../../../shared/types/database';
 
 /**
- * Social-graph helpers for the `follows` table (see database/add_follows.sql).
+ * Social-graph helpers for `follows` (see supabase/legacy/add_follows.sql).
  *
  * A follow edge points from the authenticated user (`follower_id`) to either
  * another user (profile) or a vendor. The table has:

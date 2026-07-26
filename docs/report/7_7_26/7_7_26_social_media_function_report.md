@@ -4,7 +4,7 @@
 **Document type:** Feature progress report — Social / Community feed
 **Date:** 2026-07-07
 **Scope:** The in-app social/community feed (Blog) and the external social presence links
-**Primary sources:** [`src/pages/Blog.tsx`](../../../src/pages/Blog.tsx:1), [`SPEC.md`](../../../SPEC.md:391), [`database/DATA_Schema.md`](../../../database/DATA_Schema.md:216), [`database/migrate_to_v2.sql`](../../../database/migrate_to_v2.sql:999), [`src/components/layout/Footer.tsx`](../../../src/components/layout/Footer.tsx:52)
+**Primary sources:** [`src/pages/Blog.tsx`](../../../src/pages/Blog.tsx:1), [`SPEC.md`](../../../SPEC.md:391), [`docs/DATA_Schema.md`](../../DATA_Schema.md:216), [`supabase/legacy/migrate_to_v2.sql`](../../../supabase/legacy/migrate_to_v2.sql:999), [`src/components/layout/Footer.tsx`](../../../src/components/layout/Footer.tsx:52)
 
 ---
 
@@ -40,24 +40,24 @@ The social feature is backed by five tables, defined in the v2 schema and migrat
 
 | Table | Purpose | Reference |
 |---|---|---|
-| `posts` | Community posts (title, content, cover image, view count, status) | [`DATA_Schema.md:216`](../../../database/DATA_Schema.md:216) |
-| `post_comments` | Comments with nested-reply support (`parent_comment_id`) and moderation `status` | [`DATA_Schema.md:236`](../../../database/DATA_Schema.md:236) |
-| `post_likes` | Composite-key like records | [`DATA_Schema.md:255`](../../../database/DATA_Schema.md:255) |
-| `tags` | Tag dictionary with `slug` | [`DATA_Schema.md:267`](../../../database/DATA_Schema.md:267) |
-| `post_tags` | Post-to-tag junction | [`DATA_Schema.md:281`](../../../database/DATA_Schema.md:281) |
+| `posts` | Community posts (title, content, cover image, view count, status) | [`DATA_Schema.md:216`](../../DATA_Schema.md:216) |
+| `post_comments` | Comments with nested-reply support (`parent_comment_id`) and moderation `status` | [`DATA_Schema.md:236`](../../DATA_Schema.md:236) |
+| `post_likes` | Composite-key like records | [`DATA_Schema.md:255`](../../DATA_Schema.md:255) |
+| `tags` | Tag dictionary with `slug` | [`DATA_Schema.md:267`](../../DATA_Schema.md:267) |
+| `post_tags` | Post-to-tag junction | [`DATA_Schema.md:281`](../../DATA_Schema.md:281) |
 
 `posts.status` is constrained to `draft` / `published` / `hidden`, and `post_comments.status` to `published` / `hidden` / `flagged`, so a moderation workflow is expressible at the data layer even though no UI drives it yet.
 
 ### 2.2 Row-Level Security
 
-RLS is fully specified for the social tables in [`database/migrate_to_v2.sql`](../../../database/migrate_to_v2.sql:999):
+RLS is fully specified for the social tables in [`supabase/legacy/migrate_to_v2.sql`](../../../supabase/legacy/migrate_to_v2.sql:999):
 
-- **Posts** — public `SELECT` of `status = 'published'`; authors can `SELECT` / `INSERT` / `UPDATE` / `DELETE` their own rows ([`migrate_to_v2.sql:1003`](../../../database/migrate_to_v2.sql:1003)).
-- **Comments** — public `SELECT` of published comments; owner CRUD ([`migrate_to_v2.sql:1019`](../../../database/migrate_to_v2.sql:1019)).
-- **Likes** — public `SELECT` (for counts); owner `INSERT` / `DELETE` ([`migrate_to_v2.sql:1038`](../../../database/migrate_to_v2.sql:1038)).
-- **Post tags** — readable when the parent post is published; managed by the post author ([`migrate_to_v2.sql:1058`](../../../database/migrate_to_v2.sql:1058)).
+- **Posts** — public `SELECT` of `status = 'published'`; authors can `SELECT` / `INSERT` / `UPDATE` / `DELETE` their own rows ([`migrate_to_v2.sql:1003`](../../../supabase/legacy/migrate_to_v2.sql:1003)).
+- **Comments** — public `SELECT` of published comments; owner CRUD ([`migrate_to_v2.sql:1019`](../../../supabase/legacy/migrate_to_v2.sql:1019)).
+- **Likes** — public `SELECT` (for counts); owner `INSERT` / `DELETE` ([`migrate_to_v2.sql:1038`](../../../supabase/legacy/migrate_to_v2.sql:1038)).
+- **Post tags** — readable when the parent post is published; managed by the post author ([`migrate_to_v2.sql:1058`](../../../supabase/legacy/migrate_to_v2.sql:1058)).
 
-A `post-images` storage bucket is provisioned for post cover images ([`DATA_Schema.md:527`](../../../database/DATA_Schema.md:527)).
+A `post-images` storage bucket is provisioned for post cover images ([`DATA_Schema.md:527`](../../DATA_Schema.md:527)).
 
 The security boundary for the write path is therefore **already in place** — enabling create/like/comment is a frontend integration task, not a policy-design task.
 
@@ -75,7 +75,7 @@ The security boundary for the write path is therefore **already in place** — e
 
 **Performance.** The prior implementation issued per-post reads (roughly 5N+1 queries). It was replaced with **six batched queries total** — posts, profiles (`.in('id', userIds)`), likes, comments, post_tags, and tags — with counts and tag names resolved via in-memory `Map`s ([`Blog.tsx:44`](../../../src/pages/Blog.tsx:44)). This is recorded as resolved audit Item 21.
 
-**Type safety.** All reads use generated row aliases from [`src/types/database.ts`](../../../src/types/database.ts:1) (`PostRow`, `ProfileRow`, `PostLikeRow`, `PostCommentRow`, `PostTagRow`, `TagRow`) with no `as any` DB casts ([`Blog.tsx:18`](../../../src/pages/Blog.tsx:18)). `npx tsc --noEmit` is clean.
+**Type safety.** All reads use generated row aliases from [`src/shared/types/database.ts`](../../../src/shared/types/database.ts:1) (`PostRow`, `ProfileRow`, `PostLikeRow`, `PostCommentRow`, `PostTagRow`, `TagRow`) with no `as any` DB casts ([`Blog.tsx:18`](../../../src/pages/Blog.tsx:18)). `npx tsc --noEmit` is clean.
 
 ---
 
@@ -146,6 +146,6 @@ None of these require schema or RLS changes; they are frontend integration tasks
 ## 6. Verification basis
 
 - Feed behavior and limitations read directly from [`src/pages/Blog.tsx`](../../../src/pages/Blog.tsx:1) and cross-checked against [`SPEC.md:391`](../../../SPEC.md:391).
-- Schema confirmed in [`database/DATA_Schema.md`](../../../database/DATA_Schema.md:216); RLS confirmed in [`database/migrate_to_v2.sql`](../../../database/migrate_to_v2.sql:999).
+- Schema confirmed in [`docs/DATA_Schema.md`](../../DATA_Schema.md:216); RLS confirmed in [`supabase/legacy/migrate_to_v2.sql`](../../../supabase/legacy/migrate_to_v2.sql:999).
 - N+1 elimination and type-safety status corroborated by the prior progress ledger ([`archive/5_7_26_Progress.md:53`](../../progress/archive/5_7_26_Progress.md:53)).
 - External social links read from [`src/components/layout/Footer.tsx:52`](../../../src/components/layout/Footer.tsx:52).

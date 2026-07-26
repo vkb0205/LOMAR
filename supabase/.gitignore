@@ -1,0 +1,11 @@
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+
+# Local migration outputs containing temporary Auth credentials
+fixtures/*_credentials.json

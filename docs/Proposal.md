@@ -26,7 +26,7 @@ We are seeking investment to **(a) harden the platform for an uncontrolled publi
 
 | Headline | Claim | Evidence |
 |---|---|---|
-| Product is real, not a mock | Live VTON generation, real LLM consultant, real Supabase Auth, typed DB | [`backend/test_api.py:474`](../backend/test_api.py:474), [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`src/types/database.ts`](../src/types/database.ts:1) |
+| Product is real, not a mock | Live VTON generation, real LLM consultant, real Supabase Auth, typed DB | [`backend/test_api.py:474`](../backend/test_api.py:474), [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`src/shared/types/database.ts`](../src/shared/types/database.ts:1) |
 | Deployment is automated | Push-to-deploy for both frontend (GitHub Pages) and backend (Cloud Run) | [`.github/workflows/deploy-ui.yml`](../.github/workflows/deploy-ui.yml:1), [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml:1) |
 | Engineering is disciplined | Strict TypeScript, no `as any` DB casts, security-hardened backend, 23/26 audit items resolved | [`PROGRESS_management.md:11`](../PROGRESS_management.md:11) |
 | Differentiated by AI | Virtual try-on + LLM consultant on one stack | [`SPEC.md:5`](../SPEC.md:5), [`backend/test_api.py`](../backend/test_api.py:1) |
@@ -103,7 +103,7 @@ flowchart TD
 
 LOMAR monetizes through **four reinforcing revenue streams**, sequenced by deployment maturity:
 
-1. **Vendor lead / listing fees (near-term).** Vendors pay for premium placement, verified badges, and qualified lead routing from the Customize and Explore funnels. *Tech-ready:* the vendor schema and routing already exist in [`database/migrate_to_v2.sql`](../database/migrate_to_v2.sql:1).
+1. **Vendor lead / listing fees (near-term).** Vendors pay for premium placement, verified badges, and qualified lead routing from the Customize and Explore funnels. *Tech-ready:* the vendor schema and routing already exist in [`supabase/legacy/migrate_to_v2.sql`](../supabase/legacy/migrate_to_v2.sql:1).
 2. **VTON generation credits (near-term).** Couples get a free allowance; further previews are sold as micro-credits or as part of a "Design Studio" subscription. *Tech-ready:* rate limiting already gates abuse ([`backend/test_api.py:54`](../backend/test_api.py:54)); a credit ledger is a thin addition to the existing `user_vouchers` / `user_journey_tasks` pattern.
 3. **Affiliate / booking commission (mid-term).** Commission on confirmed vendor bookings (dress ateliers, studios, venues). Requires the deferred booking-finalization work ([`SPEC.md:25`](../SPEC.md:25) non-goals).
 4. **Premium subscription — "Phố Hạnh Phúc Premium" (mid-term).** Unlimited try-on, priority consultant, exclusive voucher unlocks, shared couple dashboard. Built on the existing Supabase Auth + RLS foundation.
@@ -150,7 +150,7 @@ flowchart LR
 - **Frontend:** React 19, Vite 6, TypeScript (strict), Tailwind CSS 4, React Router 7, Motion, Supabase JS 2, Lucide. ([`package.json`](../package.json:1))
 - **Backend:** Python 3.11, FastAPI 0.115, Uvicorn, Pydantic 2, Pillow, python-multipart, slowapi, Google GenAI SDK 1.52. ([`backend/requirements.txt`](../backend/requirements.txt:1))
 - **AI:** Google Vertex AI "Nano Banana" / Gemini image model (`gemini-3.1-flash-image`) for VTON; Gemini text model (`gemini-2.5-flash`) for the consultant. ([`backend/.env.example:9`](../backend/.env.example:9), [`backend/.env.example:12`](../backend/.env.example:12))
-- **Data:** Supabase Postgres with 20 typed tables, Row-Level Security, views, and functions. ([`src/types/database.ts`](../src/types/database.ts:1), [`database/migrate_to_v2.sql:741`](../database/migrate_to_v2.sql:741))
+- **Data:** Supabase Postgres with 20 typed tables, Row-Level Security, views, and functions. ([`src/shared/types/database.ts`](../src/shared/types/database.ts:1), [`supabase/legacy/migrate_to_v2.sql:741`](../supabase/legacy/migrate_to_v2.sql:741))
 - **Infra:** GitHub Pages (frontend) + Google Cloud Run (backend) + Artifact Registry, all push-to-deploy.
 
 ### 6.2 Security & Scalability (already implemented)
@@ -167,7 +167,7 @@ The backend is **not** a demo-quality API. The following are live in the codebas
 | Rate limiting (slowapi, 10/min per IP on heavy endpoints) | [`backend/test_api.py:54`](../backend/test_api.py:54) |
 | 2-stage Docker build with `HEALTHCHECK` and non-root-ready path | [`backend/Dockerfile`](../backend/Dockerfile:1) |
 | Real Supabase Auth + UUID identity (no localStorage demo auth) | [`src/features/auth/AuthProvider.tsx`](../src/features/auth/AuthProvider.tsx:1), [`profileService.ts`](../src/features/auth/services/profileService.ts:1) |
-| Full RLS ownership model across all user-owned tables | [`database/migrate_to_v2.sql:741`](../database/migrate_to_v2.sql:741) |
+| Full RLS ownership model across all user-owned tables | [`supabase/legacy/migrate_to_v2.sql:741`](../supabase/legacy/migrate_to_v2.sql:741) |
 | Strict TypeScript, `tsc --noEmit` exits 0, no `as any` DB casts | [`tsconfig.json:13`](../tsconfig.json:13), [`PROGRESS_management.md:171`](../PROGRESS_management.md:171) |
 | Secret hygiene — `GEMINI_API_KEY` removed from client bundle; Supabase creds redacted from docs | [`vite.config.ts`](../vite.config.ts:1), [`README.md:39`](../README.md:39) |
 
@@ -223,7 +223,7 @@ The combination of **VTON + LLM consultant + journey + vouchers** on a single st
 | Vendor supply too slow for launch | Medium | High | Phase-1 curated beta caps vendor count to a trainable 10–15 |
 | AI image model pricing / availability changes | Medium | Medium | Model name is env-configurable ([`backend/.env.example:9`](../backend/.env.example:9)); can switch model without code change |
 | Generative image safety / brand risk | Low | Medium | `BLOCK_ONLY_HIGH` safety already enforced ([`backend/test_api.py:347`](../backend/test_api.py:347)) |
-| Data privacy / RLS gaps | Low | High | Full RLS ownership model already shipped ([`database/migrate_to_v2.sql:741`](../database/migrate_to_v2.sql:741)); user-scoped queries enforced ([`FloatingChat.tsx:38`](../src/components/chat/FloatingChat.tsx:38)) |
+| Data privacy / RLS gaps | Low | High | Full RLS ownership model already shipped ([`supabase/legacy/migrate_to_v2.sql:741`](../supabase/legacy/migrate_to_v2.sql:741)); user-scoped queries enforced ([`FloatingChat.tsx:38`](../src/components/chat/FloatingChat.tsx:38)) |
 | Team execution on booking/marketplace layer | Medium | Medium | Deferred cleanly in current spec; not on the launch critical path |
 
 ---

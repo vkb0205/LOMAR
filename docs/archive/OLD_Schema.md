@@ -1,3 +1,5 @@
+> Archived pre-v2 schema retained for historical reference.
+
 ## Table `users`
 
 ### Columns

@@ -12,7 +12,7 @@ import {
 // ============================================================================
 // Every function here runs through the normal (anon/authenticated) Supabase
 // client. Cross-user access is granted purely by the admin RLS override
-// policies in database/admin_policies.sql (keyed on is_admin()). No service_role
+// policies in supabase/legacy/admin_policies.sql (keyed on is_admin()). No service_role
 // key is ever used client-side. Non-admin callers will simply get their own
 // rows (or nothing) because the admin policies do not apply to them.
 // ============================================================================

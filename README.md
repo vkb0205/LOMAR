@@ -57,7 +57,35 @@ VITE_VTON_BACKEND_URL="http://localhost:3003"
 VITE_VTON_ENDPOINT="/test-try-on-upload"
 ```
 
-### 3. Run the backend
+### 3. Apply Supabase migrations
+
+Active database changes live in
+[`supabase/migrations`](supabase/migrations). Link the intended project and
+apply pending migrations with:
+
+```bash
+npx supabase login --agent no --output pretty
+npx supabase link --project-ref YOUR_PROJECT_REF
+npx supabase db push
+```
+
+The Auth migration links `profiles.id` to `auth.users.id`, backfills existing
+Auth accounts, and installs the trigger that creates a profile for every new
+signup.
+
+Legacy profiles that do not match real Auth users are preserved. In that case
+the foreign key is installed as `NOT VALID`: it is enforced for all new rows,
+while legacy rows can be mapped or retired explicitly before validating the
+constraint.
+
+For the linked project, the legacy conversion is complete and
+`20260726000400_validate_profiles_auth_fk.sql` validates the FK fully.
+
+Historical pre-CLI bootstrap scripts are retained under
+[`supabase/legacy`](supabase/legacy) and are not executed automatically by
+`db push`. See [`supabase/README.md`](supabase/README.md) for the layout.
+
+### 4. Run the backend
 
 ```bash
 cd ../LOMAR_backend
@@ -67,7 +95,7 @@ python test_api.py
 
 Backend runs at `http://localhost:3003`.
 
-### 4. Run the frontend
+### 5. Run the frontend
 
 ```bash
 cd ../LOMAR

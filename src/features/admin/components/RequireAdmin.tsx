@@ -10,7 +10,7 @@ import { ShieldAlert } from 'lucide-react';
  *  - This component only gates the UI. It is a convenience, not the security
  *    boundary.
  *  - The real enforcement is the admin RLS policies in
- *    database/admin_policies.sql (keyed on is_admin()). Even if a non-admin
+ *    supabase/legacy/admin_policies.sql (keyed on is_admin()). Even if a non-admin
  *    reached an admin page, every cross-user query would return nothing.
  *
  * Behaviour:

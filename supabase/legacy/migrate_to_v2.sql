@@ -2,7 +2,8 @@
 -- LORMAR Schema Migration: v1 (option-based) → v2 (AI-first, multi-user)
 -- ============================================================================
 -- Run this in the Supabase SQL Editor (Dashboard → SQL Editor)
--- Apply changes from new_data_schema.md → DATA_Schema.md v2
+-- Historical bootstrap script. Canonical schema docs live in
+-- docs/DATA_Schema.md; active migrations live in supabase/migrations/.
 -- ============================================================================
 -- ORDER: 1) Create _v2 tables first (refs point to new tables)
 --        2) Migrate data
@@ -44,8 +45,10 @@ create table if not exists vendors_v2 (
 
 -- 1b. profiles (replaces users, linked to auth.users)
 -- NOTE: We create profiles with a standalone PK first (no FK to auth.users yet)
--- so we can insert placeholder profiles for legacy data migration.
--- After auth is set up, the FK can be added: ALTER TABLE profiles ADD CONSTRAINT ... REFERENCES auth.users(id)
+-- so legacy user rows can be staged before they are mapped to Auth identities.
+-- After legacy migration, apply
+-- migrations/20260726000100_link_profiles_to_auth.sql to require auth.users
+-- identities, backfill Auth accounts, and install the signup trigger.
 create table if not exists profiles (
   id uuid primary key default gen_random_uuid(),
   username text unique,
@@ -58,8 +61,13 @@ create table if not exists profiles (
   updated_at timestamptz not null default now()
 );
 
--- Add owner FK for vendors_v2 now that profiles exists
-alter table vendors_v2 add column if not exists owner_id uuid references profiles(id) on delete set null;
+-- Add owner FK for vendors_v2 now that profiles exists. The owner_id column is
+-- created above, so add the constraint explicitly instead of relying on
+-- ADD COLUMN IF NOT EXISTS (which would skip the REFERENCES clause).
+alter table vendors_v2 drop constraint if exists vendors_v2_owner_id_fkey;
+alter table vendors_v2
+  add constraint vendors_v2_owner_id_fkey
+  foreign key (owner_id) references profiles(id) on delete set null;
 
 -- 1c. services (replaces products — references vendors_v2)
 create table if not exists services (
@@ -363,20 +371,8 @@ begin
     raise notice 'Migrated % users to profiles', count_users;
   end if;
 
-  -- If no users were migrated, create a default placeholder profile
-  -- so that other data migrations that depend on profiles.id have a valid target
-  if not exists (select 1 from profiles) then
-    insert into profiles (id, username, full_name, email, role, onboarding_status)
-    values (
-      gen_random_uuid(),
-      'legacy',
-      'Legacy User',
-      'legacy@localhost',
-      'customer',
-      'active'
-    );
-    raise notice 'Created default legacy profile for data migration';
-  end if;
+  -- Do not create a placeholder profile. Every profile must ultimately map to
+  -- a real auth.users row via the active Auth-link migration.
 end $$;
 
 -- 3b. Migrate vendors → vendors_v2
@@ -788,15 +784,12 @@ alter table if exists service_requests enable row level security;
 
 -- ----------------------------------------------------------------------------
 -- profiles (owner column: id == auth.uid())
--- Section 6 already grants own SELECT + own UPDATE. Add own INSERT (needed by
--- the app's just-in-time profile provisioning) and own DELETE.
+-- Section 6 already grants own SELECT + own UPDATE. Profile INSERT/DELETE is
+-- managed by Supabase Auth and migration
+-- 20260726000100_link_profiles_to_auth.sql.
 -- ----------------------------------------------------------------------------
 drop policy if exists "Users can insert own profile" on profiles;
-create policy "Users can insert own profile" on profiles
-  for insert with check (auth.uid() = id);
 drop policy if exists "Users can delete own profile" on profiles;
-create policy "Users can delete own profile" on profiles
-  for delete using (auth.uid() = id);
 
 -- ----------------------------------------------------------------------------
 -- vendors (owner column: owner_id) — public read active (Section 6) + owner CRUD

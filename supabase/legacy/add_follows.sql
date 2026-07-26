@@ -1,5 +1,5 @@
 -- ============================================================================
--- LOMAR — Social graph: `follows` table (user→user and user→vendor)
+-- Historical bootstrap: social graph (`follows`).
 -- ============================================================================
 -- Purpose
 --   Let an authenticated user follow OTHER USERS (profiles) and VENDORS.

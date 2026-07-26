@@ -45,8 +45,8 @@ src/
   index.css
 
 scripts/
-database/
 docs/
+supabase/
 ```
 
 ## Ownership rules

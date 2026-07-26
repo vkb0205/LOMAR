@@ -37,7 +37,7 @@ This report reviews the current source tree of the LOMAR repository at `d:/VKB_P
 
 - The FastAPI backend ([`backend/test_api.py`](../backend/test_api.py:1)) and its runtime configuration ([`backend/.env.example`](../backend/.env.example:1), [`backend/Dockerfile`](../backend/Dockerfile:1), [`backend/requirements.txt`](../backend/requirements.txt:1)).
 - The React/Vite frontend, focusing on auth and Supabase access ([`src/lib/supabase.ts`](../src/lib/supabase.ts:1), [`src/context/AppContext.tsx`](../src/context/AppContext.tsx:1), [`vite.config.ts`](../vite.config.ts:1)).
-- The Supabase Postgres schema and Row-Level Security policies ([`database/migrate_to_v2.sql`](../database/migrate_to_v2.sql:1)).
+- The Supabase Postgres schema and Row-Level Security policies ([`supabase/legacy/migrate_to_v2.sql`](../../../supabase/legacy/migrate_to_v2.sql:1)).
 - CI/CD pipelines ([`.github/workflows/deploy-ui.yml`](../.github/workflows/deploy-ui.yml:1), [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml:1)).
 - AI generation safety and prompt-handling paths in both VTON and `/consult`.
 
@@ -126,14 +126,14 @@ This closes Items 7, 8, and 9.
 
 ### 4.8 Row-Level Security — complete ownership model
 
-[`database/migrate_to_v2.sql:750`](../database/migrate_to_v2.sql:750) "SECTION 6b" defines:
+[`supabase/legacy/migrate_to_v2.sql:750`](../../../supabase/legacy/migrate_to_v2.sql:750) "SECTION 6b" defines:
 
 - `profiles.id == auth.uid()` (profile PK is the auth UUID),
 - user-owned tables gated by `auth.uid() = user_id`,
-- vendor-scoped tables (services, service_images, vouchers) resolved through `vendors.owner_id` via `EXISTS` sub-selects (e.g. [`migrate_to_v2.sql:822`](../database/migrate_to_v2.sql:822)),
+- vendor-scoped tables (services, service_images, vouchers) resolved through `vendors.owner_id` via `EXISTS` sub-selects (e.g. [`migrate_to_v2.sql:822`](../../../supabase/legacy/migrate_to_v2.sql:822)),
 - full owner-scoped **INSERT / UPDATE / DELETE** on every user-owned table (not just SELECT),
-- public SELECT restricted to active/published content ([`migrate_to_v2.sql:742`](../database/migrate_to_v2.sql:742), [`migrate_to_v2.sql:747`](../database/migrate_to_v2.sql:747)),
-- RLS re-asserted idempotently on 20 tables ([`migrate_to_v2.sql:767`](../database/migrate_to_v2.sql:767)–[`migrate_to_v2.sql:787`](../database/migrate_to_v2.sql:787)).
+- public SELECT restricted to active/published content ([`migrate_to_v2.sql:742`](../../../supabase/legacy/migrate_to_v2.sql:742), [`migrate_to_v2.sql:747`](../../../supabase/legacy/migrate_to_v2.sql:747)),
+- RLS re-asserted idempotently on 20 tables ([`migrate_to_v2.sql:767`](../../../supabase/legacy/migrate_to_v2.sql:767)–[`migrate_to_v2.sql:787`](../../../supabase/legacy/migrate_to_v2.sql:787)).
 
 This closes Item 12. The frontend reinforces this with user-scoped queries (e.g. [`FloatingChat.tsx:38`](../src/components/chat/FloatingChat.tsx:38) `.eq('user_id', userId)`), closing Item 22.
 
@@ -261,7 +261,7 @@ The platform is **safe to run as a gated beta today**. It becomes **safe for a p
 - [`backend/Dockerfile`](../backend/Dockerfile:1) — container build
 - [`src/lib/supabase.ts`](../src/lib/supabase.ts:1) — Supabase client init
 - [`src/context/AppContext.tsx`](../src/context/AppContext.tsx:1) — auth/session wiring
-- [`database/migrate_to_v2.sql`](../database/migrate_to_v2.sql:1) — schema + RLS (SECTION 6b at line 750)
+- [`supabase/legacy/migrate_to_v2.sql`](../../../supabase/legacy/migrate_to_v2.sql:1) — schema + RLS (SECTION 6b at line 750)
 - [`.github/workflows/deploy-backend.yml`](../.github/workflows/deploy-backend.yml:1) — backend CI/CD
 - [`.github/workflows/deploy-ui.yml`](../.github/workflows/deploy-ui.yml:1) — frontend CI/CD
 - [`vite.config.ts`](../vite.config.ts:1) — client bundle config (secret-define removed)
