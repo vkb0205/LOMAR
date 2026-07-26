@@ -14,6 +14,7 @@ export const ROUTES = {
   adminJourney: '/admin/journey',
   adminLeads: '/admin/leads',
   adminAi: '/admin/ai',
+  adminAnalytics: '/admin/analytics',
   vendorDetail: (vendorId: string) => `/vendor/${vendorId}`,
 } as const;
 

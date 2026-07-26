@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Menu,
   X,
+  ChartNoAxesCombined,
 } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
 
@@ -38,6 +39,11 @@ const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.adminJourney, label: 'Hành trình & Ưu đãi', icon: RouteIcon },
   { to: ROUTES.adminLeads, label: 'Yêu cầu dịch vụ', icon: Inbox },
   { to: ROUTES.adminAi, label: 'Giám sát AI', icon: Sparkles },
+  {
+    to: ROUTES.adminAnalytics,
+    label: 'Lượt truy cập',
+    icon: ChartNoAxesCombined,
+  },
 ];
 
 export default function AdminLayout() {

@@ -19,6 +19,8 @@ import ModerationPanel from '../features/admin/panels/ModerationPanel';
 import JourneyPanel from '../features/admin/panels/JourneyPanel';
 import LeadsPanel from '../features/admin/panels/LeadsPanel';
 import AIPanel from '../features/admin/panels/AIPanel';
+import AnalyticsPanel from '../features/admin/panels/AnalyticsPanel';
+import AnalyticsTracker from '../features/analytics/components/AnalyticsTracker';
 
 // Router base path: configurable via VITE_BASE_PATH so the same bundle can be
 // deployed under any sub-path. Defaults to root ("/") when unset. The GitHub
@@ -29,6 +31,7 @@ const ROUTER_BASENAME = (import.meta.env.VITE_BASE_PATH || '/').replace(/\/+$/, 
 export function AppRouter() {
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
+      <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
@@ -44,7 +47,7 @@ export function AppRouter() {
 
         {/* Admin area — own shell, gated by RequireAdmin (UI convenience).
             The real security boundary is the admin RLS policies in
-            database/admin_policies.sql. */}
+            supabase/legacy/admin_policies.sql. */}
         <Route
           path="/admin"
           element={
@@ -60,6 +63,7 @@ export function AppRouter() {
           <Route path="journey" element={<JourneyPanel />} />
           <Route path="leads" element={<LeadsPanel />} />
           <Route path="ai" element={<AIPanel />} />
+          <Route path="analytics" element={<AnalyticsPanel />} />
           <Route path="*" element={<Navigate to={ROUTES.admin} replace />} />
         </Route>
       </Routes>
