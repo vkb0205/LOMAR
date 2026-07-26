@@ -4,7 +4,6 @@ import type { Database } from '../../../shared/types/database';
 import type { AccountRole, UserProfile, WeddingRole } from '../types';
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 
 const DEFAULT_AVATARS: Record<WeddingRole, string> = {
   bride:
@@ -52,10 +51,7 @@ export function mapSessionUser(
   };
 }
 
-/**
- * Resolve the profile row keyed by auth.uid(). A missing row is provisioned
- * when permitted; failures fall back to session-derived identity.
- */
+/** Resolve the trigger-provisioned profile row keyed by auth.uid(). */
 export async function resolveProfile(
   activeSession: Session
 ): Promise<ProfileRow | null> {
@@ -75,27 +71,8 @@ export async function resolveProfile(
     return data as ProfileRow;
   }
 
-  const metadata = activeSession.user.user_metadata ?? {};
-  const insertPayload: ProfileInsert = {
-    id: uid,
-    email: activeSession.user.email ?? null,
-    full_name:
-      typeof metadata.full_name === 'string' ? metadata.full_name : null,
-  };
-
-  const { data: created, error: insertError } = await supabase
-    .from('profiles')
-    .insert<ProfileInsert>(insertPayload)
-    .select('*')
-    .maybeSingle();
-
-  if (insertError) {
-    console.warn(
-      'No profile row for user and provisioning failed; using session identity.',
-      insertError.message
-    );
-    return null;
-  }
-
-  return (created as ProfileRow) ?? null;
+  console.warn(
+    'No profile row exists for this Auth user. Apply Supabase migrations.'
+  );
+  return null;
 }
