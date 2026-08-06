@@ -9,6 +9,8 @@ import {
   mapExternalCategory,
 } from '../services/vendorCatalogService';
 
+export const SERVICES_PAGE_SIZE = 9;
+
 export function useServicesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'Tất Cả';
@@ -17,6 +19,7 @@ export function useServicesPage() {
   const [categories, setCategories] = useState<string[]>(getDefaultVendorCategories());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const resolved = mapExternalCategory(categoryParam);
@@ -53,15 +56,33 @@ export function useServicesPage() {
     [activeCategory, searchTerm, vendors]
   );
 
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredVendors.length / SERVICES_PAGE_SIZE)),
+    [filteredVendors.length]
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, searchTerm]);
+
+  const paginatedVendors = useMemo(() => {
+    const start = (currentPage - 1) * SERVICES_PAGE_SIZE;
+    return filteredVendors.slice(start, start + SERVICES_PAGE_SIZE);
+  }, [currentPage, filteredVendors]);
+
   const setCategory = (category: string) => setSearchParams({ category });
 
   return {
     activeCategory,
     categories,
+    currentPage,
     filteredVendors,
     loading,
+    paginatedVendors,
     searchTerm,
     setCategory,
+    setCurrentPage,
     setSearchTerm,
+    totalPages,
   };
 }

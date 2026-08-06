@@ -1,3 +1,4 @@
+import FloatingChat from '../chat/components/FloatingChat';
 import { DevelopmentSection } from './components/DevelopmentSection';
 import { HeroSection } from './components/HeroSection';
 import { StorySection } from './components/StorySection';
@@ -9,6 +10,7 @@ export default function Home() {
       <HeroSection />
       <StorySection />
       <DevelopmentSection />
+      <FloatingChat />
     </div>
   );
 }
