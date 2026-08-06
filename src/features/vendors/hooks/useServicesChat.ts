@@ -8,7 +8,7 @@ import {
   fetchConsultantMessages,
   insertConsultantMessage,
 } from '../../ai-consultant/services/chatMessageRepository';
-import type { ConsultantMessage } from '../../ai-consultant/types';
+import type { ConsultantMessage, RetrievedService } from '../../ai-consultant/types';
 
 function buildDefaultMessage(userName?: string | null): ConsultantMessage {
   return {
@@ -24,6 +24,10 @@ export function useServicesChat() {
   const [messages, setMessages] = useState<ConsultantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  // Products behind the latest answer. A turn that retrieves nothing (a
+  // clarifying question, a follow-up answered from history) keeps the previous
+  // row on screen — the user is usually still choosing among those cards.
+  const [retrievedServices, setRetrievedServices] = useState<RetrievedService[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,13 +74,14 @@ export function useServicesChat() {
     await insertConsultantMessage(userId, 'user', content);
 
     try {
-      const reply = await requestConsultReply(content);
+      const { reply, retrievedServices: turnServices } = await requestConsultReply(content);
       const assistantMessage: ConsultantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: reply,
       };
       setMessages(previous => [...previous, assistantMessage]);
+      if (turnServices.length > 0) setRetrievedServices(turnServices);
       await insertConsultantMessage(userId, 'assistant', reply);
     } catch (error) {
       console.error('Consult request failed', error);
@@ -99,6 +104,7 @@ export function useServicesChat() {
     isGenerating,
     messages,
     onGenerate: handleSend,
+    retrievedServices,
     setInputValue,
   };
 }

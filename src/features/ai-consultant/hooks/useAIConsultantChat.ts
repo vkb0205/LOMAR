@@ -3,7 +3,7 @@ import type { UserProfile } from '../../auth/types';
 import { CONSULT_NETWORK_FALLBACK_MESSAGE, requestConsultReply } from '../services/aiConsultantService';
 import { fetchConsultantMessages, insertConsultantMessage } from '../services/chatMessageRepository';
 import { fetchSuggestedService, findSuggestedServiceId } from '../services/serviceSuggestionService';
-import { ConsultantMessage, ServiceRow } from '../types';
+import { ConsultantMessage, RetrievedService, ServiceRow } from '../types';
 
 function buildDefaultMessage(user: UserProfile | null): ConsultantMessage {
   return {
@@ -19,6 +19,10 @@ export function useAIConsultantChat(user: UserProfile | null) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestedService, setSuggestedService] = useState<ServiceRow | null>(null);
+  // Products behind the most recent answer. A turn that retrieves nothing (a
+  // clarifying question, a greeting) leaves the previous row in place rather
+  // than blanking it — the user is usually still choosing among those cards.
+  const [retrievedServices, setRetrievedServices] = useState<RetrievedService[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,17 +93,21 @@ export function useAIConsultantChat(user: UserProfile | null) {
     await insertConsultantMessage(userId, 'user', userContent);
 
     try {
-      const aiResponse = await requestConsultReply(userContent);
+      // Backend session memory now owns continuity across turns. The optional
+      // history argument remains available for callers that need bootstrap
+      // recovery, but this hook no longer replays the visible transcript.
+      const { reply, retrievedServices: turnServices } = await requestConsultReply(userContent);
       const suggestedServiceId = await findSuggestedServiceId(userContent);
       const assistantMessage: ConsultantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: aiResponse,
+        content: reply,
         suggested_service_id: suggestedServiceId,
       };
 
       setMessages(previous => [...previous, assistantMessage]);
-      await insertConsultantMessage(userId, 'assistant', aiResponse, suggestedServiceId);
+      if (turnServices.length > 0) setRetrievedServices(turnServices);
+      await insertConsultantMessage(userId, 'assistant', reply, suggestedServiceId);
     } catch (error) {
       console.error('Consult request failed', error);
       setMessages(previous => [
@@ -120,6 +128,7 @@ export function useAIConsultantChat(user: UserProfile | null) {
     isTyping,
     messages,
     messagesEndRef,
+    retrievedServices,
     setInput,
     submitMessage,
     suggestedService,

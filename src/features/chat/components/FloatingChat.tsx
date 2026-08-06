@@ -93,7 +93,10 @@ export default function FloatingChat() {
     await insertChatMessage('user', userText);
 
     try {
-      const botText = (await requestConsultReply(userText)).trim() || CONSULT_NETWORK_FALLBACK_MESSAGE;
+      // This surface shows prose only; the retrieved product cards are rendered
+      // on the full AI consultant page, so the rows are intentionally dropped.
+      const { reply } = await requestConsultReply(userText);
+      const botText = reply.trim() || CONSULT_NETWORK_FALLBACK_MESSAGE;
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
       await insertChatMessage('assistant', botText);
     } catch (error) {

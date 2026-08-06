@@ -1,7 +1,8 @@
 import { Send, Sparkles } from 'lucide-react';
 import { FormEvent, RefObject } from 'react';
-import { ConsultantMessage } from '../types';
+import { ConsultantMessage, RetrievedService } from '../types';
 import { MessageBubble } from './MessageBubble';
+import { RetrievedServiceRow } from './RetrievedServiceRow';
 import { TypingIndicator } from './TypingIndicator';
 
 interface ChatPanelProps {
@@ -9,6 +10,7 @@ interface ChatPanelProps {
   isTyping: boolean;
   messages: ConsultantMessage[];
   messagesEndRef: RefObject<HTMLDivElement | null>;
+  retrievedServices: RetrievedService[];
   onInputChange: (value: string) => void;
   onSubmit: (event: FormEvent) => void;
 }
@@ -18,6 +20,7 @@ export function ChatPanel({
   isTyping,
   messages,
   messagesEndRef,
+  retrievedServices,
   onInputChange,
   onSubmit,
 }: ChatPanelProps) {
@@ -43,6 +46,8 @@ export function ChatPanel({
         {isTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
+
+      <RetrievedServiceRow services={retrievedServices} />
 
       <form onSubmit={onSubmit} className="border-t border-gray-100 p-4">
         <div className="flex gap-3">

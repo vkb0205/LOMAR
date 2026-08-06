@@ -10,6 +10,7 @@ export default function AIConsultant() {
     isTyping,
     messages,
     messagesEndRef,
+    retrievedServices,
     setInput,
     submitMessage,
     suggestedService,
@@ -22,6 +23,7 @@ export default function AIConsultant() {
         isTyping={isTyping}
         messages={messages}
         messagesEndRef={messagesEndRef}
+        retrievedServices={retrievedServices}
         onInputChange={setInput}
         onSubmit={submitMessage}
       />
