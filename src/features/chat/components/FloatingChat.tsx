@@ -4,11 +4,18 @@ import { Send, X, Heart, Sparkles } from 'lucide-react';
 import { supabase } from '../../../shared/api/supabaseClient';
 import { Database } from '../../../shared/types/database';
 import { useAuth } from '../../auth/hooks/useAuth';
+import {
+  CONSULT_NETWORK_FALLBACK_MESSAGE,
+  requestConsultReply,
+} from '../../ai-consultant/services/aiConsultantService';
 import InteractiveMascot from './InteractiveMascot';
 
 type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
 
 const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
+
+const DEFAULT_GREETING =
+  'Chào bạn! Mình là Bé Song Hỷ. Mình có thể giúp gì cho ngày trọng đại của bạn không?';
 
 export default function FloatingChat() {
   const { user } = useAuth();
@@ -21,15 +28,14 @@ export default function FloatingChat() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
 
+  const [isTyping, setIsTyping] = useState(false);
+
   useEffect(() => {
     async function fetchChat() {
-      // Item 22: scope reads by user_id and skip the fetch entirely when there
-      // is no authenticated user (RLS would return nothing anyway). Falls back
-      // to the default greeting without hitting the network.
+      // Load persisted history for signed-in users. Anonymous users still get
+      // the live AI consultant; only persistence is skipped.
       if (!userId) {
-        setMessages([
-          { text: "Chào bạn! Mình là Bé Song Hỷ. Mình có thể giúp gì cho ngày trọng đại của bạn không?", isUser: false }
-        ]);
+        setMessages([{ text: DEFAULT_GREETING, isUser: false }]);
         return;
       }
       const { data } = await supabase
@@ -43,12 +49,10 @@ export default function FloatingChat() {
           isUser: m.role === 'user'
         })));
       } else {
-        setMessages([
-          { text: "Chào bạn! Mình là Bé Song Hỷ. Mình có thể giúp gì cho ngày trọng đại của bạn không?", isUser: false }
-        ]);
+        setMessages([{ text: DEFAULT_GREETING, isUser: false }]);
       }
     }
-    fetchChat();
+    void fetchChat();
   }, [userId]);
 
   useEffect(() => {
@@ -57,33 +61,51 @@ export default function FloatingChat() {
 
   const insertChatMessage = async (role: string, content: string) => {
     if (!userId) return;
-    // Item 13: typed insert payload instead of `as any`. The explicit
-    // <Insert> generic is required for this @supabase/supabase-js version
-    // (see src/shared/types/database.ts for the schema conformance notes).
-    const payload: Database['public']['Tables']['chat_messages']['Insert'] = {
-      thread_id: MOCK_THREAD_ID,
-      user_id: userId,
-      role,
-      content,
-    };
-    await supabase
-      .from('chat_messages')
-      .insert<Database['public']['Tables']['chat_messages']['Insert']>(payload);
+    // Persistence is best-effort. A database failure must not prevent the
+    // floating chat from reaching the configured AI provider.
+    try {
+      // Item 13: typed insert payload instead of `as any`. The explicit
+      // <Insert> generic is required for this @supabase/supabase-js version
+      // (see src/shared/types/database.ts for the schema conformance notes).
+      const payload: Database['public']['Tables']['chat_messages']['Insert'] = {
+        thread_id: MOCK_THREAD_ID,
+        user_id: userId,
+        role,
+        content,
+      };
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert<Database['public']['Tables']['chat_messages']['Insert']>(payload);
+      if (error) console.error('Floating chat persistence failed', error);
+    } catch (error) {
+      console.error('Floating chat persistence failed', error);
+    }
   };
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    const userText = inputValue;
+    const userText = inputValue.trim();
+    if (!userText || isTyping) return;
+
     setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setInputValue('');
+    setIsTyping(true);
 
     await insertChatMessage('user', userText);
 
-    setTimeout(async () => {
-      const botText = "Cảm ơn bạn đã nhắn tin cho Bé Song Hỷ nhé! Mình đang tìm kiếm thông tin tốt nhất cho bạn đây...";
+    try {
+      const botText = (await requestConsultReply(userText)).trim() || CONSULT_NETWORK_FALLBACK_MESSAGE;
       setMessages(prev => [...prev, { text: botText, isUser: false }]);
       await insertChatMessage('assistant', botText);
-    }, 1000);
+    } catch (error) {
+      console.error('Floating chat request failed', error);
+      setMessages(prev => [
+        ...prev,
+        { text: CONSULT_NETWORK_FALLBACK_MESSAGE, isUser: false },
+      ]);
+      await insertChatMessage('assistant', CONSULT_NETWORK_FALLBACK_MESSAGE);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -146,15 +168,24 @@ export default function FloatingChat() {
                       <Sparkles className="w-4 h-4 text-[#ddb983]" />
                     </div>
                   )}
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed font-medium ${
-                    msg.isUser
-                      ? 'bg-[#ffe9c9] text-[#1B2C40] rounded-br-sm'
-                      : 'bg-white text-[#1B2C40] rounded-bl-sm border border-[#ffdb9f]/20 shadow-sm'
-                  }`}>
+                  <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed font-medium ${msg.isUser
+                    ? 'bg-[#ffe9c9] text-[#1B2C40] rounded-br-sm'
+                    : 'bg-white text-[#1B2C40] rounded-bl-sm border border-[#ffdb9f]/20 shadow-sm'
+                    }`}>
                     {msg.text}
                   </div>
                 </div>
               ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="w-8 h-8 rounded-full bg-[#ffe9c9] flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                    <Sparkles className="w-4 h-4 text-[#ddb983]" />
+                  </div>
+                  <div className="bg-white text-[#1B2C40] rounded-2xl rounded-bl-sm border border-[#ffdb9f]/20 shadow-sm p-3 text-xs">
+                    Bé Song Hỷ đang trả lời...
+                  </div>
+                </div>
+              )}
               <div ref={chatEndRef} />
             </div>
 
@@ -166,11 +197,12 @@ export default function FloatingChat() {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Nhắn tin với Bé Song..."
-                  className="flex-1 bg-[#FAF6EE] rounded-full py-2.5 px-4 text-xs outline-none focus:ring-1 focus:ring-[#ffdb9f] placeholder:text-gray-400"
+                  disabled={isTyping}
+                  className="flex-1 bg-[#FAF6EE] rounded-full py-2.5 px-4 text-xs outline-none focus:ring-1 focus:ring-[#ffdb9f] placeholder:text-gray-400 disabled:opacity-60"
                 />
                 <button
                   onClick={handleSendMessage}
-                  disabled={!inputValue.trim()}
+                  disabled={!inputValue.trim() || isTyping}
                   className="w-10 h-10 bg-[#ffe9c9] text-[#1B2C40] rounded-full flex items-center justify-center hover:bg-[#ffdb9f] transition-colors disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />

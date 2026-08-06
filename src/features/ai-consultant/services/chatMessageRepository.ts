@@ -1,6 +1,5 @@
 import { getJson, postJsonTyped } from '../../../shared/api/backendClient';
 import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
-import { ChatBubbleMessage } from '../types';
 
 export const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
 
