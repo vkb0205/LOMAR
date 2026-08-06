@@ -43,7 +43,13 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
-          VITE_VTON_BACKEND_URL: ${{ vars.VTON_BACKEND_URL || '' }}
+          # The deployed Render backend. Overridable via the BACKEND_URL repo
+          # variable (Settings > Secrets and variables > Actions > Variables)
+          # so the URL can change without editing this workflow. The literal
+          # fallback keeps Pages builds working when no variable is set —
+          # an empty value would make the app emit relative /api/... requests
+          # that hit the static Pages host instead of the API.
+          VITE_BACKEND_URL: ${{ vars.BACKEND_URL || 'https://lomar-backend.onrender.com' }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
