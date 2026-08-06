@@ -7,7 +7,8 @@ coverage/
 .env*
 !.env.example
 !**/.env.example
-
+.vercel/
+.react-router/
 # Backend virtual environment
 backend/vton_env/
 
