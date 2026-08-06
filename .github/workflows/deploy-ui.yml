@@ -12,11 +12,17 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment.
+#
+# cancel-in-progress is true so a newer commit supersedes an older run. With it
+# false, a single run that stalls (e.g. waiting on a runner) holds this group's
+# lock indefinitely and silently blocks every later deploy — no run is even
+# created for subsequent pushes. Superseding is safe here because the workflow
+# always deploys the current tip of main: a cancelled build is simply redone by
+# the run that replaced it.
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
