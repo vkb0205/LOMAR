@@ -1,8 +1,6 @@
-import { supabase } from '../../../shared/api/supabaseClient';
-import type { Database } from '../../../shared/types/database';
+import { getJson } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
 import type { VendorCardModel } from '../types';
-
-type VendorRow = Database['public']['Tables']['vendors']['Row'];
 
 const DEFAULT_CATEGORIES = ['Tất Cả', 'Váy Cưới', 'Chụp Ảnh', 'Địa Điểm', 'Trang Trí', 'Trang Điểm'];
 
@@ -38,15 +36,8 @@ export function filterVendors(vendors: VendorCardModel[], activeCategory: string
 }
 
 export async function fetchVendorCatalog(): Promise<VendorCardModel[]> {
-  const { data, error } = await supabase.from('vendors').select('*');
-  if (error) throw error;
-
-  return ((data || []) as VendorRow[]).map(vendor => ({
-    id: vendor.id,
-    name: vendor.name || 'Thương hiệu',
-    category: vendor.category || 'Khác',
-    rating: vendor.rating_avg ? Number(vendor.rating_avg) : 5.0,
-    addr: vendor.address || '',
-    img: vendor.image_url || '',
-  }));
+  const { vendors } = await getJson<{ vendors: VendorCardModel[] }>(
+    resolveDataEndpoint('/api/v1/catalog/vendors')
+  );
+  return vendors;
 }

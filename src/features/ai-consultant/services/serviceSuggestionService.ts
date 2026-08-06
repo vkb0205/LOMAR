@@ -1,4 +1,5 @@
-import { supabase } from '../../../shared/api/supabaseClient';
+import { getJson } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
 import { ServiceRow } from '../types';
 
 const SERVICE_CATEGORY_KEYWORDS: Array<{ category: string; keywords: string[] }> = [
@@ -20,26 +21,22 @@ export async function findSuggestedServiceId(input: string): Promise<string | nu
   if (!queryCategory) return null;
 
   try {
-    const { data } = await supabase
-      .from('services')
-      .select('*')
-      .eq('category', queryCategory)
-      .limit(1)
-      .single();
-
-    return data ? (data as ServiceRow).id : null;
-  } catch (error) {
-    console.error('Error fetching suggestion', error);
+    const { services } = await getJson<{ services: ServiceRow[] }>(
+      resolveDataEndpoint('/api/v1/catalog/customize')
+    );
+    return services.find(service => service.category === queryCategory)?.id ?? null;
+  } catch {
     return null;
   }
 }
 
 export async function fetchSuggestedService(serviceId: string): Promise<ServiceRow | null> {
-  const { data } = await supabase
-    .from('services')
-    .select('*')
-    .eq('id', serviceId)
-    .single();
-
-  return data ? (data as ServiceRow) : null;
+  try {
+    const { service } = await getJson<{ service: ServiceRow }>(
+      resolveDataEndpoint(`/api/v1/catalog/services/${encodeURIComponent(serviceId)}/suggestion`)
+    );
+    return service ?? null;
+  } catch {
+    return null;
+  }
 }

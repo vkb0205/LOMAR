@@ -1,42 +1,46 @@
-import { supabase } from '../../../shared/api/supabaseClient';
-import { ChatMessageInsert, ChatMessageRow, ConsultantMessage } from '../types';
+import { getJson, postJsonTyped } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
+import { ChatBubbleMessage } from '../types';
 
 export const MOCK_THREAD_ID = '00000000-0000-0000-0000-000000000000';
 
-export async function fetchConsultantMessages(userId: string): Promise<ConsultantMessage[]> {
-  const { data } = await supabase
-    .from('chat_messages')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+interface ChatMessageResponse {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+  suggestedServiceId?: string | null;
+}
 
-  if (!data || data.length === 0) return [];
+async function ensureThread(): Promise<string> {
+  const { threadId } = await postJsonTyped<{ threadId: string }>(
+    resolveDataEndpoint('/api/v1/chat/threads'),
+    { body: { contextType: 'consultant' } }
+  );
+  return threadId;
+}
 
-  return (data as ChatMessageRow[]).map(message => ({
-    id: message.id.toString(),
-    role: message.role as 'user' | 'assistant',
-    content: message.content || '',
-    suggested_service_id: message.suggested_service_id,
-  }));
+export async function fetchConsultantMessages(_userId: string): Promise<ChatMessageResponse[]> {
+  // Existing UI has no persisted thread identifier. The backend thread-create
+  // endpoint is the source of truth; callers can pass/store returned IDs when
+  // they need multiple independent chat sessions.
+  const threadId = await ensureThread();
+  const { messages } = await getJson<{ messages: ChatMessageResponse[] }>(
+    resolveDataEndpoint(`/api/v1/chat/threads/${encodeURIComponent(threadId)}/messages`)
+  );
+  return messages;
 }
 
 export async function insertConsultantMessage(
-  userId: string | null,
+  _userId: string | null,
   role: 'user' | 'assistant',
   content: string,
   suggestedServiceId?: string | null
 ): Promise<void> {
-  if (!userId) return;
-
-  const payload: ChatMessageInsert = {
-    thread_id: MOCK_THREAD_ID,
-    user_id: userId,
-    role,
-    content,
-    suggested_service_id: suggestedServiceId,
-  };
-
-  await supabase
-    .from('chat_messages')
-    .insert<ChatMessageInsert>(payload);
+  if (!_userId || role !== 'user') return;
+  const threadId = await ensureThread();
+  await postJsonTyped(
+    resolveDataEndpoint(`/api/v1/chat/threads/${encodeURIComponent(threadId)}/messages`),
+    { body: { content, suggestedServiceId } }
+  );
 }

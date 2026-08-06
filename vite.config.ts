@@ -12,9 +12,10 @@ export default defineConfig(({ mode }) => {
   // explicitly, so Pages deployments are unaffected by this default.
   const basePath = env.VITE_BASE_PATH || '/';
   
-  // Determine the backend API URL
-  // For production (GitHub Pages), set VITE_VTON_BACKEND_URL to your Cloud Run URL
-  const backendUrl = env.VITE_VTON_BACKEND_URL || 'http://localhost:3003';
+  // Determine the backend API URL. One FastAPI process (LOMAR_backend) serves
+  // both the legacy VTON paths and the versioned /api/v1 application-data
+  // routes, so both proxy entries below point at the same target.
+  const backendUrl = env.VITE_BACKEND_URL || env.VITE_VTON_BACKEND_URL || 'http://localhost:8080';
 
   return {
     base: basePath,
@@ -33,6 +34,10 @@ export default defineConfig(({ mode }) => {
           target: backendUrl,
           changeOrigin: true,
           rewrite: (requestPath) => requestPath.replace(/^\/api\/vton/, ''),
+        },
+        '/api/v1': {
+          target: backendUrl,
+          changeOrigin: true,
         },
       },
     },

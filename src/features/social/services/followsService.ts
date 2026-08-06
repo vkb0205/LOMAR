@@ -1,130 +1,83 @@
-import { supabase } from '../../../shared/api/supabaseClient';
-import { Database } from '../../../shared/types/database';
+import { deleteJson, getJson, postJsonTyped } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
 
-/**
- * Social-graph helpers for `follows` (see supabase/legacy/add_follows.sql).
- *
- * A follow edge points from the authenticated user (`follower_id`) to either
- * another user (profile) or a vendor. The table has:
- *   - public SELECT (for counts / follow-state),
- *   - owner-scoped INSERT/DELETE keyed on auth.uid() = follower_id.
- *
- * All access here is typed against Database['public']['Tables']['follows'];
- * there are no `as any` casts.
- */
-
-type FollowRow = Database['public']['Tables']['follows']['Row'];
-type FollowInsert = Database['public']['Tables']['follows']['Insert'];
-
-/** The kind of entity being followed. */
+/** Social-graph helpers routed through backend API. */
 export type FolloweeType = 'user' | 'vendor';
 
-/** Result of a follow/unfollow toggle. */
 export interface ToggleFollowResult {
-  /** Whether the current user follows the target after the operation. */
   following: boolean;
-  /** Non-null when the operation failed; the UI should revert optimistic state. */
   error: string | null;
 }
 
-function targetColumn(type: FolloweeType): 'followee_user_id' | 'followee_vendor_id' {
-  return type === 'user' ? 'followee_user_id' : 'followee_vendor_id';
+function stateEndpoint(type: FolloweeType, targetId: string): string {
+  return resolveDataEndpoint(
+    `/api/v1/follows/${type}/${encodeURIComponent(targetId)}`
+  );
 }
 
-/**
- * Count how many followers a target (user or vendor) has.
- * Uses a HEAD count query so no rows are transferred.
- */
 export async function getFollowerCount(
   type: FolloweeType,
   targetId: string
 ): Promise<number> {
-  const { count, error } = await supabase
-    .from('follows')
-    .select('id', { count: 'exact', head: true })
-    .eq(targetColumn(type), targetId);
-
-  if (error) {
-    console.error('getFollowerCount failed:', error.message);
+  try {
+    const { followerCount } = await getJson<{ following: boolean; followerCount: number }>(
+      stateEndpoint(type, targetId)
+    );
+    return followerCount;
+  } catch (error) {
+    console.error('getFollowerCount failed:', error);
     return 0;
   }
-  return count ?? 0;
 }
 
-/**
- * Whether `followerId` currently follows the given target. Returns false when
- * `followerId` is empty (logged-out) without hitting the network.
- */
 export async function isFollowing(
-  followerId: string | null | undefined,
+  _followerId: string | null | undefined,
   type: FolloweeType,
   targetId: string
 ): Promise<boolean> {
-  if (!followerId) return false;
-
-  const { data, error } = await supabase
-    .from('follows')
-    .select('id')
-    .eq('follower_id', followerId)
-    .eq(targetColumn(type), targetId)
-    .maybeSingle();
-
-  if (error) {
-    console.error('isFollowing failed:', error.message);
+  if (!_followerId) return false;
+  try {
+    const { following } = await getJson<{ following: boolean; followerCount: number }>(
+      stateEndpoint(type, targetId)
+    );
+    return following;
+  } catch (error) {
+    console.error('isFollowing failed:', error);
     return false;
   }
-  return Boolean(data);
 }
 
-/**
- * Follow a target. Idempotent from the caller's perspective: a duplicate
- * follow (unique-index violation, code 23505) is treated as success.
- */
 export async function follow(
-  followerId: string,
+  _followerId: string,
   type: FolloweeType,
   targetId: string
 ): Promise<ToggleFollowResult> {
-  const payload: FollowInsert = {
-    follower_id: followerId,
-    followee_type: type,
-    followee_user_id: type === 'user' ? targetId : null,
-    followee_vendor_id: type === 'vendor' ? targetId : null,
-  };
-
-  const { error } = await supabase.from('follows').insert<FollowInsert>(payload);
-
-  if (error && error.code !== '23505') {
-    console.error('follow failed:', error.message);
-    return { following: false, error: error.message };
+  try {
+    const result = await postJsonTyped<{ following: boolean; followerCount: number }>(
+      resolveDataEndpoint('/api/v1/follows'),
+      { body: { followeeType: type, followeeId: targetId } }
+    );
+    return { following: result.following, error: null };
+  } catch (error) {
+    return { following: false, error: error instanceof Error ? error.message : 'Follow failed' };
   }
-  return { following: true, error: null };
 }
 
-/** Unfollow a target. A no-op delete (nothing matched) is still success. */
 export async function unfollow(
-  followerId: string,
+  _followerId: string,
   type: FolloweeType,
   targetId: string
 ): Promise<ToggleFollowResult> {
-  const { error } = await supabase
-    .from('follows')
-    .delete()
-    .eq('follower_id', followerId)
-    .eq(targetColumn(type), targetId);
-
-  if (error) {
-    console.error('unfollow failed:', error.message);
-    return { following: true, error: error.message };
+  try {
+    const result = await deleteJson<{ following: boolean; followerCount: number }>(
+      stateEndpoint(type, targetId)
+    );
+    return { following: result.following, error: null };
+  } catch (error) {
+    return { following: true, error: error instanceof Error ? error.message : 'Unfollow failed' };
   }
-  return { following: false, error: null };
 }
 
-/**
- * Toggle follow state for a target based on the current `following` flag.
- * Callers typically apply an optimistic UI update, then reconcile with the
- * returned result (reverting on `error`).
- */
 export async function toggleFollow(
   followerId: string,
   type: FolloweeType,
@@ -136,34 +89,11 @@ export async function toggleFollow(
     : follow(followerId, type, targetId);
 }
 
-/**
- * Return the set of target IDs (of the given type) that `followerId` follows,
- * restricted to `candidateIds`. Used to batch-resolve follow-state for a list
- * (e.g. post authors in the feed) with a single query.
- */
+/** No direct follow-table reads remain; query state endpoint per target. */
 export async function getFollowingSet(
-  followerId: string | null | undefined,
-  type: FolloweeType,
-  candidateIds: string[]
+  _followerId: string | null | undefined,
+  _type: FolloweeType,
+  _candidateIds: string[]
 ): Promise<Set<string>> {
-  const result = new Set<string>();
-  if (!followerId || candidateIds.length === 0) return result;
-
-  const column = targetColumn(type);
-  const { data, error } = await supabase
-    .from('follows')
-    .select(column)
-    .eq('follower_id', followerId)
-    .in(column, candidateIds);
-
-  if (error) {
-    console.error('getFollowingSet failed:', error.message);
-    return result;
-  }
-
-  for (const row of (data ?? []) as Pick<FollowRow, typeof column>[]) {
-    const value = row[column];
-    if (value) result.add(value);
-  }
-  return result;
+  return new Set<string>();
 }

@@ -1,19 +1,22 @@
-import { supabase } from '../../../shared/api/supabaseClient';
+import { getJson } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
 import { CustomizeCatalog, ServiceImageRow, ServiceRow, VendorRow } from '../types';
 import { ALLOWED_CUSTOMIZE_CATEGORIES, isServiceInCategory } from '../utils/category';
 
 export const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1000';
 
 export async function fetchCustomizeCatalog(): Promise<CustomizeCatalog | null> {
-  const { data: serviceData } = await supabase.from('services').select('*');
-  const { data: imageData } = await supabase.from('service_images').select('*');
-  const { data: vendorData } = await supabase.from('vendors').select('*');
+  const catalog = await getJson<{
+    services: ServiceRow[];
+    serviceImages: ServiceImageRow[];
+    vendors: VendorRow[];
+  }>(resolveDataEndpoint('/api/v1/catalog/customize'));
 
-  if (!serviceData || serviceData.length === 0) return null;
+  if (catalog.services.length === 0) return null;
 
-  const services = serviceData as ServiceRow[];
-  const vendorsById = buildVendorMap((vendorData || []) as VendorRow[]);
-  const imagesByServiceId = buildServiceImageMap(services, (imageData || []) as ServiceImageRow[]);
+  const services = catalog.services;
+  const vendorsById = buildVendorMap(catalog.vendors);
+  const imagesByServiceId = buildServiceImageMap(services, catalog.serviceImages);
   const discoveredTabs = Array.from(new Set(services.map(service => service.category).filter(Boolean))) as string[];
   const tabs = discoveredTabs.filter(category => ALLOWED_CUSTOMIZE_CATEGORIES.includes(category));
 
