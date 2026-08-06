@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'backend/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.config.ts'
-      - '.github/workflows/deploy-ui.yml'
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -54,6 +47,9 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
+
+      - name: Add SPA fallback
+        run: cp dist/index.html dist/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
