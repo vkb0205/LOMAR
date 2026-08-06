@@ -116,23 +116,79 @@ In your GitHub repository:
 
 ### 2. Push to `main`
 
-The workflow [`.github/workflows/deploy-ui.yml`](.github/workflows/deploy-ui.yml) will automatically build and deploy the frontend.
+The workflow [`.github/workflows/deploy-ui.yml`](.github/workflows/deploy-ui.yml) builds and deploys the frontend automatically.
 
-Your site will be available at:
+The live site is:
 
 ```text
-https://<your-github-username>.github.io/LOMAR/
+https://vkb0205.github.io/LOMAR/
 ```
 
-### 3. Update backend URL
+The workflow sets `VITE_BASE_PATH` to `/<repo-name>/`, which drives both the Vite
+asset base and the React Router basename. It also copies `index.html` to
+`404.html` so deep links like `/LOMAR/explore` survive a hard refresh — Pages has
+no server-side rewrite.
 
-After deploying the backend, update `.env.local`:
+### 3. Backend URL
+
+The deployed API is `https://lomar-backend.onrender.com`, baked in at build time
+as `VITE_BACKEND_URL` by the workflow.
+
+Note that `.env.local` is gitignored and used for local development only; it has
+no effect on CI builds. To change the deployed backend without editing the
+workflow, add a repository variable (**Settings → Secrets and variables →
+Actions → Variables**):
+
+| Variable      | Value                                  |
+| ------------- | -------------------------------------- |
+| `BACKEND_URL` | `https://your-backend.onrender.com`     |
+
+This value must be a full absolute URL. If it is empty the app falls back to
+relative `/api/...` paths, which only work behind the Vite dev proxy and will
+404 against the static Pages host in production.
+
+### 4. Supabase credentials
+
+Auth and direct database reads need these repository *secrets* (**Settings →
+Secrets and variables → Actions → Secrets**):
+
+| Secret                    | Value                        |
+| ------------------------- | ---------------------------- |
+| `VITE_SUPABASE_URL`       | Your Supabase project URL    |
+| `VITE_SUPABASE_ANON_KEY`  | Your Supabase anon key       |
+
+These are compiled into a public JavaScript bundle, so only ever use the
+anon/publishable key — never the service-role key. The build still succeeds
+without them, but auth-dependent features will silently fail at runtime.
+
+### 5. Backend CORS
+
+The backend allowlists origins explicitly and never uses `*`. The Pages origin
+must be present in the backend's `ALLOWED_ORIGINS` environment variable on
+Render (origin only, no path):
 
 ```env
-VITE_VTON_BACKEND_URL="https://lomar-vton-backend-xxxxx.a.run.app"
+ALLOWED_ORIGINS=http://localhost:3000,https://vkb0205.github.io
 ```
 
-Then push again to redeploy the UI.
+Verify it is applied:
+
+```bash
+curl -i -X OPTIONS https://lomar-backend.onrender.com/api/v1/catalog/vendors \
+  -H "Origin: https://vkb0205.github.io" \
+  -H "Access-Control-Request-Method: GET"
+```
+
+The response should include
+`access-control-allow-origin: https://vkb0205.github.io`.
+
+### Troubleshooting: a push did not deploy
+
+The workflow uses a `pages` concurrency group. If a run stalls, it holds that
+lock and GitHub may create **no run at all** for later pushes, so `main` appears
+to stop deploying. Check <https://www.githubstatus.com> first — an Actions or
+Pages outage produces exactly this symptom. Then cancel any stuck run under the
+**Actions** tab and re-run the latest one via **Run workflow**.
 
 ## Deploy Backend to Google Cloud Run
 
