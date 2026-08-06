@@ -114,7 +114,7 @@ on one provider and avoids depending on GitHub Actions availability.
 
 1. In the Render dashboard choose **New → Blueprint**
 2. Connect this repository and select the branch (`main`)
-3. Render reads [`render.yaml`](render.yaml) and creates the `lomar-frontend`
+3. Render reads [`render.yaml`](render.yaml) and creates the `lomar`
    static site
 4. When prompted, enter the two `sync: false` values: `VITE_SUPABASE_URL` and
    `VITE_SUPABASE_ANON_KEY`
@@ -127,7 +127,7 @@ Subsequent pushes to the branch redeploy automatically.
 Render assigns something like:
 
 ```text
-https://lomar-frontend.onrender.com
+https://lomar.onrender.com
 ```
 
 Unlike GitHub Pages, the site is served from the **domain root**, so
@@ -141,7 +141,7 @@ about the frontend's origin. Set `ALLOWED_ORIGINS` on the **backend** service
 (origin only — scheme + host, no path, no trailing slash):
 
 ```env
-ALLOWED_ORIGINS=https://lomar-frontend.onrender.com
+ALLOWED_ORIGINS=https://lomar.onrender.com
 ```
 
 Values in a `render.yaml` are applied when the blueprint is first synced.
@@ -153,12 +153,12 @@ Verify:
 
 ```bash
 curl -i -X OPTIONS https://lomar-backend.onrender.com/api/v1/catalog/vendors \
-  -H "Origin: https://lomar-frontend.onrender.com" \
+  -H "Origin: https://lomar.onrender.com" \
   -H "Access-Control-Request-Method: GET"
 ```
 
 The response must echo
-`access-control-allow-origin: https://lomar-frontend.onrender.com`. If the
+`access-control-allow-origin: https://lomar.onrender.com`. If the
 header is absent, the origin is not on the allowlist and the browser will block
 every API call.
 

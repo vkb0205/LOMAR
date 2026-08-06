@@ -14,7 +14,9 @@ services:
   # staticPublishPath/routes here.
   - type: web
     runtime: static
-    name: lomar-frontend
+    # Determines the assigned *.onrender.com host, which must match the
+    # backend's ALLOWED_ORIGINS entry exactly.
+    name: lomar
     # No `plan` key: static sites have no instance type and the schema rejects
     # it (staticService sets additionalProperties: false).
     buildCommand: npm ci && npm run build
