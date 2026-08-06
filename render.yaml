@@ -1,0 +1,71 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec).
+#
+# Deploys the Vite/React frontend as a static site. The FastAPI backend lives in
+# a separate repository with its own render.yaml, so this file defines the UI
+# service only.
+#
+# No secret is committed here: every value is either public by nature (it is
+# compiled into a browser bundle and therefore readable by anyone who loads the
+# page) or declared `sync: false` so Render prompts for it in the dashboard.
+services:
+  # Static sites are `type: web` with `runtime: static` (verified against
+  # https://render.com/schema/render.yaml.json, definition "staticService").
+  # Some editor-bundled copies of the schema are stale and incorrectly flag
+  # staticPublishPath/routes here.
+  - type: web
+    runtime: static
+    name: lomar-frontend
+    # No `plan` key: static sites have no instance type and the schema rejects
+    # it (staticService sets additionalProperties: false).
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+
+    # Only rebuild when something that affects the bundle changes, so that
+    # docs-only commits do not burn free-tier build minutes. render.yaml is
+    # included because a change to the env vars below must produce a new
+    # bundle — they are inlined at build time, not read at runtime.
+    buildFilter:
+      paths:
+        - src/**
+        - public/**
+        - index.html
+        - package.json
+        - package-lock.json
+        - vite.config.ts
+        - tsconfig.json
+        - render.yaml
+
+    envVars:
+      # Served from the domain root, so the Vite asset base and the React Router
+      # basename are both "/". This is the key difference from GitHub Pages,
+      # which serves under a "/<repo-name>/" subpath.
+      - key: VITE_BASE_PATH
+        value: /
+
+      # Absolute URL of the API. Must not be empty: the frontend falls back to
+      # relative /api/... paths that only resolve through the Vite dev proxy,
+      # which does not exist in a static production deploy.
+      - key: VITE_BACKEND_URL
+        value: https://lomar-backend.onrender.com
+
+      # Supabase browser credentials. Entered in the dashboard rather than
+      # committed. Use only the anon/publishable key — never the service-role
+      # key, which would grant full database access to every visitor.
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+
+    # Client-side routing: React Router owns paths like /explore and
+    # /vendor/:id, but a hard refresh or shared link asks Render for that path
+    # directly and there is no such file on disk. Rewriting to /index.html lets
+    # the app boot and resolve the route. A rewrite (not a redirect) preserves
+    # the URL in the address bar.
+    #
+    # This is a rewrite of last resort: Render matches routes in order and
+    # serves existing static files first, so real assets under /assets/* are
+    # unaffected.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

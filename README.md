@@ -104,7 +104,79 @@ npm run dev
 
 Frontend runs at `http://localhost:3000`.
 
-## Deploy Frontend to GitHub Pages
+## Deploy Frontend to Render (recommended)
+
+The frontend deploys as a Render **static site** via
+[`render.yaml`](render.yaml). Hosting it alongside the API keeps both services
+on one provider and avoids depending on GitHub Actions availability.
+
+### 1. Create the static site
+
+1. In the Render dashboard choose **New → Blueprint**
+2. Connect this repository and select the branch (`main`)
+3. Render reads [`render.yaml`](render.yaml) and creates the `lomar-frontend`
+   static site
+4. When prompted, enter the two `sync: false` values: `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY`
+
+Render then builds with `npm ci && npm run build` and publishes `./dist`.
+Subsequent pushes to the branch redeploy automatically.
+
+### 2. Note the assigned URL
+
+Render assigns something like:
+
+```text
+https://lomar-frontend.onrender.com
+```
+
+Unlike GitHub Pages, the site is served from the **domain root**, so
+`VITE_BASE_PATH` is `/` (set in [`render.yaml`](render.yaml)). There is no
+`/<repo-name>/` subpath.
+
+### 3. Allow the origin on the backend
+
+CORS is an explicit allowlist and `*` is rejected, so the backend must be told
+about the frontend's origin. Set `ALLOWED_ORIGINS` on the **backend** service
+(origin only — scheme + host, no path, no trailing slash):
+
+```env
+ALLOWED_ORIGINS=https://lomar-frontend.onrender.com
+```
+
+Values in a `render.yaml` are applied when the blueprint is first synced.
+Render does not overwrite them on an already-running service, so for the
+existing backend change this in **Dashboard → lomar-backend → Environment**.
+Saving triggers a redeploy; the new value is not live until that finishes.
+
+Verify:
+
+```bash
+curl -i -X OPTIONS https://lomar-backend.onrender.com/api/v1/catalog/vendors \
+  -H "Origin: https://lomar-frontend.onrender.com" \
+  -H "Access-Control-Request-Method: GET"
+```
+
+The response must echo
+`access-control-allow-origin: https://lomar-frontend.onrender.com`. If the
+header is absent, the origin is not on the allowlist and the browser will block
+every API call.
+
+### Notes
+
+- **Free-tier backend cold starts.** The API sleeps when idle and can take
+  ~30–60s to answer the first request. The static frontend does not sleep, so
+  the UI loads instantly while initial data appears slow.
+- **Deep links.** [`render.yaml`](render.yaml) rewrites `/*` to `/index.html`
+  so refreshing `/explore` or sharing `/vendor/:id` works. Existing files are
+  matched first, so real assets are unaffected.
+- **`.env.local` is not used.** It is gitignored and local-only; deployed
+  values come from `render.yaml` and the dashboard.
+
+## Deploy Frontend to GitHub Pages (alternative)
+
+> Superseded by the Render static site above. Kept for reference — the two can
+> coexist as long as both origins are in the backend's `ALLOWED_ORIGINS`.
 
 ### 1. Enable GitHub Pages
 
