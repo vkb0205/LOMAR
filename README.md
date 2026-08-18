@@ -54,6 +54,7 @@ APP_URL="http://localhost:3000"
 VITE_SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
 VITE_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 VITE_VTON_BACKEND_URL="http://localhost:3003"
+VITE_AGENT_SERVICE_URL="http://localhost:8090"
 VITE_VTON_ENDPOINT="/test-try-on-upload"
 ```
 

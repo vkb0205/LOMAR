@@ -26,6 +26,7 @@ export default defineConfig(({ mode, command }) => {
   // both the legacy VTON paths and the versioned /api/v1 application-data
   // routes, so both proxy entries below point at the same target.
   const backendUrl = env.VITE_BACKEND_URL || env.VITE_VTON_BACKEND_URL || 'http://localhost:8080';
+  const agentServiceUrl = env.VITE_AGENT_SERVICE_URL || 'http://localhost:8090';
 
   return {
     base: basePath,
@@ -48,6 +49,11 @@ export default defineConfig(({ mode, command }) => {
         '/api/v1': {
           target: backendUrl,
           changeOrigin: true,
+        },
+        '/api/agent': {
+          target: agentServiceUrl,
+          changeOrigin: true,
+          rewrite: (requestPath) => requestPath.replace(/^\/api\/agent/, ''),
         },
       },
     },

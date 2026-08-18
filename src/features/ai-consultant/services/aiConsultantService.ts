@@ -1,5 +1,5 @@
-import { resolveBackendEndpoint } from '../../../shared/api/backendConfig';
-import { postJson } from '../../../shared/api/backendClient';
+import { resolveAgentEndpoint } from '../../../shared/api/agentConfig';
+import { getAccessToken } from '../../../shared/api/supabaseClient';
 import {
   ConsultHistoryMessage,
   ConsultReplyResult,
@@ -62,23 +62,45 @@ export async function requestConsultReply(
     .slice(-MAX_HISTORY_TURNS);
   const sessionId = readSessionId();
 
-  const response = await postJson<ConsultResponse>(resolveBackendEndpoint('/consult'), {
-    body: {
-      message,
-      ...(sessionId ? { sessionId } : {}),
-      ...(trimmedHistory.length > 0 ? { history: trimmedHistory } : {}),
+  const accessToken = await getAccessToken();
+  const response = await fetch(resolveAgentEndpoint('/api/v1/agents/consultant/execute'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
+    body: JSON.stringify({
+      session_id: sessionId,
+      input: {
+        message,
+        ...(sessionId ? { sessionId } : {}),
+        ...(trimmedHistory.length > 0 ? { history: trimmedHistory } : {}),
+      },
+    }),
   });
 
   if (!response.ok) {
-    console.error('Consult endpoint returned non-OK status', response.status);
+    let detail: unknown = null;
+    try {
+      detail = await response.json();
+    } catch {
+      // Keep the user-facing fallback stable when the Agent Service returns a
+      // non-JSON error such as a gateway/proxy response.
+    }
+    console.error('Agent Service consultant endpoint returned non-OK status', {
+      status: response.status,
+      detail,
+    });
     return { reply: CONSULT_FALLBACK_MESSAGE, retrievedServices: [] };
   }
 
-  saveSessionId(response.parsedBody?.sessionId);
+  const envelope = (await response.json()) as { output?: ConsultResponse };
+  const body = envelope.output;
+
+  saveSessionId(body?.sessionId);
   return {
-    reply: response.parsedBody?.reply?.trim() || CONSULT_FALLBACK_MESSAGE,
-    retrievedServices: normalizeRetrievedServices(response.parsedBody?.retrievedServices),
+    reply: body?.reply?.trim() || CONSULT_FALLBACK_MESSAGE,
+    retrievedServices: normalizeRetrievedServices(body?.retrievedServices),
   };
 }
 
