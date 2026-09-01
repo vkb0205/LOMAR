@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../shared/layout/Layout';
 import Home from '../features/home/HomePage';
-import Customize from '../features/customize/CustomizePage';
 import Services from '../features/vendors/ServicesPage';
 import Blog from '../features/blog/BlogPage';
 import Guide from '../features/guide/GuidePage';
@@ -36,7 +35,6 @@ export function AppRouter() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="explore" element={<Services />} />
-          <Route path="customize" element={<Customize />} />
           <Route path="blog" element={<Blog />} />
           <Route path="guide" element={<Guide />} />
           <Route path="ai-consultant" element={<AIConsultant />} />

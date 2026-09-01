@@ -41,7 +41,7 @@ export function VendorServiceCard({ index, service }: VendorServiceCardProps) {
           <span className="font-bold text-[#1B2C40]">
             {Number(service.base_price).toLocaleString('vi-VN')} <span className="text-[10px] font-normal">VND</span>
           </span>
-          <Link to="/customize" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F2BFC8] hover:bg-[#F2BFC8] hover:text-white transition-all">
+          <Link to="/ai-consultant" className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-[#F2BFC8] hover:bg-[#F2BFC8] hover:text-white transition-all">
             <ShoppingBag className="w-4 h-4" />
           </Link>
         </div>

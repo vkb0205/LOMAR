@@ -167,7 +167,7 @@ export default function VendorDetail() {
             <p className="text-white/70 max-w-2xl mx-auto mb-10 text-sm md:text-base">
               Hãy để Bé Song Hỷ đồng hành cùng bạn tạo nên những dấu ấn độc bản cho ngày cưới.
             </p>
-            <Link to="/customize"
+            <Link to="/ai-consultant"
               className="inline-flex items-center gap-3 bg-[#F2BFC8] text-white px-10 py-4 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-rose-400 transition-all shadow-lg hover:-translate-y-1">
               THỬ NGAY <ArrowLeft className="w-4 h-4 rotate-180" />
             </Link>

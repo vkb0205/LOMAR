@@ -1,7 +1,6 @@
 import React from 'react';
 import { Send, Sparkles } from 'lucide-react';
-import type { ConsultantMessage, RetrievedService } from '../../ai-consultant/types';
-import { RetrievedServiceRow } from '../../ai-consultant/components/RetrievedServiceRow';
+import type { ConsultantMessage } from '../../ai-consultant/types';
 
 interface ServicesChatProps {
   chatContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -10,7 +9,6 @@ interface ServicesChatProps {
   messages: ConsultantMessage[];
   onGenerate: () => void;
   onInputChange: (value: string) => void;
-  retrievedServices: RetrievedService[];
 }
 
 export function ServicesChat({
@@ -20,7 +18,6 @@ export function ServicesChat({
   messages,
   onGenerate,
   onInputChange,
-  retrievedServices,
 }: ServicesChatProps) {
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-[32px] shadow-sm border border-[#ffdb9f]/30 flex flex-col relative overflow-hidden h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)]">
@@ -56,8 +53,6 @@ export function ServicesChat({
         )}
       </div>
 
-      <RetrievedServiceRow services={retrievedServices} variant="sand" />
-
       <div className="relative z-10 w-full mt-auto px-4 pt-4 pb-4 bg-white/50 backdrop-blur-md border-t border-[#ffdb9f]/30">
         <input
           type="text"
@@ -78,4 +73,3 @@ export function ServicesChat({
     </div>
   );
 }
-

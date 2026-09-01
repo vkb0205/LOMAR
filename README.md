@@ -19,7 +19,7 @@ hooks, data access, and types together. Cross-feature infrastructure lives in
 ```text
 src/
   app/          # Application composition and router
-  features/     # admin, auth, blog, consultant, customize, dashboard, ...
+  features/     # admin, auth, blog, consultant, dashboard, ...
   shared/       # API clients, route config, layout, generated database types
   assets/
   main.tsx

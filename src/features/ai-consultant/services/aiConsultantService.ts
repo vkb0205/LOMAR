@@ -4,7 +4,6 @@ import {
   ConsultHistoryMessage,
   ConsultReplyResult,
   ConsultResponse,
-  RetrievedService,
 } from '../types';
 
 const CONSULT_FALLBACK_MESSAGE =
@@ -36,21 +35,6 @@ function saveSessionId(sessionId: string | undefined): void {
   } catch {
     // Non-fatal: backend memory remains available for the current response.
   }
-}
-
-/**
- * Keep only rows the card row can actually render.
- *
- * An entry with no `id` has no stable key and no link target, so it is dropped
- * rather than rendered as a dead card. The backend already filters these; this
- * is defence against a older/newer server shape, not redundancy.
- */
-function normalizeRetrievedServices(raw: unknown): RetrievedService[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.filter(
-    (item): item is RetrievedService =>
-      typeof item === 'object' && item !== null && typeof (item as RetrievedService).id === 'string',
-  );
 }
 
 export async function requestConsultReply(
@@ -91,7 +75,7 @@ export async function requestConsultReply(
       status: response.status,
       detail,
     });
-    return { reply: CONSULT_FALLBACK_MESSAGE, retrievedServices: [] };
+    return { reply: CONSULT_FALLBACK_MESSAGE };
   }
 
   const envelope = (await response.json()) as { output?: ConsultResponse };
@@ -100,7 +84,6 @@ export async function requestConsultReply(
   saveSessionId(body?.sessionId);
   return {
     reply: body?.reply?.trim() || CONSULT_FALLBACK_MESSAGE,
-    retrievedServices: normalizeRetrievedServices(body?.retrievedServices),
   };
 }
 

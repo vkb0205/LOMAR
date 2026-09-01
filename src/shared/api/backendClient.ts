@@ -133,8 +133,8 @@ export async function deleteJson<TResponse>(
 
 /**
  * @deprecated Legacy VTON contract helper (unversioned `/api/vton/*`
- * endpoints, FR-012). Kept unchanged so `customizePreviewService.ts` and
- * `aiConsultantService.ts` keep working; new `/api/v1/*` code should use
+ * endpoints, FR-012). Kept unchanged for legacy VTON integrations; new
+ * `/api/v1/*` code should use
  * `getJson`/`postJsonTyped`/`putJson`/`patchJson`/`deleteJson` above.
  */
 export async function postJson<TResponse>(

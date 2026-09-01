@@ -4,7 +4,7 @@
 
 LOMAR is a wedding-service ecosystem web application for **Phố Hạnh Phúc Hồ Văn Huê**. It combines a React/Vite frontend, Supabase-backed data features, local demo authentication, AI-assisted wedding consultation, wedding-service discovery, user journey tracking, voucher unlocking, and a Python FastAPI virtual try-on backend powered by Google Vertex AI / Google GenAI image models.
 
-The product is designed around the Vietnamese wedding-planning journey: users discover vendors, customize wedding products and services, generate AI mannequin previews, track preparation milestones, unlock vouchers, read community content, and interact with the Bé Song Hỷ assistant.
+The product is designed around the Vietnamese wedding-planning journey: users discover vendors and services, receive AI-assisted consultation, track preparation milestones, unlock vouchers, read community content, and interact with the Bé Song Hỷ assistant.
 
 ## 2. Goals and Product Vision
 
@@ -12,8 +12,6 @@ The product is designed around the Vietnamese wedding-planning journey: users di
 
 - Provide a polished, mobile-responsive wedding ecosystem portal for Hồ Văn Huê.
 - Let couples explore vendors and services by category.
-- Let couples customize wedding-related products such as wedding dresses and suits.
-- Generate realistic virtual try-on previews from mannequin and product images.
 - Persist user progress, saved designs, chat messages, posts, vendors, vouchers, and related marketplace data through Supabase.
 - Support static frontend deployment through GitHub Pages.
 - Support containerized backend deployment through Docker and Google Cloud Run.
@@ -165,7 +163,6 @@ Routes:
 | --- | --- | --- |
 | `/` | Home | Landing page for Phố Hạnh Phúc story and journey categories. |
 | `/explore` | Services | Vendor/service discovery with category and search filters. |
-| `/customize` | Customize | Product customization, pricing, chat, and VTON preview generation. |
 | `/blog` | Blog | Community/social feed sourced from Supabase posts and related tables. |
 | `/guide` | Guide | Wedding preparation checklist and educational content. |
 | `/ai-consultant` | AIConsultant | Chat-like consultant with product suggestions. |
@@ -186,17 +183,9 @@ The `Layout` component wraps routed pages with navbar, footer, and floating assi
 - `authLoading`: initial session bootstrap state.
 - `signIn`, `signUp`, and `signOut`: Supabase authentication operations.
 
-`CustomizationProvider` exposes:
-
-- `customizedServices`: map keyed by category containing selected product, selected options, price, vendor, and image data.
-- `saveCustomizedService`: persists customized services into localStorage.
-
-Consumers use `useAuth` or `useCustomization` directly. There is no combined application-context adapter.
+Consumers use `useAuth` directly. There is no combined application-context adapter.
 
 ### 8.2 LocalStorage Keys
-
-- `customizedServices`: current category customization selections and totals.
-- `lomar_customize_temp_preview`: generated VTON preview image cache keyed by category/product/mannequin.
 
 ## 9. Supabase Integration
 
@@ -292,28 +281,7 @@ Capabilities:
 
 The route exists as `/vendor/:vendorId`. It is expected to show detailed vendor/service information for the selected vendor. The implementation should be reviewed and kept aligned with the vendor and product schema.
 
-### 10.4 Customize
-
-The Customize page is one of the core application modules.
-
-Capabilities:
-
-- Fetch products, product images, vendors, customization options, customization values, and product-option mappings from Supabase.
-- Restrict visible customization categories to `Váy Cưới`, `Vest`, and `Venue`.
-- Show `Venue` as a coming-soon state.
-- Let users select a base product by category.
-- Show allowed customization option groups for the active product.
-- Translate selected English option values into Vietnamese labels for known options.
-- Compute current price as product base price plus selected option extra prices.
-- Persist active customized service summary to context and localStorage.
-- Let users select male/female mannequin images.
-- Build a generation prompt from product, vendor, selected options, and custom user prompt.
-- Call backend VTON upload endpoint using `FormData`.
-- Display generated image preview and persist preview in localStorage.
-- Write user and assistant chat events to `chat_messages`.
-- Save a design into `user_designs` and `user_design_selections`.
-
-### 10.5 Virtual Try-On Preview Flow
+### 10.4 Virtual Try-On Preview Flow
 
 Frontend flow:
 
@@ -916,7 +884,7 @@ Used by:
 
 - Floating chat.
 - AI Consultant.
-- Customize assistant/chat.
+- AI Consultant assistant/chat.
 
 Note: multiple chat surfaces share one table and sometimes use different user ID strategies. For production, chat sessions should be scoped by explicit surface/session/user identifiers.
 
@@ -1019,9 +987,7 @@ Manual checks:
 - Explore fetches vendors and filters by category/search.
 - Login demo accounts persist into dashboard.
 - Dashboard toggles tasks and unlocks vouchers.
-- Customize loads product categories and options.
-- Customize saves design rows.
-- VTON preview generation works when backend is configured.
+- AI Consultant loads product suggestions.
 - Blog displays posts and metadata.
 - Floating chat opens and stores messages.
 
@@ -1072,8 +1038,7 @@ Backend:
 ## 18. Known Issues and Technical Debt
 
 1. `package.json` backend scripts reference `../vton_test_ui`, which does not match the in-repository `backend` folder.
-2. Frontend environment variable naming is inconsistent: README mentions `VITE_VTON_ENDPOINT`, while Customize reads `VITE_VERTEX_AI_ENDPOINT`.
-3. TypeScript database definitions omit tables/views used by Customize and Dashboard.
+2. TypeScript database definitions omit tables/views used by Dashboard.
 4. Demo authentication is local-only and insecure for production.
 5. FloatingChat reads all chat messages without user scoping.
 6. AI Consultant is not a real LLM despite its UI naming.

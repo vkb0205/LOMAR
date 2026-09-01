@@ -19,7 +19,6 @@ src/
     auth/
     blog/
     chat/
-    customize/
     dashboard/
     guide/
     home/

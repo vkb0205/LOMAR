@@ -74,7 +74,6 @@ export default function Services() {
               messages={chat.messages}
               onGenerate={chat.onGenerate}
               onInputChange={chat.setInputValue}
-              retrievedServices={chat.retrievedServices}
             />
           </aside>
         </div>
@@ -86,4 +85,3 @@ export default function Services() {
     </div>
   );
 }
-

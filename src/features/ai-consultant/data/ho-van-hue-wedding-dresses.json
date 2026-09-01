@@ -1,0 +1,110 @@
+[
+  {
+    "id": "hvh-001",
+    "name": "Ahihi Studio",
+    "type": "Studio váy cưới",
+    "address": "170 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8023063,
+    "lng": 106.6764589,
+    "phone": "0978 880 150"
+  },
+  {
+    "id": "hvh-002",
+    "name": "Nha – Wedding and Studio",
+    "type": "Studio váy cưới",
+    "address": "220/18 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8001962,
+    "lng": 106.675275,
+    "phone": "0902 334 225"
+  },
+  {
+    "id": "hvh-003",
+    "name": "KTIU LUXURY",
+    "type": "Váy cưới & chụp ảnh",
+    "address": "154 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8029778,
+    "lng": 106.6768535,
+    "phone": ""
+  },
+  {
+    "id": "hvh-004",
+    "name": "TuArt Wedding",
+    "type": "Váy cưới cao cấp",
+    "address": "147 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8033606,
+    "lng": 106.676864,
+    "phone": "028 3913 8888"
+  },
+  {
+    "id": "hvh-005",
+    "name": "Quyên Nguyễn Bridal",
+    "type": "Thiết kế & cho thuê váy cưới",
+    "address": "115 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8047175,
+    "lng": 106.6776156,
+    "phone": "0842 880 066"
+  },
+  {
+    "id": "hvh-006",
+    "name": "TYMIE BRIDAL",
+    "type": "Váy cưới & dịch vụ cưới",
+    "address": "117 Hồ Văn Huê, Phú Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8046329,
+    "lng": 106.6775681,
+    "phone": "0931 234 709"
+  },
+  {
+    "id": "hvh-007",
+    "name": "Gallery Bridal",
+    "type": "Váy cưới & dịch vụ cưới",
+    "address": "119 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh 72200, Vietnam",
+    "lat": 10.8045483,
+    "lng": 106.6775207,
+    "phone": "0931 234 709"
+  },
+  {
+    "id": "hvh-008",
+    "name": "CEM Bridal Studio",
+    "type": "Váy cưới & dịch vụ cưới",
+    "address": "123 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.804379,
+    "lng": 106.6774257,
+    "phone": "0909 593 738"
+  },
+  {
+    "id": "hvh-009",
+    "name": "Gia Hưng Studio",
+    "type": "Váy cưới & chụp ảnh",
+    "address": "131-133 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8040405,
+    "lng": 106.6772359,
+    "phone": "0903 122 476"
+  },
+  {
+    "id": "hvh-010",
+    "name": "Blossom Hill Bridal",
+    "type": "Váy cưới & dịch vụ cưới",
+    "address": "168 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.802389,
+    "lng": 106.6765097,
+    "phone": "0903 626 080"
+  },
+  {
+    "id": "hvh-011",
+    "name": "Vera Studio",
+    "type": "Váy cưới & dịch vụ cưới",
+    "address": "176 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.8020585,
+    "lng": 106.6763197,
+    "phone": "0908 918 558"
+  },
+  {
+    "id": "hvh-012",
+    "name": "Phat Pro Studio",
+    "type": "Váy cưới & chụp ảnh",
+    "address": "234 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh, Vietnam",
+    "lat": 10.7996047,
+    "lng": 106.6750377,
+    "phone": "0981 735 554"
+  }
+]
