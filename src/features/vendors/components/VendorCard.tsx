@@ -1,11 +1,8 @@
-import { MapPin, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { VendorCardModel } from '../types';
-
-const fadeVariant = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+import { EASE } from '../../../shared/ui/motion';
+import { ArrowUpRightIcon } from '../../../shared/ui/icons';
 
 interface VendorCardProps {
   index: number;
@@ -18,39 +15,66 @@ export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
 
   return (
     <motion.div
-      variants={fadeVariant}
-      initial="hidden"
-      animate="visible"
-      transition={{ delay: index * 0.1 }}
+      initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: EASE }}
       onClick={() => onOpen(vendor.id)}
-      className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-rose-100 hover:shadow-md hover:-translate-y-1 transition-all group cursor-pointer flex flex-col"
+      className="group flex cursor-pointer flex-col rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile transition-all duration-700 ease-fluid hover:-translate-y-1.5 hover:bg-ink/8 hover:shadow-float"
     >
-      <div className="w-full aspect-[4/3] relative overflow-hidden bg-gray-100">
-        <img
-          src={vendor.img || fallbackImage}
-          alt={vendor.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-        />
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-[#1B2C40] uppercase tracking-widest shadow-sm">
-          {vendor.category}
-        </div>
-      </div>
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className="font-serif font-bold text-lg text-[#1B2C40] group-hover:text-[#314ad0] transition-colors leading-tight">{vendor.name}</h3>
-          <div className="flex items-center bg-[#ffe9c9] px-2 py-1 rounded-md text-[#ffcc7e] font-bold text-xs shrink-0">
-            <Star className="w-3 h-3 fill-current mr-1" />{vendor.rating || '5.0'}
+      {/* Inner core */}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-bezel-inner bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-canvas">
+          <img
+            src={vendor.img || fallbackImage}
+            alt={vendor.name}
+            className="h-full w-full object-cover transition-transform duration-700 ease-fluid group-hover:scale-105"
+          />
+          <div className="absolute top-4 left-4 rounded-full bg-canvas/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-ink">
+            {vendor.category}
           </div>
         </div>
-        {vendor.addr && (
-          <div className="flex items-center text-[#6B92B4] text-xs mb-4">
-            <MapPin className="w-3.5 h-3.5 mr-1 shrink-0" />
-            <span className="truncate">{vendor.addr}</span>
+
+        <div className="flex flex-1 flex-col p-5 md:p-6">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <h3 className="font-serif text-lg font-bold leading-tight text-ink transition-colors duration-500 group-hover:text-rose-deep">
+              {vendor.name}
+            </h3>
+            <div className="flex shrink-0 items-center rounded-full bg-cream px-2.5 py-1 text-[11px] font-bold text-ink-deep">
+              <Star strokeWidth={1.5} className="mr-1 h-3 w-3 fill-current" />
+              {vendor.rating || '5.0'}
+            </div>
           </div>
-        )}
-        <button className="mt-auto w-full py-3 bg-[#FAF6EE] text-[#1B2C40] rounded-full font-bold text-[10px] uppercase tracking-widest group-hover:bg-[#deebff] group-hover:text-[#091e8c] transition-colors border border-transparent">
-          XEM CHI TIẾT
-        </button>
+
+          {vendor.addr && (
+            <div className="mb-4 flex items-center text-xs text-ink/55">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1.5 h-3.5 w-3.5 shrink-0"
+                aria-hidden
+              >
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <span className="truncate">{vendor.addr}</span>
+            </div>
+          )}
+
+          {/* Button-in-button CTA */}
+          <div className="mt-auto flex w-full items-center justify-between rounded-full border border-ink/10 bg-canvas py-1.5 pr-1.5 pl-5 transition-all duration-500 ease-fluid group-hover:border-ink group-hover:bg-ink">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ink transition-colors duration-500 group-hover:text-canvas">
+              Xem chi tiết
+            </span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink/5 text-ink transition-all duration-500 ease-fluid group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105 group-hover:bg-white/10 group-hover:text-canvas">
+              <ArrowUpRightIcon className="h-3 w-3" />
+            </span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

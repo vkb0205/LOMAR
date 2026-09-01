@@ -1,5 +1,5 @@
-import { resolveBackendEndpoint } from '../../../shared/api/backendConfig';
-import { postJson } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
+import { postJsonTyped } from '../../../shared/api/backendClient';
 import {
   ConsultHistoryMessage,
   ConsultReplyResult,
@@ -62,7 +62,7 @@ export async function requestConsultReply(
     .slice(-MAX_HISTORY_TURNS);
   const sessionId = readSessionId();
 
-  const response = await postJson<ConsultResponse>(resolveBackendEndpoint('/consult'), {
+  const response = await postJsonTyped<ConsultResponse>(resolveDataEndpoint('/api/v1/chat/consult'), {
     body: {
       message,
       ...(sessionId ? { sessionId } : {}),
@@ -70,15 +70,10 @@ export async function requestConsultReply(
     },
   });
 
-  if (!response.ok) {
-    console.error('Consult endpoint returned non-OK status', response.status);
-    return { reply: CONSULT_FALLBACK_MESSAGE, retrievedServices: [] };
-  }
-
-  saveSessionId(response.parsedBody?.sessionId);
+  saveSessionId(response.sessionId ?? undefined);
   return {
-    reply: response.parsedBody?.reply?.trim() || CONSULT_FALLBACK_MESSAGE,
-    retrievedServices: normalizeRetrievedServices(response.parsedBody?.retrievedServices),
+    reply: response.reply?.trim() || CONSULT_FALLBACK_MESSAGE,
+    retrievedServices: normalizeRetrievedServices(response.retrievedServices),
   };
 }
 

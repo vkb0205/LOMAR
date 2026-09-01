@@ -114,7 +114,7 @@ export default function AdminLayout() {
           </div>
         )}
         <Link
-          to="/"
+          to={ROUTES.home}
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

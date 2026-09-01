@@ -1,122 +1,143 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Mail, MapPin, Phone, Heart } from 'lucide-react';
+import { Heart, Mail, MapPin, Phone } from 'lucide-react';
 import logoMainImg from '../../assets/images/Logo.png';
-
-function TiktokIcon({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      className={className}
-    >
-      <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z" />
-    </svg>
-  );
-}
+import { openContextualAssistant } from '../../features/chat/openAssistant';
+import { FOOTER_EXPLORE_LINKS } from '../config/navigation';
+import { ROUTES } from '../config/routes';
+import { ArrowUpRightIcon } from '../ui/icons';
+import { PillButton } from '../ui/PillButton';
+import { Reveal } from '../ui/Reveal';
+import { Sparkles } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-rose-100 pt-20 pb-10 px-4 w-full relative overflow-hidden">
-      
-      {/* Decorative Background Element */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-rose-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
-      
-      <div className="max-w-[1200px] mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
-          {/* Brand Column */}
-          <div className="flex flex-col gap-6">
-            <Link to="/" className="flex items-center gap-3 group py-1">
+    <footer className="relative w-full overflow-hidden bg-ink px-4 pt-24 pb-10 text-canvas">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_85%_0%,rgba(215,139,162,0.14),transparent_65%),radial-gradient(45%_55%_at_5%_100%,rgba(255,233,201,0.08),transparent_60%)]"
+      />
+
+      <div className="relative z-10 mx-auto max-w-[1200px]">
+        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.2fr]">
+          <Reveal className="flex flex-col gap-6" duration={0.7}>
+            <Link to={ROUTES.home} className="group flex items-center gap-3 self-start py-1">
               <img
                 src={logoMainImg}
-                alt="Logo Phố Hạnh Phúc Hồ Văn Huê"
-                className="h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+                alt="Logo Hạnh Phúc Tới Nơi · Hồ Văn Huê"
+                className="h-14 w-auto object-contain transition-transform duration-700 ease-fluid group-hover:scale-105"
               />
               <div className="flex flex-col justify-center">
-                <span className="text-xl font-serif font-bold text-[#1B2C40] tracking-wider uppercase leading-tight">
-                  PHỐ HẠNH PHÚC
+                <span className="font-serif text-xl font-bold leading-tight tracking-wide text-canvas">
+                  Hạnh Phúc Tới Nơi
                 </span>
-                <span className="text-[8px] text-[#1B2C40]/60 font-medium tracking-widest mt-0.5 uppercase">
-                  Wedding Platform
+                <span className="mt-1 text-[8px] font-medium uppercase tracking-[0.2em] text-canvas/55">
+                  Khu phố hạnh phúc · Hồ Văn Huê
                 </span>
               </div>
             </Link>
-            <p className="text-sm text-[#1B2C40]/70 leading-relaxed">
-              Hệ sinh thái dịch vụ cưới hỏi hàng đầu tại "Phố Cưới" Hồ Văn Huê. Nơi hiện thực hóa giấc mơ ngày trọng đại của mọi cặp đôi.
+            <p className="max-w-sm text-pretty text-sm leading-relaxed text-canvas/70">
+              Hệ sinh thái dịch vụ cưới hỏi tại "Phố Cưới" Hồ Văn Huê — khám phá dịch vụ, lập kế
+              hoạch và nhận tư vấn AI trong một hành trình.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-[#ffe9c9] flex items-center justify-center text-[#ffdb9f] hover:bg-[#ffdb9f] hover:text-white transition-all">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#ffe9c9] flex items-center justify-center text-[#ffdb9f] hover:bg-[#ffdb9f] hover:text-white transition-all">
-                <TiktokIcon className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">KHÁM PHÁ</h4>
-            <ul className="flex flex-col gap-4">
-              <li><Link to="/explore" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Dịch vụ cưới</Link></li>
-              <li><Link to="/customize" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Thiết kế phong cách</Link></li>
-              <li><Link to="/guide" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Cẩm nang cưới</Link></li>
-              <li><Link to="/blog" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Tin tức & Sự kiện</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">LIÊN HỆ</h4>
-            <ul className="flex flex-col gap-4">
-              <li className="flex items-start gap-3 text-sm text-[#1B2C40]/70">
-                <MapPin className="w-5 h-5 text-[#ffe9c9] shrink-0" />
-                <span>123 Hồ Văn Huê, P.9, Q. Phú Nhuận, TP. HCM</span>
+            <ul className="flex flex-col gap-3 text-sm text-canvas/70">
+              <li className="flex items-start gap-3">
+                <MapPin strokeWidth={1.5} className="mt-0.5 h-4 w-4 shrink-0 text-rose-soft" aria-hidden />
+                <span>45 Hồ Văn Huê, P.9, Phú Nhuận, TP.HCM</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-[#1B2C40]/70">
-                <Phone className="w-5 h-5 text-[#ffe9c9] shrink-0" />
-                <span>0123 456 789</span>
+              <li className="flex items-center gap-3">
+                <Phone strokeWidth={1.5} className="h-4 w-4 shrink-0 text-rose-soft" aria-hidden />
+                <a
+                  href="tel:+842838471928"
+                  className="tabular-nums transition-colors duration-500 hover:text-rose-soft"
+                >
+                  (028) 3847 1928
+                </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-[#1B2C40]/70">
-                <Mail className="w-5 h-5 text-[#ffe9c9] shrink-0" />
-                <span>contact@phohanhphuc.com</span>
+              <li className="flex items-center gap-3">
+                <Mail strokeWidth={1.5} className="h-4 w-4 shrink-0 text-rose-soft" aria-hidden />
+                <a
+                  href="mailto:hello@hanhphuctoinoi.vn"
+                  className="transition-colors duration-500 hover:text-rose-soft"
+                >
+                  hello@hanhphuctoinoi.vn
+                </a>
               </li>
             </ul>
-          </div>
+          </Reveal>
 
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">BẢN TIN</h4>
-            <p className="text-sm text-[#1B2C40]/70 mb-6">Đăng ký để nhận ưu đãi và cẩm nang cưới mới nhất.</p>
-            <div className="flex flex-col gap-3">
-              <input 
-                type="email" 
-                placeholder="Email của bạn" 
-                className="bg-[#ffe9c9] border border-[#ffdb9f] rounded-full py-3 px-5 text-sm focus:outline-none focus:ring-1 focus:ring-[#ffdb9f] text-[#1B2C40]"
-              />
-              <button className="bg-[#1B2C40] text-white py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-[#ffdb9f] transition-colors shadow-lg">
-                ĐĂNG KÝ
-              </button>
+          <Reveal delay={0.1} duration={0.7}>
+            <h4 className="mb-6 font-serif text-lg font-bold text-sage-mist">Khám phá</h4>
+            <ul className="flex flex-col gap-3">
+              {FOOTER_EXPLORE_LINKS.map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className="group inline-flex items-center gap-1.5 text-sm text-canvas/70 transition-colors duration-500 hover:text-sage-mist"
+                  >
+                    {item.label}
+                    <ArrowUpRightIcon className="h-3 w-3 -translate-x-1 opacity-0 transition-all duration-500 ease-fluid group-hover:translate-x-0 group-hover:opacity-100" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal delay={0.2} duration={0.7}>
+            {/* Double-bezel CTA panel */}
+            <div className="rounded-bezel bg-white/5 p-1.5 ring-1 ring-white/10">
+              <div className="flex flex-col rounded-bezel-inner bg-white/[0.04] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <h4 className="mb-3 font-serif text-lg font-bold text-sage-mist">Bắt đầu</h4>
+                <p className="mb-6 text-sm leading-relaxed text-pretty text-canvas/70">
+                  Tìm dịch vụ phù hợp, lưu tiến trình cưới, hoặc hỏi tư vấn AI ngay.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <PillButton to={ROUTES.explore} variant="rose" className="justify-center">
+                    Khám phá dịch vụ
+                  </PillButton>
+                  <PillButton
+                    variant="onDark"
+                    onClick={() => openContextualAssistant()}
+                    icon={<Sparkles strokeWidth={1.5} className="h-3.5 w-3.5" />}
+                    className="justify-center"
+                  >
+                    Chat với AI
+                  </PillButton>
+                </div>
+              </div>
             </div>
-          </div>
-
+          </Reveal>
         </div>
 
-        {/* Footer Bottom */}
-        <div className="pt-8 border-t border-rose-50 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-xs text-[#1B2C40]/50 font-medium">
-            &copy; {currentYear} PHỐ HẠNH PHÚC. All rights reserved.
+        {/* Editorial watermark signature */}
+        <Reveal duration={1} y={24} className="mb-10 select-none text-center" aria-hidden>
+          <span className="font-serif text-[11vw] font-bold leading-[0.9] tracking-tight text-white/[0.05] md:text-[7vw]">
+            Hạnh Phúc Tới Nơi
+          </span>
+        </Reveal>
+
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-xs font-medium text-canvas/50">
+            &copy; {currentYear} Hạnh Phúc Tới Nơi · Bảo lưu mọi quyền.
           </p>
-          <div className="flex items-center gap-2 text-xs text-[#1B2C40]/50 font-medium">
-            Created with <Heart className="w-3 h-3 text-[#ddb983] fill-current" /> by Bé Song Hỷ
-          </div>
-          <div className="flex gap-8">
-            <a href="#" className="text-xs text-[#1B2C40]/50 hover:text-[#ddb983] transition-colors font-medium">Điều khoản</a>
-            <a href="#" className="text-xs text-[#1B2C40]/50 hover:text-[#ddb983] transition-colors font-medium">Bảo mật</a>
+          <div className="flex items-center gap-6 text-xs font-medium text-canvas/50">
+            <a
+              href="mailto:hello@hanhphuctoinoi.vn?subject=Yêu+cầu%20về%20chính%20sách%20bảo%20mật"
+              className="transition-colors duration-500 hover:text-rose-soft"
+            >
+              Chính sách bảo mật
+            </a>
+            <a
+              href="mailto:hello@hanhphuctoinoi.vn?subject=Yêu+cầu%20về%20điều%20khoản%20sử%20dụng"
+              className="transition-colors duration-500 hover:text-rose-soft"
+            >
+              Điều khoản
+            </a>
+            <span className="inline-flex items-center gap-1.5">
+              <Heart className="h-3 w-3 fill-current text-rose" strokeWidth={1.5} aria-hidden />
+              Bé Song Hỷ
+            </span>
           </div>
         </div>
       </div>

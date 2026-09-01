@@ -103,10 +103,10 @@ export default function FollowButton({
   const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
 
   const base =
-    'flex items-center rounded-full font-bold uppercase tracking-widest transition-colors shadow-sm disabled:opacity-60';
+    'flex items-center rounded-full font-bold uppercase tracking-widest transition-all duration-500 ease-fluid shadow-card disabled:opacity-60 active:scale-[0.97]';
   const activeStyle = following
-    ? 'bg-white text-[#F2BFC8] border border-[#F2BFC8] hover:bg-rose-50'
-    : 'bg-[#F2BFC8] text-white hover:bg-rose-400';
+    ? 'bg-canvas text-rose-deep border border-rose/50 hover:bg-rose-mist'
+    : 'bg-rose text-white hover:bg-rose-bright';
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -126,7 +126,7 @@ export default function FollowButton({
         {following ? 'ĐANG THEO DÕI' : 'THEO DÕI'}
       </button>
       {showCount && (
-        <span className="text-xs font-bold text-[#1B2C40]/60">
+        <span className="text-xs font-bold text-ink/60">
           {count} người theo dõi
         </span>
       )}

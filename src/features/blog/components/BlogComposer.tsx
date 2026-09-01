@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
 import { ImagePlus, Send, Smile } from 'lucide-react';
 import { DEFAULT_BLOG_AVATAR } from '../constants';
+import { EASE } from '../../../shared/ui/motion';
+import { motion } from 'motion/react';
 
 interface BlogComposerProps {
   isAuthenticated: boolean;
@@ -20,47 +23,95 @@ export function BlogComposer({
   onComposerChange,
   onSubmit,
 }: BlogComposerProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) return;
+    inputRef.current?.focus();
+  }, [focused]);
+
   return (
-    <div className="bg-[#FFFFFF] rounded-[32px] pt-4 px-6 pb-0 shadow-sm border border-rose-50 flex flex-col">
-      <div className="flex items-center gap-3 mb-4 bg-white border border-rose-100 rounded-full p-2 pl-4 pr-3 shadow-sm">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-white">
-          <img src={DEFAULT_BLOG_AVATAR} alt="avatar" className="w-full h-full rounded-full object-cover" />
+    <motion.div
+      initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      transition={{ duration: 0.7, ease: EASE }}
+      className="flex flex-col rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile"
+    >
+      <div className="flex flex-col rounded-bezel-inner bg-white pt-4 pb-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+        <div
+          className={`mx-6 mb-4 flex items-center gap-3 rounded-full p-2 pr-3 pl-4 transition-all duration-500 ease-fluid ${
+            focused ? 'bg-canvas ring-1 ring-rose/40' : 'bg-canvas ring-1 ring-ink/10'
+          }`}
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-rose-mist shadow-card">
+            <img src={DEFAULT_BLOG_AVATAR} alt="avatar" className="h-full w-full rounded-full object-cover" />
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            value={composer}
+            onChange={(event) => onComposerChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') onSubmit();
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            disabled={!isAuthenticated || posting}
+            placeholder={isAuthenticated ? 'Bạn đang nghĩ gì?' : 'Đăng nhập để chia sẻ...'}
+            className="flex-1 border-none bg-transparent text-sm font-medium text-ink outline-none placeholder:text-ink/40 disabled:opacity-60"
+          />
+          <div className="flex shrink-0 items-center gap-1 text-rose-deep">
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-500 hover:bg-rose-mist"
+              aria-label="Thêm ảnh"
+            >
+              <ImagePlus strokeWidth={1.5} className="h-5 w-5" />
+            </button>
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold transition-colors duration-500 hover:bg-rose-mist"
+              aria-label="Thêm GIF"
+            >
+              GIF
+            </button>
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-500 hover:bg-rose-mist"
+              aria-label="Thêm biểu tượng cảm xúc"
+            >
+              <Smile strokeWidth={1.5} className="h-5 w-5" />
+            </button>
+            <button
+              onClick={onSubmit}
+              disabled={!isAuthenticated || posting || !composer.trim()}
+              title="Đăng bài"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-rose text-white transition-all duration-500 ease-fluid hover:bg-ink active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send strokeWidth={1.5} className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <input
-          type="text"
-          value={composer}
-          onChange={(event) => onComposerChange(event.target.value)}
-          onKeyDown={(event) => { if (event.key === 'Enter') onSubmit(); }}
-          disabled={!isAuthenticated || posting}
-          placeholder={isAuthenticated ? 'Bạn đang nghĩ gì?' : 'Đăng nhập để chia sẻ...'}
-          className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-[#1B2C40]/40 text-[#1B2C40] font-medium disabled:opacity-60"
-        />
-        <div className="flex text-[#F2BFC8] gap-1 shrink-0 items-center">
-          <button className="w-8 h-8 rounded-full hover:bg-rose-50 flex items-center justify-center transition-colors"><ImagePlus className="w-5 h-5" /></button>
-          <button className="w-8 h-8 rounded-full hover:bg-rose-50 flex items-center justify-center transition-colors font-bold text-[10px]">GIF</button>
-          <button className="w-8 h-8 rounded-full hover:bg-rose-50 flex items-center justify-center transition-colors"><Smile className="w-5 h-5" /></button>
-          <button
-            onClick={onSubmit}
-            disabled={!isAuthenticated || posting || !composer.trim()}
-            title="Đăng bài"
-            className="w-8 h-8 rounded-full bg-[#F2BFC8] text-white flex items-center justify-center transition-colors hover:bg-[#1B2C40] disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Send className="w-4 h-4" />
-          </button>
+
+        {actionError && <p className="mb-2 px-7 text-[11px] font-medium text-rose-deep">{actionError}</p>}
+
+        <div className="flex items-center justify-between gap-2 border-t border-ink/5">
+          {feedTabs.map((tab, index) => (
+            <button
+              key={tab}
+              className={`relative flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-colors duration-500 ${
+                index === 0 ? 'text-rose-deep' : 'text-ink/55 hover:text-ink'
+              }`}
+            >
+              {tab}
+              {index === 0 && (
+                <motion.span
+                  layoutId="composer-tab"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full bg-rose"
+                />
+              )}
+            </button>
+          ))}
         </div>
       </div>
-      {actionError && <p className="text-[11px] text-rose-600 mb-2 px-1">{actionError}</p>}
-      <div className="flex items-center gap-2 justify-between">
-        {feedTabs.map((tab, index) => (
-          <button
-            key={tab}
-            className={`flex-1 py-4 text-xs font-bold transition-all relative uppercase tracking-wider ${index === 0 ? 'text-[#F2BFC8]' : 'text-[#1B2C40]/60 hover:text-[#1B2C40]'}`}
-          >
-            {tab}
-            {index === 0 && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#F2BFC8] rounded-t-full" />}
-          </button>
-        ))}
-      </div>
-    </div>
+    </motion.div>
   );
 }

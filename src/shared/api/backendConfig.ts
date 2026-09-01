@@ -2,7 +2,7 @@
 // so these values are fixed when the bundle is produced — changing them later
 // requires a rebuild, not just a restart.
 const CONFIGURED_BACKEND_URL = (
-  import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_VTON_BACKEND_URL || ''
+  import.meta.env.VITE_BACKEND_URL || ''
 )
   .trim()
   .replace(/\/+$/, '');
@@ -59,9 +59,9 @@ export function resolveBackendEndpoint(endpoint: `/${string}`): string {
   // development): append the endpoint unchanged.
   if (BACKEND_BASE_URL) return `${BACKEND_BASE_URL}${endpoint}`;
 
-  // Development against the local backend: keep paths relative so the Vite
-  // proxy handles them. Legacy VTON routes live under the /api/vton prefix.
-  return endpoint.startsWith('/api/v1/') ? endpoint : `/api/vton${endpoint}`;
+  // Development against the local backend: keep versioned paths relative so
+  // the Vite proxy handles them.
+  return endpoint;
 }
 
 export function resolveDataEndpoint(endpoint: `/api/v1/${string}`): string {

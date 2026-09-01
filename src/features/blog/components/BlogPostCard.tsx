@@ -1,6 +1,8 @@
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send, Share2 } from 'lucide-react';
+import { motion } from 'motion/react';
 import FollowButton from '../../social/components/FollowButton';
 import { BlogPost } from '../types';
+import { EASE } from '../../../shared/ui/motion';
 
 interface BlogPostCardProps {
   post: BlogPost;
@@ -28,65 +30,90 @@ export function BlogPostCard({
   onAddComment,
 }: BlogPostCardProps) {
   return (
-    <article className="bg-[#FFFFFF] rounded-[32px] p-6 shadow-sm border border-rose-50 flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full shadow-sm flex shrink-0 overflow-hidden bg-rose-100">
-          <img src={post.avatar} alt="Avatar" className="w-full h-full object-cover" />
-        </div>
-        <div className="flex flex-col">
-          <h4 className="font-bold text-[#1B2C40] text-[15px] leading-tight">{post.name}</h4>
-          <span className="text-[11px] text-[#1B2C40]/50 font-medium">{post.time}</span>
-        </div>
-        {post.authorId && (
-          <div className="ml-auto">
-            <FollowButton type="user" targetId={post.authorId} size="sm" showCount={false} />
+    <motion.article
+      initial={{ opacity: 0, y: 32, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.7, ease: EASE }}
+      className="flex flex-col rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile transition-shadow duration-700 hover:shadow-card"
+    >
+      <div className="flex flex-col gap-4 rounded-bezel-inner bg-white p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+        <div className="flex items-center gap-3">
+          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-rose-mist shadow-card">
+            <img src={post.avatar} alt="Avatar" className="h-full w-full object-cover" />
           </div>
-        )}
-        <button className={`${post.authorId ? '' : 'ml-auto '}text-[#1B2C40]/40 hover:text-[#1B2C40]`}>
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
-      </div>
-      <p className="text-[13px] text-[#1B2C40] leading-relaxed whitespace-pre-line font-medium mt-1">{post.content}</p>
-      <p className="text-[13px] text-[#F2BFC8] font-medium font-sans">{post.tags}</p>
-      <div className="flex items-center gap-8 mt-2 text-[#1B2C40]/60 font-medium text-xs">
-        <button
-          onClick={() => onToggleLike(post)}
-          disabled={!isAuthenticated || likePending}
-          className={`flex items-center gap-2 transition-colors disabled:cursor-not-allowed ${post.likedByMe ? 'text-[#F2BFC8]' : 'hover:text-[#F2BFC8]'}`}
-        >
-          <Heart className={`w-4 h-4 ${post.likedByMe ? 'fill-current' : ''}`} /> {post.likes}
-        </button>
-        <button
-          onClick={() => onToggleComment(post.id)}
-          className="flex items-center gap-2 hover:text-[#F2BFC8] transition-colors"
-        >
-          <MessageCircle className="w-4 h-4" /> {post.comments}
-        </button>
-        <button className="flex items-center gap-2 hover:text-[#F2BFC8] transition-colors">
-          <Share2 className="w-4 h-4" /> {post.shares}
-        </button>
-        <button className="ml-auto hover:text-[#F2BFC8] transition-colors"><Bookmark className="w-4 h-4" /></button>
-      </div>
-      {commentOpen && (
-        <div className="flex items-center gap-2 mt-1 bg-white border border-rose-100 rounded-full p-1.5 pl-4 pr-2">
-          <input
-            type="text"
-            value={commentDraft}
-            onChange={(event) => onCommentDraftChange(event.target.value)}
-            onKeyDown={(event) => { if (event.key === 'Enter') onAddComment(post.id); }}
-            disabled={!isAuthenticated || commenting}
-            placeholder={isAuthenticated ? 'Viết bình luận...' : 'Đăng nhập để bình luận...'}
-            className="flex-1 bg-transparent border-none outline-none text-xs text-[#1B2C40] placeholder:text-[#1B2C40]/40 disabled:opacity-60"
-          />
-          <button
-            onClick={() => onAddComment(post.id)}
-            disabled={!isAuthenticated || commenting || !commentDraft.trim()}
-            className="w-7 h-7 rounded-full bg-[#F2BFC8] text-white flex items-center justify-center hover:bg-[#1B2C40] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-          >
-            <Send className="w-3.5 h-3.5" />
+          <div className="flex flex-col">
+            <h4 className="text-[15px] font-bold leading-tight text-ink">{post.name}</h4>
+            <span className="text-[11px] font-medium text-ink/50">{post.time}</span>
+          </div>
+          {post.authorId && (
+            <div className="ml-auto">
+              <FollowButton type="user" targetId={post.authorId} size="sm" showCount={false} />
+            </div>
+          )}
+          <button className={`text-ink/40 transition-colors duration-500 hover:text-ink ${post.authorId ? '' : 'ml-auto '}`}>
+            <MoreHorizontal strokeWidth={1.5} className="h-5 w-5" />
           </button>
         </div>
-      )}
-    </article>
+
+        <p className="mt-1 whitespace-pre-line text-[13px] font-medium leading-relaxed text-ink">
+          {post.content}
+        </p>
+        <p className="font-sans text-[13px] font-medium text-rose-deep">{post.tags}</p>
+
+        <div className="mt-2 flex items-center gap-7 text-xs font-medium text-ink/60">
+          <button
+            onClick={() => onToggleLike(post)}
+            disabled={!isAuthenticated || likePending}
+            className={`group/like flex items-center gap-2 transition-all duration-500 ease-fluid disabled:cursor-not-allowed ${
+              post.likedByMe ? 'text-rose-deep' : 'hover:text-rose-deep'
+            }`}
+          >
+            <Heart
+              strokeWidth={1.5}
+              className={`h-4 w-4 transition-transform duration-500 ease-fluid group-hover/like:scale-110 ${
+                post.likedByMe ? 'fill-current' : ''
+              }`}
+            />{' '}
+            {post.likes}
+          </button>
+          <button
+            onClick={() => onToggleComment(post.id)}
+            className="flex items-center gap-2 transition-colors duration-500 hover:text-rose-deep"
+          >
+            <MessageCircle strokeWidth={1.5} className="h-4 w-4" /> {post.comments}
+          </button>
+          <button className="flex items-center gap-2 transition-colors duration-500 hover:text-rose-deep">
+            <Share2 strokeWidth={1.5} className="h-4 w-4" /> {post.shares}
+          </button>
+          <button className="ml-auto transition-colors duration-500 hover:text-rose-deep">
+            <Bookmark strokeWidth={1.5} className="h-4 w-4" />
+          </button>
+        </div>
+
+        {commentOpen && (
+          <div className="mt-1 flex items-center gap-2 rounded-full bg-canvas p-1.5 pl-4 pr-2 ring-1 ring-ink/10">
+            <input
+              type="text"
+              value={commentDraft}
+              onChange={(event) => onCommentDraftChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') onAddComment(post.id);
+              }}
+              disabled={!isAuthenticated || commenting}
+              placeholder={isAuthenticated ? 'Viết bình luận...' : 'Đăng nhập để bình luận...'}
+              className="flex-1 border-none bg-transparent text-xs text-ink outline-none placeholder:text-ink/40 disabled:opacity-60"
+            />
+            <button
+              onClick={() => onAddComment(post.id)}
+              disabled={!isAuthenticated || commenting || !commentDraft.trim()}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose text-white transition-colors duration-500 ease-fluid hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send strokeWidth={1.5} className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+    </motion.article>
   );
 }

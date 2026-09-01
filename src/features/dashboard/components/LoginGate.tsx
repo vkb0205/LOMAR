@@ -1,6 +1,7 @@
 import { ArrowRight, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../shared/config/routes';
 import { DemoLoginAccount } from '../types';
 
 const DEMO_LOGIN_ACCOUNTS: DemoLoginAccount[] = [
@@ -45,7 +46,7 @@ export function LoginGate({ onDemoSignIn }: LoginGateProps) {
 
         <div className="space-y-4">
           <Link
-            to="/login?redirect=/dashboard"
+            to={`${ROUTES.login}?redirect=${encodeURIComponent(ROUTES.dashboard)}`}
             className="w-full bg-[#1B2C40] hover:bg-[#F2BFC8] text-white py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>Đăng Nhập Ngay</span>

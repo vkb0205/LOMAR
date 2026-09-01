@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { ROUTES } from '../../../shared/config/routes';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { ShieldAlert } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export default function RequireAdmin({ children }: { children: React.ReactNode }
   }
 
   if (!user) {
-    return <Navigate to="/login?redirect=/admin" replace />;
+    return <Navigate to={`${ROUTES.login}?redirect=${encodeURIComponent(ROUTES.admin)}`} replace />;
   }
 
   if (user.accountRole !== 'admin') {

@@ -131,35 +131,4 @@ export async function deleteJson<TResponse>(
   return request<TResponse>(url, 'DELETE', options);
 }
 
-/**
- * @deprecated Legacy VTON contract helper (unversioned `/api/vton/*`
- * endpoints, FR-012). Kept unchanged so `customizePreviewService.ts` and
- * `aiConsultantService.ts` keep working; new `/api/v1/*` code should use
- * `getJson`/`postJsonTyped`/`putJson`/`patchJson`/`deleteJson` above.
- */
-export async function postJson<TResponse>(
-  url: string,
-  options: JsonRequestOptions = {}
-): Promise<Response & { parsedBody?: TResponse }> {
-  const { body, headers = {}, ...requestOptions } = options;
-  const response = await fetch(url, {
-    ...requestOptions,
-    method: requestOptions.method ?? 'POST',
-    headers: await withAuthHeaders({
-      'Content-Type': 'application/json',
-      ...headers,
-    }),
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-
-  if (response.ok) {
-    const parsedBody = (await response.json()) as TResponse;
-    return Object.assign(response, { parsedBody });
-  }
-
-  return response;
-}
-
-// Re-exported so call sites that only need the token don't reach into
-// supabaseClient directly.
 export { getAccessToken };

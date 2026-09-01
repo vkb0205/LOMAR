@@ -15,11 +15,11 @@ src/
 
   features/
     admin/
-    ai-consultant/
+    ai-consultant/   # AssistantChat UI + consult API client/hooks
     auth/
     blog/
-    chat/
-    customize/
+    business-intelligence/  # BI workspace page (calls agent API)
+    chat/            # FloatingChat + openAssistant contextual launcher
     dashboard/
     guide/
     home/
@@ -33,6 +33,7 @@ src/
       supabaseClient.ts
     config/
       routes.ts
+      navigation.ts   # discovery nav + role CTA + account menu + workspace rules
     layout/
       Footer.tsx
       Layout.tsx
@@ -48,6 +49,19 @@ scripts/
 docs/
 supabase/
 ```
+
+## Monorepo siblings
+
+```text
+LORMAR/
+  LOMAR/            # this frontend (UI only)
+  LOMAR_backend/    # FastAPI HTTP/API
+  agents/           # product agent runtimes (chatbot + BI) — separate package/repo
+```
+
+Agent *logic* lives in `../agents` (`chatbot/`, `business_intelligence/`).
+Frontend keeps only UI + API clients. Backend routers call the agents package
+(`pip install -e ../agents`); `app/services/*` shims keep older import paths.
 
 ## Ownership rules
 

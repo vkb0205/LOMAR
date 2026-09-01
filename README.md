@@ -4,13 +4,13 @@
 
 # LOMAR
 
-React + Vite frontend with a FastAPI virtual try-on backend powered by Google Vertex AI Nano Banana.
+React + Vite frontend with a FastAPI Business Intelligence backend and authenticated AI copilot.
 
 ## Architecture
 
 - **Frontend**: React + Vite + TypeScript organized as compact feature modules
 - **Backend**: FastAPI + Python in the sibling `../LOMAR_backend` project
-- **AI Provider**: Google Vertex AI Nano Banana / Gemini image model
+- **AI Provider**: Configurable text-generation provider for BI analysis
 
 Frontend routes are owned by their feature. A feature keeps its page, components,
 hooks, data access, and types together. Cross-feature infrastructure lives in
@@ -19,7 +19,7 @@ hooks, data access, and types together. Cross-feature infrastructure lives in
 ```text
 src/
   app/          # Application composition and router
-  features/     # admin, auth, blog, consultant, customize, dashboard, ...
+  features/     # admin, auth, blog, business intelligence, dashboard, ...
   shared/       # API clients, route config, layout, generated database types
   assets/
   main.tsx
@@ -33,8 +33,7 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the dependency rules and full tree.
 
 - Node.js 20+
 - Python 3.10+
-- Google Cloud SDK
-- Google Cloud project with Vertex AI access
+- Google Cloud SDK (only for Cloud Run deployment)
 
 ### 1. Install dependencies
 
@@ -49,12 +48,10 @@ Copy your own Supabase project URL and anon key from the Supabase dashboard
 (**Project Settings → API**), then edit [`.env.local`](.env.local):
 
 ```env
-GEMINI_API_KEY=""
 APP_URL="http://localhost:3000"
 VITE_SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
 VITE_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
-VITE_VTON_BACKEND_URL="http://localhost:3003"
-VITE_VTON_ENDPOINT="/test-try-on-upload"
+VITE_BACKEND_URL="http://localhost:8080"
 ```
 
 ### 3. Apply Supabase migrations
@@ -89,11 +86,10 @@ Historical pre-CLI bootstrap scripts are retained under
 
 ```bash
 cd ../LOMAR_backend
-conda activate vton_env
-python test_api.py
+python -m uvicorn app.main:app --reload --port 8080
 ```
 
-Backend runs at `http://localhost:3003`.
+Backend runs at `http://localhost:8080`.
 
 ### 5. Run the frontend
 
@@ -266,10 +262,9 @@ Pages outage produces exactly this symptom. Then cancel any stuck run under the
 
 ### Option A: Automated GitHub Actions
 
-1. Create a Google Cloud service account with:
-   - Cloud Run Admin
-   - Artifact Registry Writer
-   - Vertex AI User
+1. Create a Google Cloud service account with Cloud Run Admin and Artifact
+   Registry Writer. Add Vertex AI User only when the configured BI text provider
+   uses Vertex AI.
 
 2. Add the service account key JSON as a GitHub secret:
    - Secret name: `GCP_CREDENTIALS`
@@ -289,7 +284,7 @@ The backend expects:
 GOOGLE_GENAI_USE_VERTEXAI=true
 GOOGLE_CLOUD_PROJECT=lomar-500117
 GOOGLE_CLOUD_LOCATION=global
-NANO_BANANA_MODEL=gemini-3.1-flash-image
+GOOGLE_TEXT_MODEL=gemini-2.5-flash
 API_HOST=0.0.0.0
 API_PORT=8080
 ```
@@ -297,7 +292,7 @@ API_PORT=8080
 ### Test health endpoint
 
 ```bash
-curl https://lomar-vton-backend-xxxxx.a.run.app/health
+curl https://lomar-backend-xxxxx.a.run.app/health
 ```
 
 Expected response:
@@ -305,12 +300,7 @@ Expected response:
 ```json
 {
   "ok": true,
-  "service": "LOMAR Vertex AI Nano Banana VTON API",
-  "model": "gemini-3.1-flash-image",
-  "provider": "vertex-ai",
-  "project": "lomar-500117",
-  "location": "global",
-  "vertex_configured": true
+  "service": "LOMAR Business Intelligence API"
 }
 ```
 
@@ -320,7 +310,7 @@ Expected response:
 
 - Vite base path is configurable via `VITE_BASE_PATH`
 - Backend proxy is configured in [`vite.config.ts`](vite.config.ts)
-- API URL is configured via `VITE_VTON_BACKEND_URL`
+- API URL is configured via `VITE_BACKEND_URL`
 
 ### Backend
 
@@ -336,13 +326,12 @@ If you see CORS errors in the browser console, update the backend's `ALLOWED_ORI
 
 ### Backend authentication errors
 
-Ensure your Cloud Run service account has Vertex AI permissions:
-- Vertex AI User
-- Service Account User
+Ensure the authenticated user has a valid Supabase session. BI routes under
+`/api/v1/business-intelligence` require a verified caller JWT.
 
 ### Frontend cannot reach backend
 
 Verify:
-1. `VITE_VTON_BACKEND_URL` points to your Cloud Run URL
+1. `VITE_BACKEND_URL` points to your Cloud Run URL
 2. Cloud Run service allows unauthenticated invocations
 3. Network connectivity from browser to Cloud Run URL

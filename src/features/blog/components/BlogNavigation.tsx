@@ -1,4 +1,6 @@
 import { Bookmark, Clock, Flame, Folder, Hash, Heart } from 'lucide-react';
+import { motion } from 'motion/react';
+import { EASE } from '../../../shared/ui/motion';
 
 const navigationItems = [
   { icon: Flame, text: 'Sắp Xếp Theo', active: true },
@@ -11,30 +13,56 @@ const navigationItems = [
 
 export function BlogNavigation() {
   return (
-    <aside className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0 h-fit lg:sticky lg:top-28">
-      <div className="bg-[#FFFFFF] rounded-[24px] lg:rounded-[32px] p-4 lg:p-6 shadow-sm border border-rose-50 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-3 lg:pb-6">
-        {navigationItems.map((item) => (
-          <button
-            key={item.text}
-            className={`flex items-center gap-2 lg:gap-4 px-4 py-2.5 lg:py-3 rounded-full lg:rounded-[20px] transition-colors font-semibold text-xs uppercase tracking-wider whitespace-nowrap ${item.active ? 'bg-[#FFFFFF] text-[#F2BFC8] shadow-sm border border-rose-100 lg:border-none' : 'text-[#1B2C40] hover:bg-[#FFFFFF] hover:text-[#F2BFC8]'}`}
-          >
-            <item.icon
-              className={`w-4 h-4 lg:w-5 lg:h-5 ${item.active ? 'text-[#F2BFC8]' : 'text-rose-200'}`}
-              strokeWidth={item.active ? 2.5 : 2}
-            />
-            {item.text}
-          </button>
-        ))}
+    <motion.aside
+      initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
+      className="flex h-fit w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-[320px]"
+    >
+      {/* Nav island */}
+      <div className="no-scrollbar flex overflow-x-auto rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile lg:overflow-x-visible">
+        <div className="flex flex-row gap-1 rounded-bezel-inner bg-white p-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] lg:flex-col lg:p-3">
+          {navigationItems.map((item) => {
+            const active = Boolean(item.active);
+            return (
+              <button
+                key={item.text}
+                className={`relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all duration-500 ease-fluid lg:gap-3 ${
+                  active
+                    ? 'bg-ink text-canvas shadow-lift'
+                    : 'text-ink/65 hover:bg-canvas hover:text-ink'
+                }`}
+              >
+                <item.icon
+                  strokeWidth={1.5}
+                  className={`h-4 w-4 lg:h-[18px] lg:w-[18px] ${active ? 'text-rose-soft' : 'text-sage'}`}
+                />
+                {item.text}
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <div className="hidden lg:flex bg-[#FFFFFF] rounded-[32px] p-6 shadow-sm border border-rose-50 text-center flex-col relative overflow-hidden">
-        <h2 className="font-serif text-4xl font-bold text-[#1B2C40] mb-1 relative z-10 tracking-wider">BLOG</h2>
-        <p className="text-sm text-[#F2BFC8] italic mb-4 font-serif relative z-10 flex items-center justify-center gap-2">
-          Cảm hứng cho hành trình hạnh phúc <Heart className="w-3 h-3 fill-current" />
-        </p>
-        <p className="text-[11px] text-[#1B2C40] mb-6 leading-relaxed relative z-10 px-2 opacity-80">
-          Những chia sẻ, kinh nghiệm và cảm hứng từ Phố Hạnh Phúc Hồ Văn Huê để giúp bạn chuẩn bị cho ngày trọng đại một cách hoàn hảo nhất.
-        </p>
+
+      {/* Editorial intro card — dark accent */}
+      <div className="hidden rounded-bezel bg-ink p-1.5 ring-1 ring-white/10 lg:flex">
+        <div className="relative flex w-full flex-col overflow-hidden rounded-bezel-inner bg-gradient-to-br from-ink via-ink to-ink-soft p-6 text-center">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_0%,rgba(215,139,162,0.2),transparent_65%)]"
+          />
+          <h2 className="relative z-10 mb-1 font-serif text-4xl font-bold tracking-wider text-canvas">
+            Blog
+          </h2>
+          <p className="relative z-10 mb-4 flex items-center justify-center gap-2 font-serif text-sm italic text-rose-soft">
+            Cảm hứng cho hành trình hạnh phúc <Heart strokeWidth={1.5} className="h-3 w-3 fill-current" />
+          </p>
+          <p className="relative z-10 mb-2 px-2 text-[11px] leading-relaxed text-canvas/75">
+            Những chia sẻ, kinh nghiệm và cảm hứng từ Phố Hạnh Phúc Hồ Văn Huê để giúp bạn chuẩn bị
+            cho ngày trọng đại một cách hoàn hảo nhất.
+          </p>
+        </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }

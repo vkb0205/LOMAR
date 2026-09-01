@@ -1,35 +1,38 @@
-import { Bot, User } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ConsultantMessage } from '../types';
+import type { ConsultantMessage } from '../types';
+import { EASE } from '../../../shared/ui/motion';
 
 interface MessageBubbleProps {
   message: ConsultantMessage;
+  compact?: boolean;
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, compact = false }: MessageBubbleProps) {
+  const isUser = message.role === 'user';
+  const textSize = compact ? 'text-xs' : 'text-sm';
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      transition={{ duration: 0.5, ease: EASE }}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
-      {message.role === 'assistant' && (
-        <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-          <Bot className="w-4 h-4 text-rose-600" />
+      {!isUser && (
+        <div className="mr-2 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-mist">
+          <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
         </div>
       )}
-      <div className={`max-w-[75%] p-4 rounded-2xl text-sm leading-relaxed ${
-        message.role === 'user'
-          ? 'bg-rose-500 text-white rounded-tr-sm'
-          : 'bg-gray-50 text-gray-800 rounded-tl-sm'
-      }`}>
+      <div
+        className={`max-w-[80%] rounded-2xl p-3.5 ${textSize} font-medium leading-relaxed whitespace-pre-wrap ${
+          isUser
+            ? 'rounded-br-sm bg-cream text-ink-deep'
+            : 'rounded-bl-sm border border-ink/8 bg-white text-ink shadow-card'
+        }`}
+      >
         {message.content}
       </div>
-      {message.role === 'user' && (
-        <div className="w-8 h-8 rounded-full bg-rose-200 flex items-center justify-center ml-2 flex-shrink-0 mt-1">
-          <User className="w-4 h-4 text-rose-600" />
-        </div>
-      )}
     </motion.div>
   );
 }

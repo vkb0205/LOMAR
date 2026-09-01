@@ -1,4 +1,7 @@
-import { Trophy } from 'lucide-react';
+import { BookOpen, Sparkles, Store, Trophy } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { openContextualAssistant } from '../../chat/openAssistant';
+import { ROUTES } from '../../../shared/config/routes';
 import { DashboardProgressSummary, ProgressGreeting } from '../types';
 
 interface DashboardHeaderProps {
@@ -21,6 +24,21 @@ export function DashboardHeader({ greeting, progress }: DashboardHeaderProps) {
             {greeting.title}
           </h1>
           <p className="text-xs text-[#1B2C40]/70">{greeting.desc}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to={ROUTES.explore} className="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#1B2C40] hover:bg-rose-100 transition-colors">
+              <Store className="w-3.5 h-3.5 text-[#F2BFC8]" /> Dịch vụ
+            </Link>
+            <button
+              type="button"
+              onClick={() => openContextualAssistant()}
+              className="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#1B2C40] hover:bg-rose-100 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#F2BFC8]" /> Tư vấn AI
+            </button>
+            <Link to={ROUTES.guide} className="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#1B2C40] hover:bg-rose-100 transition-colors">
+              <BookOpen className="w-3.5 h-3.5 text-[#F2BFC8]" /> Cẩm nang
+            </Link>
+          </div>
         </div>
         <span className="text-xs text-gray-500 font-bold flex items-center gap-1 shrink-0 bg-rose-50/50 px-3 py-1.5 rounded-full border border-rose-100/50">
           <Trophy className="w-3.5 h-3.5 text-[#F2BFC8] fill-rose-50" />

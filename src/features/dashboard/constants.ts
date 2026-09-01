@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { Activity, Camera, Layers, MapPin } from 'lucide-react';
+import { ROUTES } from '../../shared/config/routes';
 
 export const DASHBOARD_STATION_IDS = ['T01', 'T02', 'T03', 'T04'] as const;
 
@@ -29,7 +30,7 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     bgGradient: 'from-emerald-50 to-teal-50/30',
     badgeBg: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
     ctaText: 'Xem Gói Dịch Vụ',
-    ctaLink: '/services',
+    ctaLink: `${ROUTES.explore}?category=${encodeURIComponent('Sức Khỏe')}`,
   },
   {
     id: 'T02',
@@ -40,8 +41,8 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     color: 'text-rose-500',
     bgGradient: 'from-rose-50 to-pink-50/30',
     badgeBg: 'bg-rose-50 text-rose-600 border border-rose-100',
-    ctaText: 'Bắt Đầu Thiết Kế',
-    ctaLink: '/customize?tab=Studio',
+    ctaText: 'Khám phá Studio',
+    ctaLink: `${ROUTES.explore}?category=${encodeURIComponent('Studio')}`,
   },
   {
     id: 'T03',
@@ -52,8 +53,8 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     color: 'text-purple-500',
     bgGradient: 'from-purple-50 to-indigo-50/30',
     badgeBg: 'bg-purple-50 text-purple-600 border border-purple-100',
-    ctaText: 'Tự Tay Thiết Kế',
-    ctaLink: '/customize?tab=Váy Cưới',
+    ctaText: 'Xem Váy Cưới',
+    ctaLink: `${ROUTES.explore}?category=${encodeURIComponent('Váy Cưới')}`,
   },
   {
     id: 'T04',
@@ -64,8 +65,8 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     color: 'text-amber-500',
     bgGradient: 'from-amber-50 to-orange-50/30',
     badgeBg: 'bg-amber-50 text-amber-600 border border-amber-100',
-    ctaText: 'Thiết Kế Sảnh Tiệc',
-    ctaLink: '/customize?tab=Venue',
+    ctaText: 'Tìm địa điểm',
+    ctaLink: `${ROUTES.explore}?category=${encodeURIComponent('Nhà hàng')}`,
   },
 ];
 

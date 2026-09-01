@@ -9,8 +9,5 @@ coverage/
 !**/.env.example
 .vercel/
 .react-router/
-# Backend virtual environment
-backend/vton_env/
-
 # Backend test images
 backend/test_images/

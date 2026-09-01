@@ -34,12 +34,10 @@ export interface RetrievedService {
 
 export interface ConsultResponse {
   reply?: string;
-  /** Server-generated id for the process-local prototype session memory. */
-  sessionId?: string;
-  /** Names of catalog tools the agent invoked. Diagnostic only. */
-  toolsUsed?: string[];
-  /** Catalog rows backing the product-card row above the composer. */
+  sessionId?: string | null;
   retrievedServices?: RetrievedService[];
+  toolsUsed?: string[];
+  degraded?: boolean;
 }
 
 /** Result of one consult turn: prose plus the products behind it. */

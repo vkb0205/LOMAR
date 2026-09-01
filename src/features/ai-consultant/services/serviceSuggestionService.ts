@@ -22,7 +22,7 @@ export async function findSuggestedServiceId(input: string): Promise<string | nu
 
   try {
     const { services } = await getJson<{ services: ServiceRow[] }>(
-      resolveDataEndpoint('/api/v1/catalog/customize')
+      resolveDataEndpoint('/api/v1/catalog/services')
     );
     return services.find(service => service.category === queryCategory)?.id ?? null;
   } catch {

@@ -40,8 +40,8 @@ export async function getAccessToken(): Promise<string | null> {
 
 /**
  * Build a Headers object with the optional `Authorization: Bearer <jwt>` header
- * merged on top of the caller's headers. Use this for any fetch() to the VTON
- * backend (/test-try-on*, /proxy-image, /consult) so the call works whether the
+ * merged on top of the caller's headers. Use this for any fetch() to the API
+ * versioned API so the call works whether the backend is configured for auth.
  * backend is running open or with ENABLE_AUTH=true.
  */
 export async function withAuthHeaders(

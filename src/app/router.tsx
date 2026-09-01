@@ -1,11 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../shared/layout/Layout';
 import Home from '../features/home/HomePage';
-import Customize from '../features/customize/CustomizePage';
 import Services from '../features/vendors/ServicesPage';
 import Blog from '../features/blog/BlogPage';
 import Guide from '../features/guide/GuidePage';
-import AIConsultant from '../features/ai-consultant/AIConsultantPage';
 import Dashboard from '../features/dashboard/DashboardPage';
 import VendorDetail from '../features/vendors/VendorDetailPage';
 import Login from '../features/auth/LoginPage';
@@ -21,6 +19,8 @@ import LeadsPanel from '../features/admin/panels/LeadsPanel';
 import AIPanel from '../features/admin/panels/AIPanel';
 import AnalyticsPanel from '../features/admin/panels/AnalyticsPanel';
 import AnalyticsTracker from '../features/analytics/components/AnalyticsTracker';
+import BusinessIntelligence from '../features/business-intelligence/BusinessIntelligencePage';
+import RequireBusiness from '../features/business-intelligence/RequireBusiness';
 
 // Router base path: configurable via VITE_BASE_PATH so the same bundle can be
 // deployed under any sub-path. Defaults to root ("/") when unset. The GitHub
@@ -36,10 +36,17 @@ export function AppRouter() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="explore" element={<Services />} />
-          <Route path="customize" element={<Customize />} />
+          <Route
+            path="business-intelligence"
+            element={
+              <RequireBusiness>
+                <BusinessIntelligence />
+              </RequireBusiness>
+            }
+          />
           <Route path="blog" element={<Blog />} />
           <Route path="guide" element={<Guide />} />
-          <Route path="ai-consultant" element={<AIConsultant />} />
+          <Route path="ai-consultant" element={<Navigate to={ROUTES.home} replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="vendor/:vendorId" element={<VendorDetail />} />
           <Route path="login" element={<Login />} />

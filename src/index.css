@@ -1,11 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --color-rose-50: #ffe9c9;
-  --color-rose-100: #ffe9c9;
-  --color-rose-200: #ffe9c9;
+
+  /* ——— Editorial Luxury palette (single source of truth, public site) ——— */
+  --color-canvas: #fffdfa; /* warm cream page ground */
+  --color-ink: #1c3d2e; /* deep espresso-green brand ink */
+  --color-ink-soft: #2a523c;
+  --color-ink-deep: #17291f;
+  --color-forest: #385c1e;
+  --color-sage: #7c9a5a;
+  --color-sage-mist: #e8f0da;
+  --color-rose: #d78ba2;
+  --color-rose-bright: #e4a3b6;
+  --color-rose-deep: #a4506b;
+  --color-rose-mist: #fbe9ee;
+  --color-rose-soft: #f6cfe0;
+  --color-cream: #ffe9c9; /* warm apricot CTA */
+  --color-gold: #ffdb9f;
+
+  /* ——— Motion physics ——— */
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ——— Layered, soft-focused shadows (never harsh) ——— */
+  --shadow-tile: 0 10px 35px -25px rgb(28 61 46 / 0.5);
+  --shadow-card: 0 18px 45px -30px rgb(28 61 46 / 0.4);
+  --shadow-float: 0 24px 60px -30px rgb(28 61 46 / 0.35);
+  --shadow-lift: 0 12px 30px -15px rgb(28 61 46 / 0.5);
+
+  /* ——— Concentric bezel radii ——— */
+  --radius-bezel: 2rem;
+  --radius-bezel-inner: calc(2rem - 0.375rem);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: #d78ba2;
+    color: #fffdfa;
+  }
+
+  :focus-visible {
+    outline: 2px solid #7c9a5a;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
 }
 
 @layer utilities {
@@ -15,5 +69,17 @@
   .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+  }
+
+  /* Subtle film-grain texture — fixed, non-interactive, never on scrolling containers */
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
   }
 }

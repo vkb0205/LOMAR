@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { defaultPostLoginPath } from '../../../shared/config/navigation';
 import { useAuth } from './useAuth';
 import { DEMO_PASSWORD } from '../constants';
-import type { AuthMode, DemoAccount, LoginFormValues } from '../types';
+import type { AuthMode, DemoAccount, LoginFormValues, UserProfile } from '../types';
 import { validateLoginForm } from '../services/loginValidationService';
+
+function resolveRedirect(explicit: string | null, user: UserProfile | null): string {
+  if (explicit && explicit.startsWith('/') && !explicit.startsWith('//')) {
+    return explicit;
+  }
+  return defaultPostLoginPath(user?.accountRole);
+}
 
 export function useLoginPage() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const explicitRedirect = searchParams.get('redirect');
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [values, setValues] = useState<LoginFormValues>({
@@ -24,9 +32,9 @@ export function useLoginPage() {
 
   useEffect(() => {
     if (user) {
-      navigate(redirectPath);
+      navigate(resolveRedirect(explicitRedirect, user));
     }
-  }, [user, navigate, redirectPath]);
+  }, [user, navigate, explicitRedirect]);
 
   const updateValue = <Key extends keyof LoginFormValues>(key: Key, value: LoginFormValues[Key]) => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -37,10 +45,10 @@ export function useLoginPage() {
     setError('');
   };
 
-  const completeAuth = () => {
+  const completeAuth = (nextUser?: UserProfile | null) => {
     setSuccess(true);
     window.setTimeout(() => {
-      navigate(redirectPath);
+      navigate(resolveRedirect(explicitRedirect, nextUser ?? user));
     }, 500);
   };
 

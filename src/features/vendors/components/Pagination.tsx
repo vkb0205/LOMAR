@@ -31,20 +31,20 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
   const pages = getPageNumbers(currentPage, totalPages);
 
   return (
-    <nav className="flex justify-center items-center gap-2 mt-12" aria-label="Phân trang">
+    <nav className="mt-12 flex items-center justify-center gap-2" aria-label="Phân trang">
       <button
         type="button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         aria-label="Trang trước"
-        className="w-10 h-10 flex items-center justify-center rounded-full border border-rose-100 bg-white text-[#1B2C40] hover:border-[#1B2C40] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-rose-100 transition-colors"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-canvas text-ink ring-1 ring-ink/15 transition-all duration-500 ease-fluid hover:ring-ink/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:ring-ink/15"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft strokeWidth={1.5} className="h-4 w-4" />
       </button>
 
       {pages.map((page, index) =>
         page === 'ellipsis' ? (
-          <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-[#6B92B4] text-sm select-none">
+          <span key={`ellipsis-${index}`} className="flex h-10 w-10 select-none items-center justify-center text-sm text-ink/50">
             …
           </span>
         ) : (
@@ -53,10 +53,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
             type="button"
             onClick={() => onPageChange(page)}
             aria-current={page === currentPage ? 'page' : undefined}
-            className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-colors ${
+            className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-500 ease-fluid ${
               page === currentPage
-                ? 'bg-[#1B2C40] text-white shadow-sm'
-                : 'border border-rose-100 bg-white text-[#1B2C40] hover:border-[#1B2C40]'
+                ? 'bg-ink text-canvas shadow-lift'
+                : 'bg-canvas text-ink ring-1 ring-ink/15 hover:ring-ink/40'
             }`}
           >
             {page}
@@ -69,9 +69,9 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         aria-label="Trang sau"
-        className="w-10 h-10 flex items-center justify-center rounded-full border border-rose-100 bg-white text-[#1B2C40] hover:border-[#1B2C40] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-rose-100 transition-colors"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-canvas text-ink ring-1 ring-ink/15 transition-all duration-500 ease-fluid hover:ring-ink/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:ring-ink/15"
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight strokeWidth={1.5} className="h-4 w-4" />
       </button>
     </nav>
   );

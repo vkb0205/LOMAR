@@ -1,10 +1,24 @@
 # LOMAR Project Specification
 
+> Historical product specification. The active product direction is Business
+> Intelligence; the former customization and VTON sections below are retained
+> only as migration history and are not implemented runtime behavior.
+
+> This specification reflects the active product surface as of the Business
+> Intelligence migration. Superseded VTON/customization design notes are
+> historical and do not describe a supported application feature.
+
 ## 1. Executive Summary
 
-LOMAR is a wedding-service ecosystem web application for **Phố Hạnh Phúc Hồ Văn Huê**. It combines a React/Vite frontend, Supabase-backed data features, local demo authentication, AI-assisted wedding consultation, wedding-service discovery, user journey tracking, voucher unlocking, and a Python FastAPI virtual try-on backend powered by Google Vertex AI / Google GenAI image models.
+LOMAR is a marketplace and business operations web application for **Phố Hạnh
+Phúc Hồ Văn Huê**. It combines a React/Vite frontend, Supabase-backed data
+features, authenticated business intelligence, and an AI copilot that helps
+businesses analyze performance, retrieve activity, produce reports, and preview
+recommendation actions.
 
-The product is designed around the Vietnamese wedding-planning journey: users discover vendors, customize wedding products and services, generate AI mannequin previews, track preparation milestones, unlock vouchers, read community content, and interact with the Bé Song Hỷ assistant.
+The product supports discovery and marketplace workflows while giving businesses
+a dedicated Business Intelligence workspace for operational insight and
+assisted analysis.
 
 ## 2. Goals and Product Vision
 
@@ -12,8 +26,11 @@ The product is designed around the Vietnamese wedding-planning journey: users di
 
 - Provide a polished, mobile-responsive wedding ecosystem portal for Hồ Văn Huê.
 - Let couples explore vendors and services by category.
-- Let couples customize wedding-related products such as wedding dresses and suits.
-- Generate realistic virtual try-on previews from mannequin and product images.
+- Give businesses a Business Intelligence workspace with metrics, performance
+  trends, category analysis, reports, recommendation previews, and activity
+  history.
+- Provide authenticated AI assistance for report generation, recommendations,
+  analysis, and business activity retrieval.
 - Persist user progress, saved designs, chat messages, posts, vendors, vouchers, and related marketplace data through Supabase.
 - Support static frontend deployment through GitHub Pages.
 - Support containerized backend deployment through Docker and Google Cloud Run.
@@ -21,7 +38,8 @@ The product is designed around the Vietnamese wedding-planning journey: users di
 ### 2.2 Non-Goals / Current Limitations
 
 - Authentication is currently demo/local-state based, not Supabase Auth or OAuth.
-- AI Consultant responses are currently rule-based/mock suggestions using Supabase product lookups, not a live LLM conversation service.
+- Business Intelligence data and automation previews are deterministic prototype
+  data; previews never mutate a real campaign, catalogue, or business record.
 - Payment, booking finalization, inventory management, and vendor admin workflows are not implemented.
 - Venue customization is shown as a coming-soon state.
 - Several Supabase tables used by UI code are not represented in the generated `Database` TypeScript interface and are accessed through loose `any` casts.
@@ -42,7 +60,9 @@ A visitor can browse public-facing areas such as home, services, guide, blog, an
 
 ### 3.4 Vendor / Service Provider
 
-Represented by vendor records in Supabase. Vendor-facing administration is not currently implemented, but vendor data powers service discovery and product customization.
+Represented by vendor records in Supabase. Businesses can use the Business
+Intelligence workspace to inspect prototype operational data and AI-generated
+analysis.
 
 ## 4. High-Level Architecture
 
@@ -52,10 +72,10 @@ Browser / GitHub Pages
        ├─ React Router routes under /LOMAR
        ├─ Tailwind CSS v4 theme utilities
        ├─ Supabase JS client for database reads/writes
-       ├─ LocalStorage for demo auth and customization state
-       └─ VTON API calls
-             ├─ Development: Vite proxy /api/vton -> FastAPI backend
-             └─ Production: direct Cloud Run URL via VITE_VTON_BACKEND_URL
+       ├─ LocalStorage for demo UI state
+       └─ Authenticated Business Intelligence API calls
+             ├─ Development: Vite proxy /api -> FastAPI backend
+             └─ Production: direct backend URL via VITE_BACKEND_URL
 
 FastAPI Backend / Cloud Run
   ├─ /health
@@ -168,12 +188,13 @@ Routes:
 | `/customize` | Customize | Product customization, pricing, chat, and VTON preview generation. |
 | `/blog` | Blog | Community/social feed sourced from Supabase posts and related tables. |
 | `/guide` | Guide | Wedding preparation checklist and educational content. |
-| `/ai-consultant` | AIConsultant | Chat-like consultant with product suggestions. |
 | `/dashboard` | Dashboard | User journey tracking, vouchers, and saved designs. |
 | `/vendor/:vendorId` | VendorDetail | Vendor detail view. |
 | `/login` | Login | Demo login and registration UI. |
+| `/business-intelligence` | BusinessIntelligence | Vendor/admin BI workspace. |
+| `/ai-consultant` | *(redirect)* | Legacy path; redirects home. Assistant is contextual. |
 
-The `Layout` component wraps routed pages with navbar, footer, and floating assistant chat.
+The `Layout` component wraps routed pages with navbar, footer, and a contextual floating assistant (hidden on BI/login/admin). Explore also embeds a services-sidebar chat.
 
 ## 8. Global State and Persistence
 
