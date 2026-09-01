@@ -1,6 +1,6 @@
 import { getJson } from '../../../shared/api/backendClient';
 import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
-import type { VendorCardModel } from '../types';
+import type { VendorCardModel, VendorSortKey } from '../types';
 
 const DEFAULT_CATEGORIES = ['Tất Cả', 'Váy Cưới', 'Chụp Ảnh', 'Địa Điểm', 'Trang Trí', 'Trang Điểm'];
 
@@ -33,6 +33,17 @@ export function filterVendors(vendors: VendorCardModel[], activeCategory: string
       Boolean(vendor.addr?.toLowerCase().includes(normalizedSearch));
     return matchesCategory && matchesSearch;
   });
+}
+
+export function sortVendors(vendors: VendorCardModel[], sortKey: VendorSortKey) {
+  if (sortKey === 'featured') return vendors;
+  const sorted = [...vendors];
+  if (sortKey === 'rating') {
+    sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else {
+    sorted.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+  }
+  return sorted;
 }
 
 export async function fetchVendorCatalog(): Promise<VendorCardModel[]> {

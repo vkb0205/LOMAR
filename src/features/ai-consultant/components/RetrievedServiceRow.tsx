@@ -19,12 +19,12 @@ export function RetrievedServiceRow({ services }: RetrievedServiceRowProps) {
   if (services.length === 0) return null;
 
   return (
-    <div className="border-t border-ink/8 bg-canvas/70 px-4 py-3">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-sage">
+    <div className="border-t border-hairline bg-canvas px-4 py-3">
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-sage">
         Dịch vụ gợi ý ({services.length})
       </p>
       <div
-        className="flex gap-3 overflow-x-auto pb-1"
+        className="scroll-area-x flex gap-2 overflow-x-auto pb-1"
         role="list"
         aria-label="Dịch vụ được gợi ý"
       >
@@ -33,7 +33,7 @@ export function RetrievedServiceRow({ services }: RetrievedServiceRowProps) {
           const name = service.name ?? 'Dịch vụ';
           const card = (
             <>
-              <div className="h-20 w-full overflow-hidden rounded-xl bg-canvas">
+              <div className="h-20 w-full overflow-hidden rounded-lg bg-surface-soft">
                 <img
                   src={service.thumbnailUrl || FALLBACK_THUMBNAIL}
                   alt={name}
@@ -42,19 +42,19 @@ export function RetrievedServiceRow({ services }: RetrievedServiceRowProps) {
                 />
               </div>
               <p className="mt-2 line-clamp-2 text-xs font-semibold text-ink">{name}</p>
-              {price && <p className="mt-0.5 text-xs font-bold text-ink">{price}</p>}
+              {price && <p className="mt-0.5 font-mono text-xs font-semibold text-forest">{price}</p>}
             </>
           );
 
           const shared =
-            'w-36 flex-shrink-0 rounded-2xl border border-ink/10 bg-white p-2 transition-all duration-500 ease-fluid';
+            'w-36 flex-shrink-0 rounded-lg border border-hairline bg-canvas p-2 transition-all duration-150';
 
           return (
             <div role="listitem" key={service.id}>
               {service.vendorId ? (
                 <Link
                   to={ROUTES.vendorDetail(service.vendorId)}
-                  className={`${shared} block hover:-translate-y-0.5 hover:shadow-card focus:outline-none focus:ring-2 focus:ring-rose/50`}
+                  className={`${shared} block hover:border-rose hover:shadow-subtle focus:outline-none focus:ring-2 focus:ring-rose/40`}
                   title={name}
                 >
                   {card}

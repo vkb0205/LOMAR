@@ -20,15 +20,15 @@ export function MessageBubble({ message, compact = false }: MessageBubbleProps) 
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       {!isUser && (
-        <div className="mr-2 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-mist">
-          <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
+        <div className="mr-2.5 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-ink-deep">
+          <Sparkles strokeWidth={1.5} className="h-3.5 w-3.5 text-canvas" />
         </div>
       )}
       <div
-        className={`max-w-[80%] rounded-2xl p-3.5 ${textSize} font-medium leading-relaxed whitespace-pre-wrap ${
+        className={`max-w-[85%] p-3 ${textSize} leading-relaxed font-medium whitespace-pre-wrap ${
           isUser
-            ? 'rounded-br-sm bg-cream text-ink-deep'
-            : 'rounded-bl-sm border border-ink/8 bg-white text-ink shadow-card'
+            ? 'rounded-lg rounded-tr-sm bg-surface-card text-ink'
+            : 'rounded-lg rounded-tl-sm border border-hairline bg-canvas text-ink'
         }`}
       >
         {message.content}

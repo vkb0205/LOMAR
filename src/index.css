@@ -3,6 +3,7 @@
 @theme {
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* ——— Editorial Luxury palette (single source of truth, public site) ——— */
   --color-canvas: #fffdfa; /* warm cream page ground */
@@ -20,10 +21,19 @@
   --color-cream: #ffe9c9; /* warm apricot CTA */
   --color-gold: #ffdb9f;
 
+  /* ——— AIC-mimic paper system (explore page) — LOMAR palette in AIC roles ——— */
+  --color-hairline: #e7dfd2; /* 1px warm hairline borders */
+  --color-hairline-soft: #ece6da;
+  --color-surface-soft: #f5f0e6; /* inputs, wells, hover */
+  --color-surface-card: #f0e9dc; /* bubbles, selected, badges */
+  --color-muted: #6c6a64; /* secondary text */
+  --color-muted-soft: #8e8b82; /* placeholders, tertiary */
+
   /* ——— Motion physics ——— */
   --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ——— Layered, soft-focused shadows (never harsh) ——— */
+  --shadow-subtle: 0 1px 3px rgb(28 61 46 / 0.08);
   --shadow-tile: 0 10px 35px -25px rgb(28 61 46 / 0.5);
   --shadow-card: 0 18px 45px -30px rgb(28 61 46 / 0.4);
   --shadow-float: 0 24px 60px -30px rgb(28 61 46 / 0.35);
@@ -36,12 +46,12 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     -webkit-text-size-adjust: 100%;
   }
 
   html:focus-within {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 
   body {
@@ -81,5 +91,47 @@
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
     background-size: 120px 120px;
+  }
+
+  /* Skeleton shimmer — AIC gradient sweep on warm paper */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-card) 25%,
+      var(--color-surface-soft) 50%,
+      var(--color-surface-card) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 0.5rem;
+  }
+
+  /* Thin, calm scrollbars (6px, hairline thumb) */
+  .scroll-area {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(28, 61, 46, 0.2) transparent;
+  }
+  .scroll-area::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(28, 61, 46, 0.16);
+    border-radius: 9999px;
+  }
+  .scroll-area:hover::-webkit-scrollbar-thumb {
+    background: rgba(28, 61, 46, 0.32);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
-import { MapPin, MessageCircle, Route } from 'lucide-react';
+import { MessageCircle, Route } from 'lucide-react';
+import { motion } from 'motion/react';
 import { HoVanHueMap } from './components/map/HoVanHueMap';
 import { MapChatPanel } from './components/map/MapChatPanel';
 import { categoryMeta, vendors, type VendorCategory } from './data/hoVanHueVendors';
 import { ROUTES } from '../../shared/config/routes';
 import { Link } from 'react-router-dom';
-import { EyebrowTag } from '../../shared/ui/EyebrowTag';
+import { EASE } from '../../shared/ui/motion';
 
 /**
  * Bản đồ Hạnh Phúc — interactive district map for Hồ Văn Huê.
@@ -35,24 +36,25 @@ export default function MapPage() {
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] w-full flex-col bg-canvas font-sans text-ink md:min-h-[calc(100dvh-4.25rem)]">
-      {/* Editorial page header */}
-      <header className="mx-auto w-full max-w-[1400px] px-4 pt-24 sm:px-6 md:pt-28 xl:px-8">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      {/* Page header — flat paper, caption-upper label, serif weight-400 title */}
+      <motion.header
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: EASE }}
+        className="mx-auto w-full max-w-[1400px] px-4 pt-20 sm:px-6 md:pt-24 xl:px-8"
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <EyebrowTag tone="sage">
-              <MapPin strokeWidth={1.5} className="h-3 w-3" aria-hidden />
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-soft">
               Khu phố hạnh phúc · Hồ Văn Huê
-            </EyebrowTag>
-            <h1 className="mt-4 font-serif text-[clamp(1.75rem,4vw,3rem)] font-bold leading-[1.05] tracking-tight text-ink">
-              Bản đồ <span className="italic text-rose">Hạnh Phúc</span>
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-pretty text-ink/70 md:text-base">
-              Một con phố, trọn vẹn hành trình ngày cưới. Chọn điểm ghé trên bản đồ hoặc để Bé
-              Song Hỷ vẽ sẵn tuyến tối ưu cho bạn.
             </p>
+            <h1 className="mt-2 font-serif text-[clamp(1.5rem,3vw,2.25rem)] font-normal leading-tight tracking-tight text-ink">
+              Bản đồ <span className="italic text-rose-deep">Hạnh Phúc</span>
+            </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pb-1">
+          {/* Category filter pills — ink when active, hairline ghost when not */}
+          <div className="no-scrollbar flex flex-wrap items-center gap-1.5 md:justify-end">
             {categories.map(([category, meta]) => {
               const active = activeFilters.length === 0 || activeFilters.includes(category);
               return (
@@ -61,25 +63,24 @@ export default function MapPage() {
                   type="button"
                   onClick={() => handleToggleFilter(category)}
                   aria-pressed={active}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all duration-500 ${
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-200 ${
                     active
-                      ? 'border-transparent text-ink shadow-sm'
-                      : 'border-ink/10 bg-white/60 text-ink/40 opacity-70'
+                      ? 'border-transparent bg-ink text-canvas'
+                      : 'border-hairline text-muted hover:bg-surface-soft hover:text-ink'
                   }`}
-                  style={active ? { background: meta.bg, boxShadow: `inset 0 0 0 1px ${meta.color}33` } : undefined}
                 >
-                  <span>{meta.icon}</span>
-                  <span>{meta.label}</span>
+                  <span aria-hidden>{meta.icon}</span>
+                  <span className="whitespace-nowrap">{meta.label}</span>
                 </button>
               );
             })}
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Split view: map + consultant chat */}
       <div className="mx-auto mt-6 w-full max-w-[1400px] flex-1 px-4 pb-10 sm:px-6 xl:px-8">
-        <div className="relative flex h-[calc(100dvh-22rem)] min-h-[560px] w-full gap-4 overflow-hidden md:gap-6">
+        <div className="relative flex h-[calc(100dvh-17rem)] min-h-[560px] w-full gap-4 overflow-hidden md:gap-6">
           <main className="relative min-w-0 flex-1 overflow-hidden">
             <HoVanHueMap
               activeFilters={activeFilters}
@@ -88,10 +89,10 @@ export default function MapPage() {
               onSelectVendor={setSelectedId}
             />
 
-            {/* Route status chip */}
+            {/* Route status chip — hairline paper card */}
             <div className="pointer-events-none absolute left-1/2 top-4 z-[600] -translate-x-1/2 px-4">
-              <div className="flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 px-4 py-2 text-xs font-medium text-ink shadow-card backdrop-blur-md">
-                <Route strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
+              <div className="flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink shadow-card">
+                <Route strokeWidth={1.75} className="h-4 w-4 shrink-0 text-rose-deep" />
                 <span className="whitespace-nowrap">
                   {highlightedIds.length > 0
                     ? `Route đề xuất: ${highlightedIds.length} điểm từ vị trí của bạn`
@@ -104,15 +105,15 @@ export default function MapPage() {
 
             {/* Route legend, only when a route exists */}
             {highlightedIds.length > 0 && (
-              <div className="absolute bottom-6 left-4 z-[550] flex items-center gap-1.5 rounded-full border border-ink/10 bg-white/90 px-3 py-2 shadow-card backdrop-blur-md">
+              <div className="absolute bottom-6 left-4 z-[550] flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 shadow-card">
                 <div
-                  className="h-0.5 w-6 rounded bg-rose-deep"
+                  className="h-0.5 w-6 rounded"
                   style={{
                     backgroundImage:
                       'repeating-linear-gradient(90deg, #a4506b 0, #a4506b 4px, transparent 4px, transparent 8px)',
                   }}
                 />
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/60">
+                <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
                   Route tối ưu
                 </p>
               </div>
@@ -124,7 +125,7 @@ export default function MapPage() {
                 onClick={() => setPanelOpen(true)}
                 aria-label="Hiện chat"
                 title="Hiện chat"
-                className="absolute bottom-6 right-4 z-[650] flex h-12 w-12 items-center justify-center rounded-full bg-rose text-white shadow-float transition-all duration-500 ease-fluid hover:-translate-y-0.5 hover:bg-ink lg:hidden"
+                className="absolute bottom-6 right-4 z-[650] flex h-12 w-12 items-center justify-center rounded-full bg-ink text-canvas shadow-card transition-colors duration-200 hover:bg-ink-soft lg:hidden"
               >
                 <MessageCircle strokeWidth={1.5} className="h-5 w-5" />
               </button>
@@ -152,7 +153,7 @@ export default function MapPage() {
         </div>
 
         {/* Soft nudge into the full catalog */}
-        <p className="mt-6 text-center text-xs text-ink/50">
+        <p className="mt-6 text-center text-xs text-muted">
           Muốn xem đầy đủ chi tiết từng vendor?{' '}
           <Link
             to={ROUTES.explore}

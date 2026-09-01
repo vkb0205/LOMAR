@@ -14,11 +14,11 @@ export function TypingIndicator({ compact = false }: TypingIndicatorProps) {
       transition={{ duration: 0.4, ease: EASE }}
       className="flex justify-start"
     >
-      <div className="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-mist">
-        <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
+      <div className="mr-2.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-ink-deep">
+        <Sparkles strokeWidth={1.5} className="h-3.5 w-3.5 text-canvas" />
       </div>
       <div
-        className={`rounded-2xl rounded-bl-sm border border-ink/8 bg-white shadow-card ${
+        className={`rounded-lg rounded-tl-sm border border-hairline bg-canvas ${
           compact ? 'p-3' : 'p-4'
         }`}
       >

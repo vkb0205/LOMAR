@@ -128,6 +128,10 @@ export default function Navbar() {
 
   const onHero = !scrolled && !mobileOpen;
 
+  const handlePrimaryNavClick = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-[80]">
@@ -198,6 +202,7 @@ export default function Navbar() {
                   <Link
                     key={link.id}
                     to={link.path}
+                    onClick={handlePrimaryNavClick}
                     aria-current={active ? 'page' : undefined}
                     className="relative rounded-full px-4 py-1.5 text-[13px] tracking-tight"
                   >
@@ -397,6 +402,7 @@ export default function Navbar() {
                     >
                       <Link
                         to={link.path}
+                        onClick={handlePrimaryNavClick}
                         className={`group flex items-baseline gap-4 border-b border-white/8 py-4 transition-colors duration-500 ${
                           active ? 'text-cream' : 'text-canvas hover:text-cream'
                         }`}

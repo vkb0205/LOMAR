@@ -137,22 +137,22 @@
 }
 
 .hvh-popup strong {
-  color: #a4506b;
+  color: #1c3d2e;
   font-size: 14px;
 }
 
 .hvh-popup span,
 .hvh-popup small {
-  color: #4a6551;
+  color: #6c6a64;
   font-size: 12px;
 }
 
 .hvh-rich-popup {
   width: 292px;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fffdfa;
-  color: #a4506b;
+  color: #1c3d2e;
   font-family: inherit;
 }
 
@@ -172,15 +172,22 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(216, 27, 96, 0.55), transparent 60%);
+  background: linear-gradient(to top, rgba(164, 80, 107, 0.5), transparent 60%);
 }
 
 .hvh-rich-popup__category,
-.hvh-rich-popup__rank,
 .hvh-rich-popup__price {
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #a4506b;
+  background: rgba(255, 253, 250, 0.95);
+  color: #1c3d2e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hvh-rich-popup__rank {
+  border-radius: 999px;
+  background: #17291f;
+  color: #fffdfa;
   font-size: 11px;
   font-weight: 700;
 }
@@ -198,10 +205,8 @@
   left: 10px;
   top: 10px;
   z-index: 2;
-  background: linear-gradient(135deg, #a4506b, #d78ba2);
-  color: white;
   padding: 5px 8px;
-  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.35);
+  box-shadow: 0 1px 3px rgba(28, 61, 46, 0.3);
 }
 
 .hvh-rich-popup__body {
@@ -217,7 +222,7 @@
 
 .hvh-rich-popup strong {
   display: block;
-  color: #a4506b;
+  color: #1c3d2e;
   font-size: 14px;
   line-height: 1.25;
 }
@@ -225,7 +230,7 @@
 .hvh-rich-popup small {
   display: block;
   margin-top: 3px;
-  color: #4a6551;
+  color: #6c6a64;
   font-size: 11px;
   line-height: 1.35;
 }
@@ -250,17 +255,17 @@
 }
 
 .hvh-rich-popup__rating b {
-  color: #a4506b;
+  color: #1c3d2e;
 }
 
 .hvh-rich-popup__rating small {
   margin: 0;
-  color: #4a6551;
+  color: #6c6a64;
 }
 
 .hvh-rich-popup p {
   margin: 8px 0 0;
-  color: #4a6551;
+  color: #6c6a64;
   font-size: 12px;
   line-height: 1.45;
 }
@@ -271,8 +276,8 @@
   gap: 6px;
   margin-top: 10px;
   padding-top: 9px;
-  border-top: 1px solid #fbe9ee;
-  color: #4a6551;
+  border-top: 1px solid #e7dfd2;
+  color: #6c6a64;
   font-size: 11px;
 }
 
@@ -284,9 +289,10 @@
 }
 
 .hvh-rich-popup__chips span {
+  border: 1px solid #e7dfd2;
   border-radius: 999px;
-  background: #fffdfa;
-  color: #a4506b;
+  background: #f5f0e6;
+  color: #1c3d2e;
   padding: 3px 7px;
   font-size: 10px;
 }
@@ -297,17 +303,17 @@
 }
 
 .maplibregl-ctrl-attrib {
-  background: rgba(255, 245, 248, 0.85) !important;
+  background: rgba(255, 253, 250, 0.9) !important;
   backdrop-filter: blur(6px);
   border-radius: 8px 0 0 0;
 }
 
 .maplibregl-popup-content {
-  border: 1px solid #f6cfe0;
-  border-radius: 16px;
+  border: 1px solid #e7dfd2;
+  border-radius: 12px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 10px 28px rgba(28, 61, 46, 0.14);
+  box-shadow: 0 4px 16px rgba(28, 61, 46, 0.12);
 }
 
 .maplibregl-popup-close-button {
@@ -322,27 +328,27 @@
 }
 
 .maplibregl-ctrl-group {
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(28, 61, 46, 0.12);
+  box-shadow: 0 1px 3px rgba(28, 61, 46, 0.1);
 }
 
 .maplibregl-ctrl-group button {
   background: #fffdfa !important;
-  border-color: #f6cfe0 !important;
+  border-color: #e7dfd2 !important;
 }
 
 .maplibregl-ctrl-group button:hover {
-  background: #fbe9ee !important;
+  background: #f5f0e6 !important;
 }
 
 .maplibregl-ctrl-group button span::before,
 .maplibregl-ctrl-group button span::after {
-  background: #a4506b !important;
+  background: #1c3d2e !important;
 }
 
 .maplibregl-ctrl-group button.maplibregl-ctrl-compass span::before {
-  border-color: #a4506b !important;
+  border-color: #1c3d2e !important;
 }
 
 .maplibregl-canvas {

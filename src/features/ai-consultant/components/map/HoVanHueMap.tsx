@@ -328,17 +328,19 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
   };
 
   return (
-    <section className="relative h-full min-h-[520px] overflow-hidden rounded-bezel border border-ink/10 bg-canvas shadow-tile">
+    <section className="relative h-full min-h-[520px] overflow-hidden rounded-xl border border-hairline bg-canvas shadow-subtle">
       <div ref={mapElementRef} className="h-full min-h-[520px] w-full" />
 
       {!mapReady && !mapError && (
         <div className="absolute inset-0 z-[1000] grid place-items-center bg-canvas/90 backdrop-blur-sm">
-          <div className="rounded-full bg-white px-5 py-3 text-sm text-ink shadow-card">Đang tải bản đồ…</div>
+          <div className="rounded-lg border border-hairline bg-canvas px-5 py-3 text-sm text-ink shadow-subtle">
+            Đang tải bản đồ…
+          </div>
         </div>
       )}
 
       {mapError && (
-        <div className="absolute left-4 right-4 top-4 z-[1000] rounded-2xl border border-rose-soft bg-white/95 px-4 py-3 text-sm text-rose-deep shadow-card">
+        <div className="absolute left-4 right-4 top-4 z-[1000] rounded-lg border border-rose/30 bg-canvas px-4 py-3 text-sm text-rose-deep shadow-subtle">
           {mapError}
         </div>
       )}
@@ -346,7 +348,7 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
       <button
         type="button"
         onClick={locateMe}
-        className="absolute bottom-5 right-5 z-[500] rounded-full border border-ink/10 bg-white/95 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-ink shadow-card backdrop-blur transition hover:-translate-y-0.5 hover:bg-cream hover:shadow-float"
+        className="absolute bottom-5 right-5 z-[500] rounded-lg border border-hairline bg-canvas px-4 py-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-ink shadow-card transition-colors duration-200 hover:bg-surface-soft"
       >
         ⌾ Vị trí của tôi
       </button>

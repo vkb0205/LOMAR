@@ -46,17 +46,15 @@ export function AssistantChat({
   const shell = 'h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)]';
 
   return (
-    <div
-      className={`flex flex-col overflow-hidden rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-card ${shell} ${className}`}
-    >
-      <div className="flex shrink-0 items-center gap-3 rounded-bezel-inner border-b border-ink/8 bg-white px-5 py-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-mist">
-          <Sparkles strokeWidth={1.5} className="h-5 w-5 text-rose-deep" />
+    <div className={`flex flex-col overflow-hidden rounded-xl border border-hairline bg-canvas shadow-card ${shell} ${className}`}>
+      <div className="flex shrink-0 items-center gap-3 border-b border-hairline bg-canvas px-4 py-3.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-deep">
+          <Sparkles strokeWidth={1.5} className="h-4.5 w-4.5 text-canvas" />
         </div>
         <div className="min-w-0">
-          <h2 className="truncate font-serif text-sm font-bold text-ink">{title}</h2>
-          <p className="flex items-center gap-1 truncate text-[11px] font-medium text-sage">
-            <Heart strokeWidth={1.5} className="h-2.5 w-2.5 shrink-0 fill-current" />
+          <h2 className="truncate text-sm font-semibold text-ink">{title}</h2>
+          <p className="flex items-center gap-1 truncate text-xs font-medium text-sage">
+            <Heart strokeWidth={1.75} className="h-2.5 w-2.5 shrink-0 fill-current" />
             {subtitle}
           </p>
         </div>
@@ -64,7 +62,7 @@ export function AssistantChat({
 
       <div
         ref={scrollContainerRef}
-        className={`no-scrollbar flex-1 space-y-4 overflow-y-auto bg-canvas/60 ${
+        className={`scroll-area flex-1 space-y-3.5 overflow-y-auto bg-canvas ${
           useCompact ? 'p-4' : 'p-5 md:p-6'
         }`}
       >
@@ -77,10 +75,7 @@ export function AssistantChat({
 
       <RetrievedServiceRow services={retrievedServices} />
 
-      <form
-        onSubmit={onSubmit}
-        className="shrink-0 border-t border-ink/8 bg-white/80 p-3 md:p-4"
-      >
+      <form onSubmit={onSubmit} className="shrink-0 border-t border-hairline bg-canvas p-3">
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -88,15 +83,15 @@ export function AssistantChat({
             onChange={event => onInputChange(event.target.value)}
             placeholder="Nhắn tin với Bé Song Hỷ..."
             disabled={isTyping}
-            className="flex-1 rounded-full bg-canvas px-4 py-2.5 text-xs text-ink outline-none ring-1 ring-ink/10 transition-shadow duration-500 placeholder:text-ink/40 focus:ring-rose/50 disabled:opacity-60 md:px-5 md:py-3 md:text-sm"
+            className="h-10 min-w-0 flex-1 rounded-lg border border-hairline bg-surface-soft px-3.5 text-sm text-ink outline-none transition-colors duration-200 placeholder:text-muted-soft focus:border-rose focus:ring-1 focus:ring-rose/30 disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose text-white transition-all duration-500 ease-fluid hover:-translate-y-0.5 hover:bg-ink active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 md:h-11 md:w-11"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink text-canvas transition-colors duration-200 hover:bg-ink-soft active:bg-ink-soft disabled:pointer-events-none disabled:opacity-50"
             aria-label="Gửi tin nhắn"
           >
-            <Send strokeWidth={1.5} className="h-4 w-4" />
+            <Send strokeWidth={1.75} className="h-4 w-4" />
           </button>
         </div>
       </form>

@@ -8,10 +8,6 @@ export function useVendorDetail(vendorId?: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [vendorId]);
-
-  useEffect(() => {
     let active = true;
 
     async function loadVendor() {

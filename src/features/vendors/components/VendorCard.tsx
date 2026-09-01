@@ -1,8 +1,8 @@
-import { Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Check, Copy, ExternalLink, MapPin, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { VendorCardModel } from '../types';
 import { EASE } from '../../../shared/ui/motion';
-import { ArrowUpRightIcon } from '../../../shared/ui/icons';
 
 interface VendorCardProps {
   index: number;
@@ -10,72 +10,144 @@ interface VendorCardProps {
   onOpen: (vendorId: string) => void;
 }
 
+function formatRank(rank: number) {
+  return `#${String(rank).padStart(2, '0')}`;
+}
+
+/** AIC FinalScoreBadge mapping — mono score colored by value tier. */
+function scoreColorClass(rating: number) {
+  if (rating >= 4.8) return 'text-forest';
+  if (rating >= 4.5) return 'text-amber-600';
+  return 'text-muted';
+}
+
 export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
+  const globalRank = index + 1;
   const fallbackImage = `https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=600&sig=${vendor.id}`;
+  const rating = vendor.rating || 5.0;
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  const handleCopy = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const text = [vendor.name, vendor.addr].filter(Boolean).join(' — ');
+    navigator.clipboard.writeText(text).catch(() => null);
+    setCopied(true);
+  };
+
+  const handleDirections = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!vendor.addr) return;
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.addr)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: EASE }}
+      transition={{ duration: 0.5, delay: (index % 4) * 0.06, ease: EASE }}
+      role="article"
+      aria-label={`Kết quả ${globalRank}: ${vendor.name}`}
+      tabIndex={0}
       onClick={() => onOpen(vendor.id)}
-      className="group flex cursor-pointer flex-col rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile transition-all duration-700 ease-fluid hover:-translate-y-1.5 hover:bg-ink/8 hover:shadow-float"
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen(vendor.id);
+        }
+      }}
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-hairline bg-canvas transition-all duration-150 hover:border-rose hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose"
     >
-      {/* Inner core */}
-      <div className="flex flex-1 flex-col overflow-hidden rounded-bezel-inner bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-canvas">
-          <img
-            src={vendor.img || fallbackImage}
-            alt={vendor.name}
-            className="h-full w-full object-cover transition-transform duration-700 ease-fluid group-hover:scale-105"
-          />
-          <div className="absolute top-4 left-4 rounded-full bg-canvas/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-ink">
-            {vendor.category}
+      {/* Rank badge — dark mono chip, top-left */}
+      <span className="absolute top-2 left-2 z-10 rounded-md bg-ink-deep px-1.5 py-0.5 font-mono text-[11px] font-semibold text-canvas opacity-90">
+        {formatRank(globalRank)}
+      </span>
+
+      {/* Category chip — outline, top-right */}
+      <span className="absolute top-2 right-2 z-10 rounded-full border border-hairline bg-canvas/90 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-muted uppercase backdrop-blur-sm">
+        {vendor.category}
+      </span>
+
+      {/* Media frame — 16/9 */}
+      <div className="relative aspect-video w-full overflow-hidden bg-surface-soft">
+        <img
+          src={vendor.img || fallbackImage}
+          alt={vendor.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      {/* Card body */}
+      <div className="flex flex-1 flex-col gap-2.5 p-3">
+        {/* Identity row */}
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate text-[14px] leading-tight font-semibold text-ink">
+              {vendor.name}
+            </p>
+            {vendor.addr && (
+              <p className="mt-0.5 flex min-w-0 items-center gap-1 font-mono text-[12px] text-muted">
+                <MapPin size={11} strokeWidth={1.75} className="shrink-0" />
+                <span className="truncate">{vendor.addr}</span>
+              </p>
+            )}
           </div>
+          <span
+            className={`flex shrink-0 items-center gap-1 font-mono text-sm font-semibold ${scoreColorClass(rating)}`}
+            title={`Đánh giá ${rating.toFixed(1)}/5`}
+          >
+            <Star size={12} strokeWidth={2} className="fill-current" />
+            {rating.toFixed(1)}
+          </span>
         </div>
 
-        <div className="flex flex-1 flex-col p-5 md:p-6">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <h3 className="font-serif text-lg font-bold leading-tight text-ink transition-colors duration-500 group-hover:text-rose-deep">
-              {vendor.name}
-            </h3>
-            <div className="flex shrink-0 items-center rounded-full bg-cream px-2.5 py-1 text-[11px] font-bold text-ink-deep">
-              <Star strokeWidth={1.5} className="mr-1 h-3 w-3 fill-current" />
-              {vendor.rating || '5.0'}
-            </div>
-          </div>
-
-          {vendor.addr && (
-            <div className="mb-4 flex items-center text-xs text-ink/55">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-1.5 h-3.5 w-3.5 shrink-0"
-                aria-hidden
-              >
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-              <span className="truncate">{vendor.addr}</span>
-            </div>
-          )}
-
-          {/* Button-in-button CTA */}
-          <div className="mt-auto flex w-full items-center justify-between rounded-full border border-ink/10 bg-canvas py-1.5 pr-1.5 pl-5 transition-all duration-500 ease-fluid group-hover:border-ink group-hover:bg-ink">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-ink transition-colors duration-500 group-hover:text-canvas">
-              Xem chi tiết
-            </span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink/5 text-ink transition-all duration-500 ease-fluid group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105 group-hover:bg-white/10 group-hover:text-canvas">
-              <ArrowUpRightIcon className="h-3 w-3" />
-            </span>
-          </div>
+        {/* Action row */}
+        <div className="mt-auto grid grid-cols-3 gap-2 border-t border-hairline pt-2.5">
+          <button
+            type="button"
+            aria-label="Xem chi tiết"
+            onClick={event => {
+              event.stopPropagation();
+              onOpen(vendor.id);
+            }}
+            className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft text-muted transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose"
+          >
+            <ExternalLink size={15} strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            aria-label="Chỉ đường"
+            disabled={!vendor.addr}
+            title={vendor.addr ? 'Chỉ đường trên Google Maps' : 'Không có địa chỉ'}
+            onClick={handleDirections}
+            className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft text-muted transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <MapPin size={15} strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            aria-label={copied ? 'Đã sao chép' : 'Sao chép thông tin'}
+            title={copied ? 'Đã sao chép' : 'Sao chép thông tin'}
+            onClick={handleCopy}
+            className={`inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose ${
+              copied ? 'text-rose-deep' : 'text-muted'
+            }`}
+          >
+            {copied ? <Check size={15} strokeWidth={2} /> : <Copy size={15} strokeWidth={1.75} />}
+          </button>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

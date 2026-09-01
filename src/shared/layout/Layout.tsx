@@ -11,6 +11,8 @@ export default function Layout() {
   // Contextual float everywhere couples need help — not BI, login, or admin.
   const showFloatingAssistant =
     !pathname.startsWith('/admin') &&
+    pathname !== ROUTES.explore &&
+    pathname !== ROUTES.map &&
     pathname !== ROUTES.businessIntelligence &&
     pathname !== ROUTES.login;
 

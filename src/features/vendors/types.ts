@@ -11,3 +11,5 @@ export interface VendorCardModel {
   addr?: string;
   img?: string;
 }
+
+export type VendorSortKey = 'featured' | 'rating' | 'name';

@@ -5,13 +5,14 @@ import { AssistantChat } from '../ai-consultant/components/AssistantChat';
 import { useConsultantChat } from '../ai-consultant/hooks/useConsultantChat';
 import { openContextualAssistant } from '../chat/openAssistant';
 import { ROUTES } from '../../shared/config/routes';
+import { SERVICES_PAGE_SIZE } from './hooks/useServicesPage';
 import { CategoryFilterBar } from './components/CategoryFilterBar';
 import { Pagination } from './components/Pagination';
+import { ResultToolbar } from './components/ResultToolbar';
 import { ServicesHero } from './components/ServicesHero';
 import { VendorCard } from './components/VendorCard';
+import { VendorCardSkeleton } from './components/VendorCardSkeleton';
 import { useServicesPage } from './hooks/useServicesPage';
-import { Spinner } from '../../shared/ui/Spinner';
-import { EmptyState } from '../../shared/ui/EmptyState';
 
 export default function Services() {
   const navigate = useNavigate();
@@ -41,44 +42,70 @@ export default function Services() {
         </div>
 
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:gap-10">
-          <div className="w-full min-w-0 flex-1">
-            {services.loading ? (
-              <div className="flex w-full justify-center py-24">
-                <Spinner />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
-                {services.paginatedVendors.map((vendor, index) => (
-                  <VendorCard
-                    key={vendor.id}
-                    vendor={vendor}
-                    index={index}
-                    onOpen={vendorId => navigate(ROUTES.vendorDetail(vendorId))}
-                  />
-                ))}
-              </div>
+          {/* Result workspace — hairline sheet on soft paper (AIC result panel) */}
+          <section className="w-full min-w-0 flex-1 overflow-hidden rounded-xl border border-hairline bg-surface-soft">
+            {!services.loading && services.filteredVendors.length > 0 && (
+              <ResultToolbar
+                activeCategory={services.activeCategory}
+                loadMs={services.loadMs}
+                rangeStart={services.visibleRange.start}
+                rangeEnd={services.visibleRange.end}
+                sortKey={services.sortKey}
+                totalCount={services.filteredVendors.length}
+                onSortChange={services.setSortKey}
+              />
             )}
 
-            {services.filteredVendors.length === 0 && !services.loading && (
-              <div className="w-full py-16">
-                <EmptyState
-                  icon={<Search strokeWidth={1.5} className="h-7 w-7" />}
-                  title="Không tìm thấy dịch vụ"
-                  description="Hiện tại chưa có dịch vụ nào trong danh mục này. Vui lòng thử lại sau hoặc chọn danh mục khác."
-                />
-              </div>
-            )}
-
-            {!services.loading &&
-              services.filteredVendors.length > 0 &&
-              services.totalPages > 1 && (
-                <Pagination
-                  currentPage={services.currentPage}
-                  totalPages={services.totalPages}
-                  onPageChange={services.setCurrentPage}
-                />
+            <div className="p-4">
+              {services.loading ? (
+                <div
+                  className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+                  role="status"
+                  aria-label="Đang tải dịch vụ"
+                >
+                  {Array.from({ length: SERVICES_PAGE_SIZE }, (_, index) => (
+                    <VendorCardSkeleton key={index} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" role="list">
+                  {services.paginatedVendors.map((vendor, index) => (
+                    <VendorCard
+                      key={vendor.id}
+                      vendor={vendor}
+                      index={(services.currentPage - 1) * SERVICES_PAGE_SIZE + index}
+                      onOpen={vendorId => navigate(ROUTES.vendorDetail(vendorId))}
+                    />
+                  ))}
+                </div>
               )}
-          </div>
+
+              {services.filteredVendors.length === 0 && !services.loading && (
+                <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-canvas px-8 py-16 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-card text-muted">
+                    <Search strokeWidth={1.5} className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-5 font-serif text-2xl font-normal text-ink">
+                    Không tìm thấy dịch vụ
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+                    Hiện tại chưa có dịch vụ nào trong danh mục này. Vui lòng thử lại sau hoặc
+                    chọn danh mục khác.
+                  </p>
+                </div>
+              )}
+
+              {!services.loading &&
+                services.filteredVendors.length > 0 &&
+                services.totalPages > 1 && (
+                  <Pagination
+                    currentPage={services.currentPage}
+                    totalPages={services.totalPages}
+                    onPageChange={services.setCurrentPage}
+                  />
+                )}
+            </div>
+          </section>
 
           <aside className="hidden w-full shrink-0 lg:block lg:w-[380px] lg:sticky lg:top-24 lg:self-start">
             <AssistantChat
@@ -97,31 +124,27 @@ export default function Services() {
           </aside>
         </div>
 
-        {/* Mobile AI banner — dark bezel panel */}
-        <div className="mt-10 rounded-bezel bg-gradient-to-br from-ink to-ink-soft p-1.5 ring-1 ring-white/10 shadow-float lg:hidden">
-          <div className="rounded-bezel-inner flex flex-col justify-between gap-4 bg-ink-deep/40 p-5 sm:flex-row sm:items-center">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                <Sparkles strokeWidth={1.5} className="h-5 w-5 text-cream" />
-              </div>
-              <div>
-                <p className="font-serif text-base font-bold text-canvas">Cần gợi ý nhanh?</p>
-                <p className="mt-1 text-xs leading-relaxed text-canvas/70">
-                  Mở Bé Song Hỷ để hỏi ngân sách, concept hoặc dịch vụ phù hợp ngay tại đây.
-                </p>
-              </div>
+        {/* Mobile AI banner — hairline sheet */}
+        <div className="mt-8 flex flex-col justify-between gap-4 rounded-xl border border-hairline bg-surface-soft p-5 sm:flex-row sm:items-center lg:hidden">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-deep">
+              <Sparkles strokeWidth={1.5} className="h-5 w-5 text-canvas" />
             </div>
-            <button
-              type="button"
-              onClick={() => openContextualAssistant()}
-              className="group inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full bg-cream py-2 pl-5 pr-2 text-[11px] font-bold uppercase tracking-widest text-ink-deep transition-all duration-500 ease-fluid hover:bg-gold active:scale-[0.98]"
-            >
-              Mở tư vấn AI
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-deep/10 transition-all duration-500 ease-fluid group-hover:translate-x-1 group-hover:-translate-y-[1px] group-hover:scale-105">
-                <Sparkles strokeWidth={1.5} className="h-3.5 w-3.5" />
-              </span>
-            </button>
+            <div>
+              <p className="text-sm font-semibold text-ink">Cần gợi ý nhanh?</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted">
+                Mở Bé Song Hỷ để hỏi ngân sách, concept hoặc dịch vụ phù hợp ngay tại đây.
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => openContextualAssistant()}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-canvas transition-colors duration-200 hover:bg-ink-soft active:bg-ink-soft"
+          >
+            Mở tư vấn AI
+            <Sparkles strokeWidth={1.5} className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>

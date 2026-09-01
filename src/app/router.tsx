@@ -22,6 +22,7 @@ import AnalyticsTracker from '../features/analytics/components/AnalyticsTracker'
 import BusinessIntelligence from '../features/business-intelligence/BusinessIntelligencePage';
 import RequireBusiness from '../features/business-intelligence/RequireBusiness';
 import MapPage from '../features/ai-consultant/MapPage';
+import RouteScrollManager from '../shared/layout/RouteScrollManager';
 
 // Router base path: configurable via VITE_BASE_PATH so the same bundle can be
 // deployed under any sub-path. Defaults to root ("/") when unset. The GitHub
@@ -32,6 +33,7 @@ const ROUTER_BASENAME = (import.meta.env.VITE_BASE_PATH || '/').replace(/\/+$/, 
 export function AppRouter() {
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
+      <RouteScrollManager />
       <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<Layout />}>
