@@ -31,7 +31,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'TRANG CHỦ', path: '/' },
     { name: 'DỊCH VỤ', path: '/explore', hasChild: true },
-    { name: 'CUSTOMIZE CÙNG BẠN', path: '/customize' },
+    { name: 'TƯ VẤN CÙNG BẠN', path: '/ai-consultant' },
     { name: 'BLOG', path: '/blog' },
     { name: 'WEDDING GUIDE', path: '/guide' },
   ];
@@ -123,14 +123,7 @@ export default function Navbar() {
                       Hành Trình Của Bạn
                     </Link>
 
-                    <Link
-                      to="/ai-consultant"
-                      onClick={() => setShowDropdown(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-rose-50/40 hover:text-[#F2BFC8] transition-colors"
-                    >
-                      <Sparkles className="w-4 h-4 text-[#F2BFC8]" />
-                      Tư Vấn Viên AI
-                    </Link>
+                    {/* adj */}
 
                     <button
                       onClick={handleLogout}

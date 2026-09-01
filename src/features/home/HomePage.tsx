@@ -1,3 +1,4 @@
+import Footer from '@/src/shared/layout/Footer';
 import FloatingChat from '../chat/components/FloatingChat';
 import { DevelopmentSection } from './components/DevelopmentSection';
 import { HeroSection } from './components/HeroSection';
@@ -11,6 +12,7 @@ export default function Home() {
       <StorySection />
       <DevelopmentSection />
       <FloatingChat />
+      <Footer />
     </div>
   );
 }

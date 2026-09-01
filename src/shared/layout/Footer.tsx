@@ -63,7 +63,7 @@ export default function Footer() {
             <h4 className="font-serif font-bold text-[#1B2C40] text-lg mb-6 uppercase tracking-wider">KHÁM PHÁ</h4>
             <ul className="flex flex-col gap-4">
               <li><Link to="/explore" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Dịch vụ cưới</Link></li>
-              <li><Link to="/customize" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Thiết kế phong cách</Link></li>
+              <li><Link to="/ai-consultant" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Tư vấn phong cách</Link></li>
               <li><Link to="/guide" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Cẩm nang cưới</Link></li>
               <li><Link to="/blog" className="text-sm text-[#1B2C40]/70 hover:text-[#ddb983] transition-colors">Tin tức & Sự kiện</Link></li>
             </ul>

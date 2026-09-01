@@ -41,7 +41,7 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     bgGradient: 'from-rose-50 to-pink-50/30',
     badgeBg: 'bg-rose-50 text-rose-600 border border-rose-100',
     ctaText: 'Bắt Đầu Thiết Kế',
-    ctaLink: '/customize?tab=Studio',
+    ctaLink: '/ai-consultant',
   },
   {
     id: 'T03',
@@ -53,7 +53,7 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     bgGradient: 'from-purple-50 to-indigo-50/30',
     badgeBg: 'bg-purple-50 text-purple-600 border border-purple-100',
     ctaText: 'Tự Tay Thiết Kế',
-    ctaLink: '/customize?tab=Váy Cưới',
+    ctaLink: '/ai-consultant',
   },
   {
     id: 'T04',
@@ -65,7 +65,7 @@ export const DASHBOARD_STATIONS: DashboardStation[] = [
     bgGradient: 'from-amber-50 to-orange-50/30',
     badgeBg: 'bg-amber-50 text-amber-600 border border-amber-100',
     ctaText: 'Thiết Kế Sảnh Tiệc',
-    ctaLink: '/customize?tab=Venue',
+    ctaLink: '/ai-consultant',
   },
 ];
 

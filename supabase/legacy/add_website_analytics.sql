@@ -153,8 +153,7 @@ begin
       count(distinct page_path)::integer as unique_pages,
       sum(duration_seconds)::integer as duration_seconds,
       bool_or(
-        page_path = '/customize'
-        or page_path = '/ai-consultant'
+        page_path = '/ai-consultant'
         or page_path like '/vendor/%'
       ) as has_high_intent_page
     from filtered
