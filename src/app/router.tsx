@@ -21,6 +21,7 @@ import AnalyticsPanel from '../features/admin/panels/AnalyticsPanel';
 import AnalyticsTracker from '../features/analytics/components/AnalyticsTracker';
 import BusinessIntelligence from '../features/business-intelligence/BusinessIntelligencePage';
 import RequireBusiness from '../features/business-intelligence/RequireBusiness';
+import MapPage from '../features/ai-consultant/MapPage';
 
 // Router base path: configurable via VITE_BASE_PATH so the same bundle can be
 // deployed under any sub-path. Defaults to root ("/") when unset. The GitHub
@@ -46,7 +47,8 @@ export function AppRouter() {
           />
           <Route path="blog" element={<Blog />} />
           <Route path="guide" element={<Guide />} />
-          <Route path="ai-consultant" element={<Navigate to={ROUTES.home} replace />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="ai-consultant" element={<Navigate to={ROUTES.map} replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="vendor/:vendorId" element={<VendorDetail />} />
           <Route path="login" element={<Login />} />

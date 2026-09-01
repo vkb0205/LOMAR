@@ -2,18 +2,31 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
+// @ts-expect-error -- plain .mjs helper, no type declarations needed for a build script.
+import { assertProductionEnv } from './scripts/assertProductionEnv.mjs';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
+  // Third arg '' disables the VITE_ prefix filter so process.env values
+  // supplied by the host (Render dashboard) are merged with any .env files.
   const env = loadEnv(mode, '.', '');
-  
+
+  // Guard the real build only. `vite dev`/`preview` stay usable without
+  // credentials, and supabaseClient.ts already throws in dev if they're absent.
+  if (command === 'build' && mode === 'production') {
+    assertProductionEnv(env);
+  }
+
   // Base path for the built app. Defaults to root ("/") so an unconfigured
   // deployment serves correctly from a domain root. The GitHub Pages workflow
   // (.github/workflows/deploy-ui.yml) sets VITE_BASE_PATH to "/<repo-name>/"
   // explicitly, so Pages deployments are unaffected by this default.
   const basePath = env.VITE_BASE_PATH || '/';
-  
+
   // Determine the backend API URL for the versioned application-data routes.
+  // The agent service keeps its own URL so AI Consultant traffic can be split
+  // out from the main FastAPI process when the two are deployed separately.
   const backendUrl = env.VITE_BACKEND_URL || 'http://localhost:8080';
+  const agentServiceUrl = env.VITE_AGENT_SERVICE_URL || 'http://localhost:8090';
 
   return {
     base: basePath,
@@ -31,6 +44,11 @@ export default defineConfig(({ mode }) => {
         '/api/v1': {
           target: backendUrl,
           changeOrigin: true,
+        },
+        '/api/agent': {
+          target: agentServiceUrl,
+          changeOrigin: true,
+          rewrite: (requestPath) => requestPath.replace(/^\/api\/agent/, ''),
         },
       },
     },

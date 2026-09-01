@@ -44,8 +44,7 @@ export const PRIMARY_NAV: AppNavItem[] = [
   {
     id: 'map',
     label: 'BẢN ĐỒ HẠNH PHÚC',
-    path: ROUTES.explore,
-    matchPrefix: '/vendor',
+    path: ROUTES.map,
     audiences: ['public', 'couple', 'business', 'admin'],
   },
   {
@@ -161,6 +160,7 @@ export function safeRedirectPath(candidate: string | null | undefined, fallback:
 
 export const FOOTER_EXPLORE_LINKS: Array<{ label: string; path: StaticRoutePath }> = [
   { label: 'Dịch vụ cưới', path: ROUTES.explore },
+  { label: 'Bản đồ hạnh phúc', path: ROUTES.map },
   { label: 'Hành trình của tôi', path: ROUTES.dashboard },
   { label: 'Cẩm nang cưới', path: ROUTES.guide },
   { label: 'Tin tức & cộng đồng', path: ROUTES.blog },

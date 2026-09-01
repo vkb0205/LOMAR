@@ -1,6 +1,7 @@
 export const ROUTES = {
   home: '/',
   explore: '/explore',
+  map: '/map',
   blog: '/blog',
   guide: '/guide',
   dashboard: '/dashboard',
@@ -17,7 +18,7 @@ export const ROUTES = {
   vendorDetail: (vendorId: string) => `/vendor/${vendorId}`,
 } as const;
 
-/** Legacy path only — redirects home; assistant is contextual, not a page. */
+/** Legacy path only — redirects to the interactive map page. */
 export const LEGACY_AI_CONSULTANT_PATH = '/ai-consultant' as const;
 
 export type StaticRoutePath = Exclude<(typeof ROUTES)[keyof typeof ROUTES], (value: string) => string>;
