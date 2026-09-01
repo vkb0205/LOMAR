@@ -13,7 +13,7 @@ export function LoginBrandPanel({ loading, onDemoLogin }: LoginBrandPanelProps) 
     <div className="flex-1 flex flex-col justify-between py-4 pr-0 md:pr-6 border-b md:border-b-0 md:border-r border-[#b5d9f2]/20">
       <div className="space-y-6 text-center md:text-left">
         <div className="flex items-center gap-3 justify-center md:justify-start">
-          <img src={logoMainImg} alt="Logo" className="h-16 w-auto object-contain" />
+          <img src={logoMainImg} alt="Logo" className="h-20 w-auto object-contain" />
           <div className="flex flex-col justify-center border-l border-[#1e4696]/20 pl-3">
             <span className="font-serif text-[#1B2C40] font-bold text-lg tracking-wider uppercase leading-none">PHỐ HẠNH PHÚC</span>
           </div>

@@ -26,7 +26,7 @@ export default function Footer() {
               <img
                 src={logoMainImg}
                 alt="Logo Hạnh Phúc Tới Nơi · Hồ Văn Huê"
-                className="h-14 w-auto object-contain transition-transform duration-700 ease-fluid group-hover:scale-105"
+                className="h-16 w-auto object-contain transition-transform duration-700 ease-fluid group-hover:scale-105"
               />
               <div className="flex flex-col justify-center">
                 <span className="font-serif text-xl font-bold leading-tight tracking-wide text-canvas">

@@ -10,8 +10,8 @@ import {
   Sparkles,
   User,
 } from 'lucide-react';
-import logoImg from '../../assets/images/Asset 24.png';
-import logoDarkImg from '../../assets/images/Logo.png';
+import logoImg from '../../assets/images/logo-on-pink.png';
+import logoDarkImg from '../../assets/images/logo-full-color.png';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { ROUTES } from '../config/routes';
 import { openContextualAssistant } from '../../features/chat/openAssistant';
@@ -104,11 +104,18 @@ export default function Navbar() {
 
   // Keep the header transparent while it is over the page hero.
   useEffect(() => {
-    const headerHeight = 68;
-
     function update() {
       const hero = document.querySelector<HTMLElement>('[data-hero]');
-      setScrolled(hero ? hero.getBoundingClientRect().bottom <= headerHeight : true);
+      if (!hero) {
+        setScrolled(true);
+        return;
+      }
+
+      const rect = hero.getBoundingClientRect();
+      const heroHeight = rect.height;
+      const scrolledAmount = -rect.top;
+
+      setScrolled(scrolledAmount >= heroHeight / 8);
     }
 
     update();
@@ -138,7 +145,7 @@ export default function Navbar() {
         <div
           className={`pointer-events-auto flex h-16 w-full items-center border-b px-4 transition-[background-color,box-shadow,border-color] duration-700 ease-fluid sm:h-[4.25rem] sm:px-6 xl:px-8 ${
             scrolled
-              ? 'border-white/10 bg-ink/95 shadow-float'
+              ? 'border-rose-mist/30 bg-rose shadow-float'
               : 'border-transparent bg-transparent shadow-none'
           }`}
         >
@@ -175,9 +182,7 @@ export default function Navbar() {
               <img
                 src={onHero ? logoDarkImg : logoImg}
                 alt=""
-                className={`w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 ${
-                  onHero ? 'h-7 md:h-8' : 'h-9 md:h-10'
-                }`}
+                className="w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 h-11 md:h-12 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
               />
               <div className="hidden min-w-0 flex-col justify-center sm:flex">
                 <span className={`truncate font-serif text-base font-bold leading-tight tracking-wide ${onHero ? 'text-ink' : 'text-white'}`}>
@@ -275,7 +280,7 @@ export default function Navbar() {
                   <img
                     src={user.avatarUrl}
                     alt=""
-                    className="h-8 w-8 rounded-full object-cover ring-1 ring-sage-mist/50"
+                    className="h-8 w-8 rounded-full object-cover ring-1 ring-rose-mist/50"
                   />
                   <span className="hidden min-w-0 flex-1 truncate text-left text-sm font-semibold md:block">
                     {user.name.split(' ').pop()}
@@ -300,11 +305,11 @@ export default function Navbar() {
                       transition={{ duration: 0.4, ease: EASE }}
                       id={accountMenuId}
                       role="menu"
-                      className="absolute right-0 top-full z-50 mt-3 w-72 origin-top-right overflow-hidden rounded-[1.25rem] border border-sage-mist bg-canvas py-1.5 shadow-float"
+                      className="absolute right-0 top-full z-50 mt-3 w-72 origin-top-right overflow-hidden rounded-[1.25rem] border border-rose-mist bg-canvas py-1.5 shadow-float"
                     >
-                      <div className="border-b border-sage-mist/70 px-4 py-3">
+                      <div className="border-b border-rose-mist/70 px-4 py-3">
                         <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
-                        <p className="mt-0.5 text-xs font-medium text-sage">{roleLabelFor(user)}</p>
+                        <p className="mt-0.5 text-xs font-medium text-rose">{roleLabelFor(user)}</p>
                       </div>
 
                       <div className="py-1">
@@ -320,12 +325,12 @@ export default function Navbar() {
                               to={item.path}
                               onClick={() => setShowDropdown(false)}
                               className={`flex items-start gap-3 px-4 py-2.5 transition-colors duration-500 ${
-                                active ? 'bg-sage-mist/60 text-ink' : 'text-ink hover:bg-sage-mist/40'
+                                active ? 'bg-rose-mist/60 text-ink' : 'text-ink hover:bg-rose-mist/40'
                               }`}
                             >
                               <Icon
                                 strokeWidth={1.5}
-                                className={`mt-0.5 h-4 w-4 shrink-0 ${active ? 'text-sage' : 'text-sage/70'}`}
+                                className={`mt-0.5 h-4 w-4 shrink-0 ${active ? 'text-rose' : 'text-rose/70'}`}
                               />
                               <span className="min-w-0">
                                 <span className="block text-sm font-semibold">{item.label}</span>
@@ -344,7 +349,7 @@ export default function Navbar() {
                         type="button"
                         role="menuitem"
                         onClick={() => void handleLogout()}
-                        className="flex w-full items-center gap-3 border-t border-sage-mist/70 px-4 py-2.5 text-left text-sm font-semibold text-red-600 transition-colors duration-500 hover:bg-red-50"
+                        className="flex w-full items-center gap-3 border-t border-rose-mist/70 px-4 py-2.5 text-left text-sm font-semibold text-red-600 transition-colors duration-500 hover:bg-red-50"
                       >
                         <LogOut strokeWidth={1.5} className="h-4 w-4 text-red-500" />
                         Đăng xuất
@@ -378,7 +383,7 @@ export default function Navbar() {
             role="dialog"
             aria-modal="true"
             aria-label="Menu điều hướng"
-            className="fixed inset-0 z-[70] bg-ink-deep/90 backdrop-blur-3xl lg:hidden"
+            className="fixed inset-0 z-[70] bg-rose-deep/95 backdrop-blur-3xl lg:hidden"
           >
             <div className="h-full overflow-y-auto px-6 pb-12 pt-28 sm:px-10 sm:pt-32">
               <motion.p
@@ -471,7 +476,7 @@ export default function Navbar() {
                           key={item.id}
                           to={item.path}
                           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors duration-500 ${
-                            active ? 'bg-white/15 text-sage-mist' : 'text-canvas/80 hover:bg-white/10'
+                            active ? 'bg-white/15 text-rose-mist' : 'text-canvas/80 hover:bg-white/10'
                           }`}
                         >
                           <Icon strokeWidth={1.5} className="h-4 w-4 opacity-70" />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Copy, ExternalLink, MapPin, Star } from 'lucide-react';
+import { ArrowUpRight, Check, Clock, Copy, MapPin, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { VendorCardModel } from '../types';
 import { EASE } from '../../../shared/ui/motion';
@@ -14,11 +14,30 @@ function formatRank(rank: number) {
   return `#${String(rank).padStart(2, '0')}`;
 }
 
-/** AIC FinalScoreBadge mapping — mono score colored by value tier. */
 function scoreColorClass(rating: number) {
   if (rating >= 4.8) return 'text-forest';
   if (rating >= 4.5) return 'text-amber-600';
   return 'text-muted';
+}
+
+function formatHoursLine(hours: NonNullable<VendorCardModel['hours']>) {
+  if (!hours.length) return '';
+  const today = new Date().getDay();
+  const todayEntry = hours.find(entry => {
+    const dayMap: Record<string, number> = {
+      CN: 0,
+      T2: 1,
+      T3: 2,
+      T4: 3,
+      T5: 4,
+      T6: 5,
+      T7: 6,
+    };
+    return dayMap[entry.day.toUpperCase()] === today;
+  });
+  if (todayEntry) return `Hôm nay ${todayEntry.open} – ${todayEntry.close}`;
+  const first = hours[0];
+  return `${first.day}: ${first.open} – ${first.close}`;
 }
 
 export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
@@ -26,6 +45,7 @@ export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
   const fallbackImage = `https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=600&sig=${vendor.id}`;
   const rating = vendor.rating || 5.0;
   const [copied, setCopied] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(false);
 
   useEffect(() => {
     if (!copied) return;
@@ -49,6 +69,19 @@ export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
       'noopener,noreferrer'
     );
   };
+
+  const handleOpen = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    onOpen(vendor.id);
+  };
+
+  const handleToggleHours = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setHoursOpen(prev => !prev);
+  };
+
+  const hoursLine = vendor.hours && vendor.hours.length > 0 ? formatHoursLine(vendor.hours) : 'Null time';
+  const hasHoursList = Boolean(vendor.hours && vendor.hours.length > 0);
 
   return (
     <motion.article
@@ -89,7 +122,7 @@ export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-2.5 p-3">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         {/* Identity row */}
         <div className="flex min-w-0 items-start justify-between gap-2">
           <div className="min-w-0">
@@ -112,41 +145,34 @@ export function VendorCard({ index, vendor, onOpen }: VendorCardProps) {
           </span>
         </div>
 
-        {/* Action row */}
-        <div className="mt-auto grid grid-cols-3 gap-2 border-t border-hairline pt-2.5">
-          <button
-            type="button"
-            aria-label="Xem chi tiết"
-            onClick={event => {
-              event.stopPropagation();
-              onOpen(vendor.id);
-            }}
-            className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft text-muted transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose"
-          >
-            <ExternalLink size={15} strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            aria-label="Chỉ đường"
-            disabled={!vendor.addr}
-            title={vendor.addr ? 'Chỉ đường trên Google Maps' : 'Không có địa chỉ'}
-            onClick={handleDirections}
-            className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft text-muted transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <MapPin size={15} strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            aria-label={copied ? 'Đã sao chép' : 'Sao chép thông tin'}
-            title={copied ? 'Đã sao chép' : 'Sao chép thông tin'}
-            onClick={handleCopy}
-            className={`inline-flex h-8 w-full items-center justify-center rounded-lg bg-surface-soft transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose ${
-              copied ? 'text-rose-deep' : 'text-muted'
-            }`}
-          >
-            {copied ? <Check size={15} strokeWidth={2} /> : <Copy size={15} strokeWidth={1.75} />}
-          </button>
-        </div>
+        {/* Opening hours — subtle inline disclosure */}
+        {hoursLine && (
+          <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
+            <Clock size={11} strokeWidth={1.75} className="shrink-0" />
+            <span className="truncate">{hoursLine}</span>
+            {hasHoursList && vendor.hours && vendor.hours.length > 1 && (
+              <button
+                type="button"
+                aria-expanded={hoursOpen}
+                aria-label={hoursOpen ? 'Ẩn giờ mở cửa' : 'Xem tất cả giờ mở cửa'}
+                onClick={handleToggleHours}
+                className="ml-auto text-[11px] font-medium text-rose-deep transition-opacity duration-150 hover:opacity-80 focus-visible:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose"
+              >
+                {hoursOpen ? 'Thu gọn' : 'Tất cả'}
+              </button>
+            )}
+          </div>
+        )}
+        {hoursOpen && vendor.hours && vendor.hours.length > 0 && (
+          <ul className="flex flex-col gap-0.5 border-l border-hairline pl-2 font-mono text-[11px] text-muted">
+            {vendor.hours.map(entry => (
+              <li key={entry.day} className="flex justify-between gap-2">
+                <span>{entry.day}</span>
+                <span className="text-ink">{entry.open} – {entry.close}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </motion.article>
   );
