@@ -21,52 +21,6 @@ export default function AIConsultant() {
 
   return (
     <div className="flex h-[calc(100dvh-8rem)] min-h-0 w-full flex-col overflow-hidden bg-[#faf6f0] text-[#2d2520] md:h-[calc(100dvh-5rem)]">
-      {/* <header className="z-10 flex shrink-0 items-center gap-4 border-b border-[#ede5d8] bg-white px-4 py-3.5 shadow-sm md:px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#c9906a] to-[#a8714f] text-sm font-bold text-white shadow-sm">
-            HVH
-          </div>
-          <div className="min-w-0">
-            <h1 className="truncate font-serif text-base font-semibold leading-tight text-[#2d2520]">
-              Wedding Street AI
-            </h1>
-            <p className="truncate text-[11px] leading-tight text-[#7a6e68]">Hồ Văn Huê · Phú Nhuận</p>
-          </div>
-        </div>
-
-        <div className="hidden h-5 w-px bg-[#ede5d8] sm:block" />
-
-        <div className="hidden items-center gap-1.5 text-xs text-[#7a6e68] sm:flex">
-          <span className="h-2 w-2 rounded-full bg-[#8aab8a]" />
-          <span>{vendors.length} vendors trên tuyến</span>
-        </div>
-
-        {highlightedIds.length > 0 && (
-          <>
-            <div className="hidden h-5 w-px bg-[#ede5d8] lg:block" />
-            <div className="hidden min-w-0 items-center gap-1.5 text-xs font-medium text-[#c9906a] lg:flex">
-              <Sparkles className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{highlightedIds.length} vendor được đề xuất</span>
-            </div>
-          </>
-        )}
-
-        <div className="ml-auto flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-full bg-[#f5e6e0] px-3 py-1.5 text-xs font-medium text-[#c9906a] md:flex">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>TP. Hồ Chí Minh</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setPanelOpen(open => !open)}
-            className="flex items-center gap-1.5 rounded-full border border-[#ede5d8] px-3 py-1.5 text-xs font-medium text-[#7a6e68] transition hover:border-[#c9906a] hover:text-[#c9906a]"
-          >
-            {panelOpen ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">{panelOpen ? 'Ẩn chat' : 'Hiện chat'}</span>
-          </button>
-        </div>
-      </header> */}
-
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <main className="relative min-w-0 flex-1 overflow-hidden">
           <HoVanHueMap
