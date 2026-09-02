@@ -9,12 +9,15 @@ export default function Layout() {
   const { pathname } = useLocation();
   const workspace = isWorkspacePath(pathname);
   // Contextual float everywhere couples need help — not BI, login, or admin.
+  // Keep the widget mounted even while hidden (e.g. /explore and /map have
+  // their own in-page assistant) so switching pages doesn't wipe its history.
   const showFloatingAssistant =
     !pathname.startsWith('/admin') &&
     pathname !== ROUTES.explore &&
     pathname !== ROUTES.map &&
     pathname !== ROUTES.businessIntelligence &&
     pathname !== ROUTES.login;
+  const floatingContainerClass = showFloatingAssistant ? '' : 'hidden';
 
   return (
     <div className="min-h-[100dvh] w-full bg-canvas flex flex-col font-sans text-ink">
@@ -30,7 +33,9 @@ export default function Layout() {
         <Outlet />
       </main>
       {!workspace && <Footer />}
-      {showFloatingAssistant && <FloatingChat />}
+      <div className={floatingContainerClass} aria-hidden={!showFloatingAssistant ? true : undefined}>
+        <FloatingChat />
+      </div>
     </div>
   );
 }
