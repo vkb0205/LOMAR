@@ -65,9 +65,10 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
   }, [userId, user?.name, greeting]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only the message list container; scrollIntoView on a fixed/sticky
+    // panel also scrolls the page behind it, yanking users to the bottom of the site.
     const el = scrollContainerRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages, isTyping]);
 
   const sendMessage = async (raw?: string) => {

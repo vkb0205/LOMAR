@@ -107,20 +107,24 @@ export default function Services() {
             </div>
           </section>
 
-          <aside className="hidden w-full shrink-0 lg:block lg:w-[380px] lg:sticky lg:top-24 lg:self-start">
-            <AssistantChat
-              layout="sidebar"
-              title="Bé Song Hỷ"
-              subtitle="Gợi ý dịch vụ phù hợp"
-              input={chat.input}
-              isTyping={chat.isTyping}
-              messages={chat.messages}
-              messagesEndRef={chat.messagesEndRef}
-              scrollContainerRef={chat.scrollContainerRef}
-              retrievedServices={chat.retrievedServices}
-              onInputChange={chat.setInput}
-              onSubmit={chat.submitMessage}
-            />
+          {/* Spacer keeps the result column width; the chat itself is fixed so it
+              stays visible while scrolling the whole page (sticky dies at the row's bottom edge). */}
+          <aside className="hidden w-full shrink-0 lg:block lg:w-[380px]">
+            <div className="fixed top-24 right-[max(1rem,calc((100vw_-_1400px)/2_+_1rem))] z-30 w-[380px]">
+              <AssistantChat
+                layout="sidebar"
+                title="Bé Song Hỷ"
+                subtitle="Gợi ý dịch vụ phù hợp"
+                input={chat.input}
+                isTyping={chat.isTyping}
+                messages={chat.messages}
+                messagesEndRef={chat.messagesEndRef}
+                scrollContainerRef={chat.scrollContainerRef}
+                retrievedServices={chat.retrievedServices}
+                onInputChange={chat.setInput}
+                onSubmit={chat.submitMessage}
+              />
+            </div>
           </aside>
         </div>
 
