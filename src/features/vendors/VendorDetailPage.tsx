@@ -140,12 +140,9 @@ export default function VendorDetail() {
                 </h2>
                 <div className="h-px flex-1 bg-rose/30" />
               </div>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <p className="mb-10 text-base leading-relaxed text-ink/80 md:text-lg">
-                {vendor.name} là một trong những thương hiệu uy tín hàng đầu tại Phố Hạnh Phúc Hồ
-                Văn Huê. Với phong cách phục vụ tận tâm và chất lượng dịch vụ đỉnh cao, chúng tôi
-                cam kết mang đến những trải nghiệm tuyệt vời nhất cho ngày trọng đại của bạn.
+            </Reveal><Reveal delay={0.1}>
+              <p className="mb-10 whitespace-pre-line text-base leading-relaxed text-ink/80 md:text-lg">
+                {vendor.description}
               </p>
             </Reveal>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
