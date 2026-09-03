@@ -133,6 +133,8 @@ export default function Navbar() {
     navigate(ROUTES.home);
   };
 
+  const onHero = !scrolled && !mobileOpen;
+
   const handlePrimaryNavClick = () => {
     window.scrollTo(0, 0);
   };
@@ -143,7 +145,7 @@ export default function Navbar() {
         <div
           className={`pointer-events-auto flex h-16 w-full items-center border-b px-4 transition-[background-color,box-shadow,border-color] duration-700 ease-fluid sm:h-[4.25rem] sm:px-6 xl:px-8 ${
             scrolled
-              ? 'border-ink/10 bg-white shadow-float'
+              ? 'border-rose-mist/30 bg-rose shadow-float'
               : 'border-transparent bg-transparent shadow-none'
           }`}
         >
@@ -153,7 +155,7 @@ export default function Navbar() {
               ref={menuButtonRef}
               type="button"
               className={`relative mr-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors duration-500 lg:hidden ${
-                !mobileOpen ? 'text-ink hover:bg-ink/5' : 'text-white hover:bg-white/10'
+                onHero ? 'text-ink hover:bg-ink/5' : 'text-white hover:bg-white/10'
               }`}
               aria-label={mobileOpen ? 'Đóng menu' : 'Mở menu'}
               aria-expanded={mobileOpen}
@@ -178,15 +180,15 @@ export default function Navbar() {
               aria-label="Về trang chủ Hạnh Phúc Tới Nơi"
             >
               <img
-                src={!mobileOpen ? logoDarkImg : logoImg}
+                src={onHero ? logoDarkImg : logoImg}
                 alt=""
-                className="w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 h-11 md:h-12 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+                className={`w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 h-11 md:h-12 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] ${scrolled ? 'brightness-0 invert' : ''}`}
               />
               <div className="hidden min-w-0 flex-col justify-center sm:flex">
-                <span className={`truncate font-serif text-base font-bold leading-tight tracking-wide ${!mobileOpen ? 'text-ink' : 'text-white'}`}>
+                <span className={`truncate font-serif text-base font-bold leading-tight tracking-wide ${onHero ? 'text-ink' : 'text-white'}`}>
                   Hạnh Phúc Tới Nơi
                 </span>
-                <span className={`hidden text-[9px] font-medium uppercase tracking-[0.18em] md:block ${!mobileOpen ? 'text-ink/55' : 'text-white/45'}`}>
+                <span className={`hidden text-[9px] font-medium uppercase tracking-[0.18em] md:block ${onHero ? 'text-ink/55' : 'text-white/45'}`}>
                   Khu phố hạnh phúc · Hồ Văn Huê
                 </span>
               </div>
@@ -198,7 +200,7 @@ export default function Navbar() {
             className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block"
             aria-label="Điều hướng chính"
           >
-            <div className={`pointer-events-auto flex items-center gap-0.5 rounded-full p-1 ${!mobileOpen ? 'bg-ink/5' : 'bg-white/10'}`}>
+            <div className={`pointer-events-auto flex items-center gap-0.5 rounded-full p-1 ${onHero ? 'bg-ink/5' : 'bg-white/10'}`}>
               {navLinks.map((link) => {
                 const active = activeNavId === link.id;
                 return (
@@ -220,7 +222,7 @@ export default function Navbar() {
                       className={`relative z-10 transition-colors duration-500 ${
                         active
                           ? 'font-semibold text-ink'
-                          : !mobileOpen
+                          : onHero
                             ? 'font-medium text-ink/70 hover:text-ink'
                             : 'font-medium text-white/70 hover:text-white'
                       }`}
@@ -270,7 +272,7 @@ export default function Navbar() {
                   aria-haspopup="menu"
                   aria-controls={accountMenuId}
                   className={`flex max-w-[10rem] items-center gap-2 rounded-full border py-1.5 pr-2 pl-1.5 transition-colors duration-500 sm:max-w-[14rem] ${
-                    !mobileOpen
+                    onHero
                       ? 'border-ink/15 bg-ink/5 text-ink hover:bg-ink/10'
                       : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
                   }`}
@@ -286,7 +288,7 @@ export default function Navbar() {
                   <ChevronDown
                     strokeWidth={1.5}
                     className={`hidden h-4 w-4 transition-transform duration-500 ease-fluid md:block ${
-                      !mobileOpen ? 'text-ink/50' : 'text-white/50'
+                      onHero ? 'text-ink/50' : 'text-white/50'
                     } ${
                       showDropdown ? 'rotate-180' : ''
                     }`}
