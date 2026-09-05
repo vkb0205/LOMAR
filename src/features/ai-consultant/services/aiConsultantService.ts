@@ -1,5 +1,5 @@
 import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
-import { postJsonTyped } from '../../../shared/api/backendClient';
+import { getJson, postJsonTyped } from '../../../shared/api/backendClient';
 import {
   ConsultHistoryMessage,
   ConsultReplyResult,
@@ -79,3 +79,30 @@ export async function requestConsultReply(
 
 export const CONSULT_NETWORK_FALLBACK_MESSAGE =
   'Mình xin lỗi, hiện tại chưa thể kết nối tới trợ lý AI. Vui lòng thử lại sau hoặc duyệt danh mục dịch vụ của Phố Hạnh Phúc nhé!';
+
+export interface StoredConsultMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+  suggestedServiceId?: string | null;
+}
+
+/**
+ * Rehydrate a logged-in couple's previous consult thread. Returns [] when no
+ * session exists yet or when the stored id no longer resolves (e.g. stale
+ * anonymous server-session ids or another user's thread).
+ */
+export async function loadConsultantHistory(): Promise<StoredConsultMessage[]> {
+  const sessionId = readSessionId();
+  if (!sessionId) return [];
+  try {
+    const { messages } = await getJson<{ messages: StoredConsultMessage[] }>(
+      resolveDataEndpoint(`/api/v1/chat/threads/${encodeURIComponent(sessionId)}/messages`)
+    );
+    return messages;
+  } catch {
+    return [];
+  }
+}

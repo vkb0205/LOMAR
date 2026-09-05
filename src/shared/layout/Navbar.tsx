@@ -182,7 +182,7 @@ export default function Navbar() {
               <img
                 src={onHero ? logoDarkImg : logoImg}
                 alt=""
-                className="w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 h-11 md:h-12 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+                className={`w-auto object-contain transition-transform duration-500 ease-fluid group-hover:scale-105 h-11 md:h-12 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] ${scrolled ? 'brightness-0 invert' : ''}`}
               />
               <div className="hidden min-w-0 flex-col justify-center sm:flex">
                 <span className={`truncate font-serif text-base font-bold leading-tight tracking-wide ${onHero ? 'text-ink' : 'text-white'}`}>

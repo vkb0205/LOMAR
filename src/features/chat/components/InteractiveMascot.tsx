@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import mascotBody from '../../../assets/images/Mascot.png';
+import mascotBody from '../../../assets/images/Mascot_new.png';
 // import mascotEye from '../../../assets/images/mascot_eye.png';
 
 interface InteractiveMascotProps {
