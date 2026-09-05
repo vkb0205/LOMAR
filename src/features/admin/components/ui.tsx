@@ -28,7 +28,7 @@ const STATUS_STYLES: Record<string, string> = {
   quoted: 'bg-indigo-50 text-indigo-700 border-indigo-100',
   locked: 'bg-gray-100 text-gray-600 border-gray-200',
   customer: 'bg-gray-100 text-gray-600 border-gray-200',
-  vendor_admin: 'bg-purple-50 text-purple-700 border-purple-100',
+  vendor: 'bg-purple-50 text-purple-700 border-purple-100',
   // negative / warning
   hidden: 'bg-gray-200 text-gray-700 border-gray-300',
   flagged: 'bg-rose-50 text-rose-700 border-rose-100',

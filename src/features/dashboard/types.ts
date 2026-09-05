@@ -1,11 +1,9 @@
 import { Database } from '../../shared/types/database';
-import { DashboardStationId } from './constants';
 
 export type JourneyTaskRow = Database['public']['Tables']['journey_tasks']['Row'];
 export type UserJourneyTaskRow = Database['public']['Tables']['user_journey_tasks']['Row'];
 export type VoucherRow = Database['public']['Tables']['vouchers']['Row'];
 export type UserVoucherRow = Database['public']['Tables']['user_vouchers']['Row'];
-export type AiDesignProjectRow = Database['public']['Tables']['ai_design_projects']['Row'];
 
 export type DashboardStatus = 'pending' | 'completed';
 export type VoucherStatus = 'locked' | 'unlocked' | 'redeemed' | string;
@@ -25,15 +23,9 @@ export interface DashboardVoucher {
   requiredTaskId: string | null;
 }
 
-export type SavedDesign = Pick<
-  AiDesignProjectRow,
-  'id' | 'title' | 'category' | 'status' | 'created_at'
->;
-
 export interface DashboardData {
   tasks: DashboardTask[];
   vouchers: DashboardVoucher[];
-  savedDesigns: SavedDesign[];
 }
 
 export interface DashboardProgressSummary {
@@ -52,5 +44,3 @@ export interface DemoLoginAccount {
   email: string;
   password: string;
 }
-
-export type StationDesignFilter = Record<DashboardStationId, (design: SavedDesign) => boolean>;

@@ -37,7 +37,7 @@ function roleLabelFor(user: {
   role?: string | null;
 }): string {
   if (user.accountRole === 'admin') return 'Quản trị';
-  if (user.accountRole === 'vendor_admin') return 'Doanh nghiệp';
+  if (user.accountRole === 'vendor') return 'Doanh nghiệp';
   if (user.role === 'groom') return 'Chú rể';
   if (user.role === 'planner') return 'Planner';
   return 'Cô dâu';

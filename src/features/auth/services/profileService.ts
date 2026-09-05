@@ -20,10 +20,12 @@ function normalizeWeddingRole(value: unknown): WeddingRole {
     : 'bride';
 }
 
-function normalizeAccountRole(value: unknown): AccountRole {
-  return value === 'customer' || value === 'vendor_admin' || value === 'admin'
-    ? value
-    : 'customer';
+/**
+ * Validate the canonical application role stored in `profiles.role`.
+ * Unknown or missing values fail closed to the least-privileged customer role.
+ */
+function lomarRoleToAccountRole(value: unknown): AccountRole {
+  return value === 'vendor' || value === 'admin' ? value : 'customer';
 }
 
 export function mapSessionUser(
@@ -43,7 +45,7 @@ export function mapSessionUser(
     name,
     email,
     role,
-    accountRole: normalizeAccountRole(profile?.role),
+    accountRole: lomarRoleToAccountRole(profile?.role),
     avatarUrl:
       profile?.avatar_url ||
       (typeof metadata.avatar_url === 'string' ? metadata.avatar_url : '') ||

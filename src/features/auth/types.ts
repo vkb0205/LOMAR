@@ -4,7 +4,7 @@ import type { Session } from '@supabase/supabase-js';
 // separate from the platform authority role stored in profiles.role.
 export type WeddingRole = 'bride' | 'groom' | 'planner';
 
-export type AccountRole = 'customer' | 'vendor_admin' | 'admin';
+export type AccountRole = 'customer' | 'vendor' | 'admin';
 
 export interface UserProfile {
   /** Supabase Auth UUID (auth.uid()); also the profiles primary key. */
@@ -12,7 +12,7 @@ export interface UserProfile {
   name: string;
   email: string;
   role: WeddingRole;
-  /** Platform authority from profiles.role. */
+  /** Platform authority from the canonical profiles.role column. */
   accountRole: AccountRole;
   avatarUrl?: string;
 }
@@ -20,6 +20,8 @@ export interface UserProfile {
 export interface SignResult {
   error: string | null;
 }
+
+export type OAuthProvider = 'google' | 'facebook';
 
 export interface AuthState {
   user: UserProfile | null;
@@ -33,6 +35,7 @@ export interface AuthState {
     role: WeddingRole
   ) => Promise<SignResult>;
   signOut: () => Promise<void>;
+  signInWithOAuth: (provider: OAuthProvider, redirectTo?: string) => Promise<SignResult>;
 }
 
 export type AuthMode = 'login' | 'signup';

@@ -24,7 +24,7 @@ type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
 const ROLE_OPTIONS: { value: AccountRole; label: string }[] = [
   { value: 'customer', label: 'Khách hàng' },
-  { value: 'vendor_admin', label: 'Nhà cung cấp' },
+  { value: 'vendor', label: 'Nhà cung cấp' },
   { value: 'admin', label: 'Quản trị' },
 ];
 

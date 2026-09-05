@@ -98,7 +98,6 @@ async function main() {
   const dependentSpecs = [
     ['vendors', 'owner_id'],
     ['user_favorite_services', 'user_id'],
-    ['reviews', 'user_id'],
     ['user_journey_tasks', 'user_id'],
     ['user_vouchers', 'user_id'],
     ['posts', 'user_id'],
@@ -106,12 +105,7 @@ async function main() {
     ['post_likes', 'user_id'],
     ['chat_threads', 'user_id'],
     ['chat_messages', 'user_id'],
-    ['ai_design_projects', 'user_id'],
-    ['ai_design_generations', 'user_id'],
-    ['ai_design_assets', 'user_id'],
     ['service_requests', 'user_id'],
-    ['follows', 'follower_id'],
-    ['follows', 'followee_user_id'],
   ];
   const dependencies = [];
   for (const [table, column] of dependentSpecs) {

@@ -34,7 +34,6 @@ export function useBlogFeed() {
         name: user.name,
         time: '1 giờ',
         content: row.content,
-        tags: '',
         likes: 0,
         comments: 0,
         shares: 0,

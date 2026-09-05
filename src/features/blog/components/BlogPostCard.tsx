@@ -1,6 +1,5 @@
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import FollowButton from '../../social/components/FollowButton';
 import { BlogPost } from '../types';
 import { EASE } from '../../../shared/ui/motion';
 
@@ -48,7 +47,6 @@ export function BlogPostCard({
           </div>
           {post.authorId && (
             <div className="ml-auto">
-              <FollowButton type="user" targetId={post.authorId} size="sm" showCount={false} />
             </div>
           )}
           <button className={`text-ink/40 transition-colors duration-500 hover:text-ink ${post.authorId ? '' : 'ml-auto '}`}>
@@ -59,7 +57,6 @@ export function BlogPostCard({
         <p className="mt-1 whitespace-pre-line text-[13px] font-medium leading-relaxed text-ink">
           {post.content}
         </p>
-        <p className="font-sans text-[13px] font-medium text-rose-deep">{post.tags}</p>
 
         <div className="mt-2 flex items-center gap-7 text-xs font-medium text-ink/60">
           <button

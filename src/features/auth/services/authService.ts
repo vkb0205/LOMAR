@@ -1,5 +1,5 @@
 import { supabase } from '../../../shared/api/supabaseClient';
-import type { SignResult, WeddingRole } from '../types';
+import type { OAuthProvider, SignResult, WeddingRole } from '../types';
 
 export async function signInWithPassword(
   email: string,
@@ -31,4 +31,15 @@ export async function signUpWithPassword(
 
 export async function signOutSession(): Promise<void> {
   await supabase.auth.signOut();
+}
+
+export async function signInWithOAuth(
+  provider: OAuthProvider,
+  redirectTo?: string
+): Promise<SignResult> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: redirectTo ? { redirectTo } : undefined,
+  });
+  return { error: error?.message ?? null };
 }

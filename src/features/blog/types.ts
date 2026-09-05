@@ -5,7 +5,6 @@ export interface BlogPost {
   name: string;
   time: string;
   content: string;
-  tags: string;
   likes: number;
   comments: number;
   shares: number;

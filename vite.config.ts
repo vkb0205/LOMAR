@@ -23,10 +23,7 @@ export default defineConfig(({ mode, command }) => {
   const basePath = env.VITE_BASE_PATH || '/';
 
   // Determine the backend API URL for the versioned application-data routes.
-  // The agent service keeps its own URL so AI Consultant traffic can be split
-  // out from the main FastAPI process when the two are deployed separately.
   const backendUrl = env.VITE_BACKEND_URL || 'http://localhost:8080';
-  const agentServiceUrl = env.VITE_AGENT_SERVICE_URL || 'http://localhost:8090';
 
   return {
     base: basePath,
@@ -44,11 +41,6 @@ export default defineConfig(({ mode, command }) => {
         '/api/v1': {
           target: backendUrl,
           changeOrigin: true,
-        },
-        '/api/agent': {
-          target: agentServiceUrl,
-          changeOrigin: true,
-          rewrite: (requestPath) => requestPath.replace(/^\/api\/agent/, ''),
         },
       },
     },

@@ -6,6 +6,7 @@ export default function Login() {
   const {
     error,
     handleDemoLogin,
+    handleOAuthLogin,
     handleSubmit,
     loading,
     mode,
@@ -27,6 +28,7 @@ export default function Login() {
           loading={loading}
           mode={mode}
           onModeChange={selectMode}
+          onOAuthLogin={handleOAuthLogin}
           onSubmit={handleSubmit}
           onValueChange={updateValue}
           success={success}

@@ -50,11 +50,6 @@ services:
       - key: VITE_BACKEND_URL
         value: https://lomar-backend.onrender.com
 
-      # Public Agent Service URL. The AI Consultant calls this service directly
-      # from the browser instead of routing the LLM request through LOMAR_backend.
-      - key: VITE_AGENT_SERVICE_URL
-        sync: false
-
       # Supabase browser credentials. Entered in the dashboard rather than
       # committed. Use only the anon/publishable key — never the service-role
       # key, which would grant full database access to every visitor.

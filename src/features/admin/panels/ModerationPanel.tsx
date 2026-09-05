@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Trash2, EyeOff, Eye, Flag, FileText, MessageSquare, Star } from 'lucide-react';
+import { Trash2, EyeOff, Eye, Flag, FileText, MessageSquare } from 'lucide-react';
 import {
   fetchPosts,
   updatePostStatus,
@@ -7,9 +7,6 @@ import {
   fetchComments,
   updateCommentStatus,
   deleteComment,
-  fetchReviews,
-  updateReviewStatus,
-  deleteReview,
   fetchProfileNames,
 } from '../services/adminService';
 import { Database } from '../../../shared/types/database';
@@ -26,20 +23,17 @@ import {
 
 type PostRow = Database['public']['Tables']['posts']['Row'];
 type CommentRow = Database['public']['Tables']['post_comments']['Row'];
-type ReviewRow = Database['public']['Tables']['reviews']['Row'];
 
-type Tab = 'posts' | 'comments' | 'reviews';
+type Tab = 'posts' | 'comments';
 type DeleteTarget =
   | { kind: 'post'; id: string; label: string }
   | { kind: 'comment'; id: string; label: string }
-  | { kind: 'review'; id: string; label: string }
   | null;
 
 export default function ModerationPanel() {
   const [tab, setTab] = useState<Tab>('posts');
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [comments, setComments] = useState<CommentRow[]>([]);
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [names, setNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -50,18 +44,15 @@ export default function ModerationPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [p, c, r] = await Promise.all([
+      const [p, c] = await Promise.all([
         fetchPosts(),
         fetchComments(),
-        fetchReviews(),
       ]);
       setPosts(p);
       setComments(c);
-      setReviews(r);
       const ids = [
         ...p.map((x) => x.user_id),
         ...c.map((x) => x.user_id),
-        ...r.map((x) => x.user_id),
       ];
       setNames(await fetchProfileNames(ids));
     } catch (e) {
@@ -108,23 +99,6 @@ export default function ModerationPanel() {
     }
   };
 
-  const setRStatus = async (
-    row: ReviewRow,
-    status: 'published' | 'hidden' | 'flagged'
-  ) => {
-    setBusyId(row.id);
-    try {
-      await updateReviewStatus(row.id, status);
-      setReviews((prev) =>
-        prev.map((r) => (r.id === row.id ? { ...r, status } : r))
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Cập nhật thất bại');
-    } finally {
-      setBusyId(null);
-    }
-  };
-
   const confirmDelete = async () => {
     if (!toDelete) return;
     setBusyId(toDelete.id);
@@ -135,9 +109,6 @@ export default function ModerationPanel() {
       } else if (toDelete.kind === 'comment') {
         await deleteComment(toDelete.id);
         setComments((prev) => prev.filter((r) => r.id !== toDelete.id));
-      } else {
-        await deleteReview(toDelete.id);
-        setReviews((prev) => prev.filter((r) => r.id !== toDelete.id));
       }
       setToDelete(null);
     } catch (e) {
@@ -150,14 +121,13 @@ export default function ModerationPanel() {
   const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }>; count: number }[] = [
     { key: 'posts', label: 'Bài viết', icon: FileText, count: posts.length },
     { key: 'comments', label: 'Bình luận', icon: MessageSquare, count: comments.length },
-    { key: 'reviews', label: 'Đánh giá', icon: Star, count: reviews.length },
   ];
 
   return (
     <div>
       <PanelHeader
         title="Kiểm duyệt nội dung"
-        description="Ẩn, gắn cờ hoặc gỡ bài viết, bình luận và đánh giá"
+        description="Ẩn, gắn cờ hoặc gỡ bài viết và bình luận"
       />
 
       <div className="flex gap-2 mb-5 flex-wrap">
@@ -252,7 +222,7 @@ export default function ModerationPanel() {
               ))}
             </div>
           )
-        ) : tab === 'comments' ? (
+        ) : (
           comments.length === 0 ? (
             <EmptyBlock label="Chưa có bình luận" />
           ) : (
@@ -319,77 +289,6 @@ export default function ModerationPanel() {
               ))}
             </div>
           )
-        ) : reviews.length === 0 ? (
-          <EmptyBlock label="Chưa có đánh giá" />
-        ) : (
-          <div className="divide-y divide-gray-50">
-            {reviews.map((row) => (
-              <div key={row.id} className="p-4 hover:bg-rose-50/20 transition-colors">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <StatusBadge status={row.status} />
-                      <span className="inline-flex items-center gap-0.5 text-amber-500 text-xs font-bold">
-                        {row.rating}
-                        <Star className="w-3 h-3 fill-amber-400" />
-                      </span>
-                      <span className="text-[11px] text-[#1B2C40]/50">
-                        {author(row.user_id)} · {formatDate(row.created_at)}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[#1B2C40]/80">
-                      {row.comment || '(Không có nội dung)'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {row.status !== 'flagged' && (
-                      <AdminActionButton
-                        variant="neutral"
-                        disabled={busyId === row.id}
-                        onClick={() => setRStatus(row, 'flagged')}
-                        title="Gắn cờ"
-                      >
-                        <Flag className="w-3.5 h-3.5" />
-                      </AdminActionButton>
-                    )}
-                    {row.status === 'hidden' ? (
-                      <AdminActionButton
-                        variant="primary"
-                        disabled={busyId === row.id}
-                        onClick={() => setRStatus(row, 'published')}
-                        title="Hiện lại"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </AdminActionButton>
-                    ) : (
-                      <AdminActionButton
-                        variant="neutral"
-                        disabled={busyId === row.id}
-                        onClick={() => setRStatus(row, 'hidden')}
-                        title="Ẩn"
-                      >
-                        <EyeOff className="w-3.5 h-3.5" />
-                      </AdminActionButton>
-                    )}
-                    <AdminActionButton
-                      variant="danger"
-                      disabled={busyId === row.id}
-                      onClick={() =>
-                        setToDelete({
-                          kind: 'review',
-                          id: row.id,
-                          label: 'đánh giá này',
-                        })
-                      }
-                      title="Xóa"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </AdminActionButton>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         )}
       </AdminCard>
 

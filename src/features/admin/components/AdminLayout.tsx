@@ -8,7 +8,6 @@ import {
   MessageSquareWarning,
   Route as RouteIcon,
   Inbox,
-  Sparkles,
   ArrowLeft,
   ShieldCheck,
   Menu,
@@ -38,7 +37,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.adminModeration, label: 'Kiểm duyệt nội dung', icon: MessageSquareWarning },
   { to: ROUTES.adminJourney, label: 'Hành trình & Ưu đãi', icon: RouteIcon },
   { to: ROUTES.adminLeads, label: 'Yêu cầu dịch vụ', icon: Inbox },
-  { to: ROUTES.adminAi, label: 'Giám sát AI', icon: Sparkles },
   {
     to: ROUTES.adminAnalytics,
     label: 'Lượt truy cập',

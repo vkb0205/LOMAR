@@ -6,7 +6,6 @@ import { StationPanel } from './components/StationPanel';
 import { StationTabs } from './components/StationTabs';
 import { VoucherWallet } from './components/VoucherWallet';
 import { useDashboardPage } from './hooks/useDashboardPage';
-import { getStationDesigns } from './utils/designs';
 
 export default function Dashboard() {
   const { user, signIn } = useAuth();
@@ -23,7 +22,6 @@ export default function Dashboard() {
   }
 
   const activeTask = dashboard.tasks.find(task => task.taskId === dashboard.activeStation.id);
-  const activeStationDesigns = getStationDesigns(dashboard.activeStation.id, dashboard.savedDesigns);
 
   return (
     <div className="w-full flex-1 p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 bg-[#FFFFFF]">
@@ -39,7 +37,6 @@ export default function Dashboard() {
           />
 
           <StationPanel
-            designs={activeStationDesigns}
             station={dashboard.activeStation}
             task={activeTask}
             onToggleTask={dashboard.toggleTaskStatus}

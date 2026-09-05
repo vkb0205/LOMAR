@@ -3,7 +3,6 @@ import { Heart, ShoppingBag, Phone, Share2, Filter, Sparkles, Star } from 'lucid
 import { motion } from 'motion/react';
 import { openContextualAssistant } from '../chat/openAssistant';
 import { ROUTES } from '../../shared/config/routes';
-import FollowButton from '../social/components/FollowButton';
 import { VendorServiceCard } from './components/VendorServiceCard';
 import { useVendorDetail } from './hooks/useVendorDetail';
 import { Spinner } from '../../shared/ui/Spinner';
@@ -112,7 +111,6 @@ export default function VendorDetail() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <FollowButton type="vendor" targetId={vendor.id} size="md" showCount={false} />
               <button className="group inline-flex items-center gap-2.5 rounded-full bg-canvas py-2 pl-5 pr-2 text-[11px] font-bold uppercase tracking-widest text-ink shadow-lift transition-all duration-500 ease-fluid hover:bg-white active:scale-[0.98] sm:py-2.5 sm:pl-6 sm:pr-2.5">
                 Liên hệ
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink/5 transition-all duration-500 ease-fluid group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105 group-hover:bg-ink/10">

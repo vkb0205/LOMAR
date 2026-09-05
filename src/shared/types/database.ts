@@ -14,203 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      ai_design_assets: {
-        Row: {
-          asset_type: string
-          created_at: string
-          file_url: string
-          generation_id: string | null
-          height: number | null
-          id: string
-          mime_type: string | null
-          project_id: string
-          size_bytes: number | null
-          user_id: string
-          width: number | null
-        }
-        Insert: {
-          asset_type: string
-          created_at?: string
-          file_url: string
-          generation_id?: string | null
-          height?: number | null
-          id?: string
-          mime_type?: string | null
-          project_id: string
-          size_bytes?: number | null
-          user_id: string
-          width?: number | null
-        }
-        Update: {
-          asset_type?: string
-          created_at?: string
-          file_url?: string
-          generation_id?: string | null
-          height?: number | null
-          id?: string
-          mime_type?: string | null
-          project_id?: string
-          size_bytes?: number | null
-          user_id?: string
-          width?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_design_assets_generation_id_fkey"
-            columns: ["generation_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_generations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_design_assets_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_design_assets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_design_generations: {
-        Row: {
-          completed_at: string | null
-          cost_estimate: number | null
-          created_at: string
-          error_message: string | null
-          id: string
-          input_payload: Json
-          model_name: string
-          negative_prompt: string | null
-          output_image_url: string | null
-          output_metadata: Json
-          project_id: string
-          prompt: string
-          status: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          cost_estimate?: number | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          input_payload?: Json
-          model_name: string
-          negative_prompt?: string | null
-          output_image_url?: string | null
-          output_metadata?: Json
-          project_id: string
-          prompt: string
-          status?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          cost_estimate?: number | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          input_payload?: Json
-          model_name?: string
-          negative_prompt?: string | null
-          output_image_url?: string | null
-          output_metadata?: Json
-          project_id?: string
-          prompt?: string
-          status?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_design_generations_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_design_generations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_design_projects: {
-        Row: {
-          bride_image_url: string | null
-          category: string
-          created_at: string
-          groom_image_url: string | null
-          id: string
-          reference_image_url: string | null
-          selected_generation_id: string | null
-          service_id: string | null
-          status: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          bride_image_url?: string | null
-          category: string
-          created_at?: string
-          groom_image_url?: string | null
-          id?: string
-          reference_image_url?: string | null
-          selected_generation_id?: string | null
-          service_id?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          bride_image_url?: string | null
-          category?: string
-          created_at?: string
-          groom_image_url?: string | null
-          id?: string
-          reference_image_url?: string | null
-          selected_generation_id?: string | null
-          service_id?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_design_projects_selected_generation_fk"
-            columns: ["selected_generation_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_generations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_design_projects_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_design_projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       analytics_page_views: {
         Row: {
           duration_seconds: number
@@ -312,7 +115,6 @@ export type Database = {
         Row: {
           context_type: string
           created_at: string
-          design_project_id: string | null
           id: string
           service_id: string | null
           title: string | null
@@ -323,7 +125,6 @@ export type Database = {
         Insert: {
           context_type?: string
           created_at?: string
-          design_project_id?: string | null
           id?: string
           service_id?: string | null
           title?: string | null
@@ -334,7 +135,6 @@ export type Database = {
         Update: {
           context_type?: string
           created_at?: string
-          design_project_id?: string | null
           id?: string
           service_id?: string | null
           title?: string | null
@@ -343,13 +143,6 @@ export type Database = {
           vendor_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "chat_threads_design_project_fk"
-            columns: ["design_project_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_projects"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "chat_threads_service_id_fkey"
             columns: ["service_id"]
@@ -369,55 +162,6 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      follows: {
-        Row: {
-          created_at: string
-          followee_type: string
-          followee_user_id: string | null
-          followee_vendor_id: string | null
-          follower_id: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          followee_type: string
-          followee_user_id?: string | null
-          followee_vendor_id?: string | null
-          follower_id: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          followee_type?: string
-          followee_user_id?: string | null
-          followee_vendor_id?: string | null
-          follower_id?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "follows_followee_user_id_fkey"
-            columns: ["followee_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "follows_followee_vendor_id_fkey"
-            columns: ["followee_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "follows_follower_id_fkey"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -540,36 +284,6 @@ export type Database = {
           },
         ]
       }
-      post_tags: {
-        Row: {
-          post_id: string
-          tag_id: string
-        }
-        Insert: {
-          post_id: string
-          tag_id: string
-        }
-        Update: {
-          post_id?: string
-          tag_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_tags_v2_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "post_tags_v2_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       posts: {
         Row: {
           content: string
@@ -650,108 +364,11 @@ export type Database = {
         }
         Relationships: []
       }
-      reviews: {
-        Row: {
-          comment: string | null
-          created_at: string
-          id: string
-          rating: number
-          service_id: string | null
-          status: string
-          updated_at: string
-          user_id: string
-          vendor_id: string | null
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          rating: number
-          service_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-          vendor_id?: string | null
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          rating?: number
-          service_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-          vendor_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_v2_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_v2_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_v2_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_images: {
-        Row: {
-          alt_text: string | null
-          created_at: string
-          display_order: number
-          id: string
-          image_url: string
-          is_main: boolean
-          service_id: string
-        }
-        Insert: {
-          alt_text?: string | null
-          created_at?: string
-          display_order?: number
-          id?: string
-          image_url: string
-          is_main?: boolean
-          service_id: string
-        }
-        Update: {
-          alt_text?: string | null
-          created_at?: string
-          display_order?: number
-          id?: string
-          image_url?: string
-          is_main?: boolean
-          service_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_images_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       service_requests: {
         Row: {
           budget_max: number | null
           budget_min: number | null
           created_at: string
-          design_project_id: string | null
           event_date: string | null
           id: string
           message: string | null
@@ -765,7 +382,6 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string
-          design_project_id?: string | null
           event_date?: string | null
           id?: string
           message?: string | null
@@ -779,7 +395,6 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string
-          design_project_id?: string | null
           event_date?: string | null
           id?: string
           message?: string | null
@@ -790,13 +405,6 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "service_requests_design_project_id_fkey"
-            columns: ["design_project_id"]
-            isOneToOne: false
-            referencedRelation: "ai_design_projects"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "service_requests_service_id_fkey"
             columns: ["service_id"]
@@ -869,24 +477,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      tags: {
-        Row: {
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          slug?: string
-        }
-        Relationships: []
       }
       user_favorite_services: {
         Row: {

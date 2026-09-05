@@ -9,10 +9,12 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../../shared/api/supabaseClient';
 import { AuthContext } from './AuthContext';
 import {
+  signInWithOAuth,
   signInWithPassword,
   signOutSession,
   signUpWithPassword,
 } from './services/authService';
+import { setUnauthenticatedHandler } from '../../shared/api/backendClient';
 import { mapSessionUser, resolveProfile } from './services/profileService';
 import type { AuthState, UserProfile } from './types';
 
@@ -65,6 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    setUnauthenticatedHandler(() => {
+      void supabase.auth.signOut({ scope: 'local' });
+      setSession(null);
+      setUser(null);
+    });
+    return () => setUnauthenticatedHandler(null);
+  }, []);
+
   const signOut = useCallback(async () => {
     await signOutSession();
     // The auth subscription also clears these values; update eagerly so the
@@ -81,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn: signInWithPassword,
       signUp: signUpWithPassword,
       signOut,
+      signInWithOAuth,
     }),
     [authLoading, session, signOut, user]
   );

@@ -16,7 +16,6 @@ import VendorsPanel from '../features/admin/panels/VendorsPanel';
 import ModerationPanel from '../features/admin/panels/ModerationPanel';
 import JourneyPanel from '../features/admin/panels/JourneyPanel';
 import LeadsPanel from '../features/admin/panels/LeadsPanel';
-import AIPanel from '../features/admin/panels/AIPanel';
 import AnalyticsPanel from '../features/admin/panels/AnalyticsPanel';
 import AnalyticsTracker from '../features/analytics/components/AnalyticsTracker';
 import BusinessIntelligence from '../features/business-intelligence/BusinessIntelligencePage';
@@ -73,7 +72,6 @@ export function AppRouter() {
           <Route path="moderation" element={<ModerationPanel />} />
           <Route path="journey" element={<JourneyPanel />} />
           <Route path="leads" element={<LeadsPanel />} />
-          <Route path="ai" element={<AIPanel />} />
           <Route path="analytics" element={<AnalyticsPanel />} />
           <Route path="*" element={<Navigate to={ROUTES.admin} replace />} />
         </Route>

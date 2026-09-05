@@ -6,7 +6,7 @@ import { ShieldAlert } from 'lucide-react';
 
 /**
  * Route guard for /business-intelligence.
- * UI convenience only — API enforces require_business_user (vendor_admin|admin).
+ * UI convenience only — API enforces the vendor/admin account-role check.
  */
 export default function RequireBusiness({ children }: { children: React.ReactNode }) {
   const { user, authLoading } = useAuth();
@@ -28,7 +28,7 @@ export default function RequireBusiness({ children }: { children: React.ReactNod
     );
   }
 
-  if (user.accountRole !== 'admin' && user.accountRole !== 'vendor_admin') {
+  if (user.accountRole !== 'admin' && user.accountRole !== 'vendor') {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 bg-[#fffdfa] text-center">
         <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-5">
@@ -39,7 +39,7 @@ export default function RequireBusiness({ children }: { children: React.ReactNod
         </h1>
         <p className="text-sm text-[#1B2C40]/60 max-w-md">
           Không gian Business Intelligence dành cho tài khoản nhà cung cấp
-          (vendor_admin) hoặc quản trị hệ thống (admin).
+          (vendor) hoặc quản trị hệ thống (admin).
         </p>
       </div>
     );

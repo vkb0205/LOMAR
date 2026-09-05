@@ -5,7 +5,6 @@ import {
   Package,
   FileText,
   Inbox,
-  Sparkles,
   AlertTriangle,
   Flag,
 } from 'lucide-react';
@@ -47,12 +46,6 @@ const STATS: StatDef[] = [
     label: 'Yêu cầu dịch vụ',
     icon: Inbox,
     sub: { key: 'leadsNew', label: 'mới', warn: false },
-  },
-  {
-    key: 'generations',
-    label: 'Lượt tạo AI',
-    icon: Sparkles,
-    sub: { key: 'generationsFailed', label: 'thất bại', warn: true },
   },
 ];
 
@@ -129,7 +122,7 @@ export default function OverviewPanel() {
           </div>
 
           {/* Moderation attention row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 gap-4 mt-4">
             <AdminCard className="p-5 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
                 <Flag className="w-5 h-5" />
@@ -140,19 +133,6 @@ export default function OverviewPanel() {
                 </p>
                 <p className="text-xs font-bold uppercase tracking-wider text-[#1B2C40]/50">
                   Bình luận bị gắn cờ
-                </p>
-              </div>
-            </AdminCard>
-            <AdminCard className="p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
-                <Flag className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-serif font-bold text-[#1B2C40]">
-                  {metrics.reviewsFlagged.toLocaleString('vi-VN')}
-                </p>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#1B2C40]/50">
-                  Đánh giá bị gắn cờ
                 </p>
               </div>
             </AdminCard>

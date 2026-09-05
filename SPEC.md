@@ -237,11 +237,8 @@ The TypeScript `Database` interface currently defines:
 - `chat_messages`
 - `post_comments`
 - `post_likes`
-- `post_tags`
 - `posts`
 - `products`
-- `reviews`
-- `tags`
 - `task_dictionary`
 - `user_favorite_products`
 - `user_journey_tasks`
@@ -274,8 +271,7 @@ These should be added to the generated TypeScript database type for stronger saf
 - `user_designs.id` -> `user_design_selections.design_id`
 - `customization_values.id` -> `user_design_selections.value_id`
 - `posts.user_id` -> `users.id`
-- `posts.id` -> `post_likes.post_id`, `post_comments.post_id`, `post_tags.post_id`
-- `tags.id` -> `post_tags.tag_id`
+- `posts.id` -> `post_likes.post_id`, `post_comments.post_id`
 - `task_dictionary.id` -> `user_journey_tasks.task_id`
 - `vouchers.id` -> `user_vouchers.voucher_id`
 - `task_dictionary.id` -> `vouchers.required_task_id`
@@ -422,7 +418,6 @@ Capabilities:
 - For each post, resolves author information from `users`.
 - Counts likes from `post_likes`.
 - Counts comments from `post_comments`.
-- Resolves tags through `post_tags` and `tags`.
 - Formats relative time in hours/days.
 - Displays static composer UI, sorting menu, highlight card, trending posts, and topics.
 
@@ -911,16 +906,6 @@ Fields inferred from reads:
 - `user_id`
 - `content`
 - `created_at`
-
-#### `tags`
-
-- `id`
-- `name`
-
-#### `post_tags`
-
-- `post_id`
-- `tag_id`
 
 ### 14.5 Chat Table
 

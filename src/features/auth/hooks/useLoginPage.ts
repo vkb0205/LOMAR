@@ -14,7 +14,7 @@ function resolveRedirect(explicit: string | null, user: UserProfile | null): str
 }
 
 export function useLoginPage() {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signInWithOAuth, signUp, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const explicitRedirect = searchParams.get('redirect');
@@ -68,6 +68,17 @@ export function useLoginPage() {
     setLoading(false);
   };
 
+  const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
+    setLoading(true);
+    setError('');
+    const redirectTo = `${window.location.origin}/login${window.location.search}`;
+    const { error: oauthError } = await signInWithOAuth(provider, redirectTo);
+    if (oauthError) {
+      setError(oauthError);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const validationError = validateLoginForm(mode, values);
@@ -100,6 +111,7 @@ export function useLoginPage() {
   return {
     error,
     handleDemoLogin,
+    handleOAuthLogin,
     handleSubmit,
     loading,
     mode,

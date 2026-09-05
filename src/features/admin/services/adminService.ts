@@ -1,5 +1,8 @@
 import { supabase } from '../../../shared/api/supabaseClient';
+import { putJson } from '../../../shared/api/backendClient';
+import { resolveDataEndpoint } from '../../../shared/api/backendConfig';
 import { Database } from '../../../shared/types/database';
+import type { AccountRole } from '../../auth/types';
 import {
   parseJourneyTaskInsert,
   parseJourneyTaskUpdate,
@@ -20,7 +23,6 @@ import {
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 type VendorRow = Database['public']['Tables']['vendors']['Row'];
 type ServiceRow = Database['public']['Tables']['services']['Row'];
-type ReviewRow = Database['public']['Tables']['reviews']['Row'];
 type PostRow = Database['public']['Tables']['posts']['Row'];
 type PostCommentRow = Database['public']['Tables']['post_comments']['Row'];
 type JourneyTaskRow = Database['public']['Tables']['journey_tasks']['Row'];
@@ -30,9 +32,8 @@ type VoucherRow = Database['public']['Tables']['vouchers']['Row'];
 type VoucherInsert = Database['public']['Tables']['vouchers']['Insert'];
 type VoucherUpdate = Database['public']['Tables']['vouchers']['Update'];
 type ServiceRequestRow = Database['public']['Tables']['service_requests']['Row'];
-type GenerationRow = Database['public']['Tables']['ai_design_generations']['Row'];
 
-export type AccountRole = 'customer' | 'vendor_admin' | 'admin';
+export type { AccountRole } from '../../auth/types';
 
 // ----------------------------------------------------------------------------
 // Overview / metrics
@@ -46,11 +47,8 @@ export interface PlatformMetrics {
   posts: number;
   postsHidden: number;
   commentsFlagged: number;
-  reviewsFlagged: number;
   leads: number;
   leadsNew: number;
-  generations: number;
-  generationsFailed: number;
 }
 
 /** Count rows matching an optional equality filter, using a head-only query. */
@@ -80,11 +78,8 @@ export async function fetchPlatformMetrics(): Promise<PlatformMetrics> {
     posts,
     postsHidden,
     commentsFlagged,
-    reviewsFlagged,
     leads,
     leadsNew,
-    generations,
-    generationsFailed,
   ] = await Promise.all([
     countRows('profiles'),
     countRows('vendors'),
@@ -93,11 +88,8 @@ export async function fetchPlatformMetrics(): Promise<PlatformMetrics> {
     countRows('posts'),
     countRows('posts', { column: 'status', value: 'hidden' }),
     countRows('post_comments', { column: 'status', value: 'flagged' }),
-    countRows('reviews', { column: 'status', value: 'flagged' }),
     countRows('service_requests'),
     countRows('service_requests', { column: 'status', value: 'new' }),
-    countRows('ai_design_generations'),
-    countRows('ai_design_generations', { column: 'status', value: 'failed' }),
   ]);
 
   return {
@@ -108,11 +100,8 @@ export async function fetchPlatformMetrics(): Promise<PlatformMetrics> {
     posts,
     postsHidden,
     commentsFlagged,
-    reviewsFlagged,
     leads,
     leadsNew,
-    generations,
-    generationsFailed,
   };
 }
 
@@ -140,15 +129,9 @@ export async function updateProfileRole(
   id: string,
   role: AccountRole
 ): Promise<void> {
-  const payload: Database['public']['Tables']['profiles']['Update'] = {
-    role,
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase
-    .from('profiles')
-    .update<Database['public']['Tables']['profiles']['Update']>(payload)
-    .eq('id', id);
-  if (error) throw error;
+  await putJson(resolveDataEndpoint(`/api/v1/admin/users/${id}/role`), {
+    body: { role },
+  });
 }
 
 export async function deleteProfile(id: string): Promise<void> {
@@ -219,7 +202,7 @@ export async function deleteService(id: string): Promise<void> {
 }
 
 // ----------------------------------------------------------------------------
-// Content moderation: posts, comments, reviews
+// Content moderation: posts and comments
 // ----------------------------------------------------------------------------
 
 export async function fetchPosts(): Promise<PostRow[]> {
@@ -277,35 +260,6 @@ export async function updateCommentStatus(
 
 export async function deleteComment(id: string): Promise<void> {
   const { error } = await supabase.from('post_comments').delete().eq('id', id);
-  if (error) throw error;
-}
-
-export async function fetchReviews(): Promise<ReviewRow[]> {
-  const { data, error } = await supabase
-    .from('reviews')
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  return (data as ReviewRow[]) ?? [];
-}
-
-export async function updateReviewStatus(
-  id: string,
-  status: 'published' | 'hidden' | 'flagged'
-): Promise<void> {
-  const payload: Database['public']['Tables']['reviews']['Update'] = {
-    status,
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase
-    .from('reviews')
-    .update<Database['public']['Tables']['reviews']['Update']>(payload)
-    .eq('id', id);
-  if (error) throw error;
-}
-
-export async function deleteReview(id: string): Promise<void> {
-  const { error } = await supabase.from('reviews').delete().eq('id', id);
   if (error) throw error;
 }
 
@@ -413,20 +367,6 @@ export async function updateServiceRequestStatus(
     .update<Database['public']['Tables']['service_requests']['Update']>(payload)
     .eq('id', id);
   if (error) throw error;
-}
-
-// ----------------------------------------------------------------------------
-// AI oversight (ai_design_generations)
-// ----------------------------------------------------------------------------
-
-export async function fetchGenerations(): Promise<GenerationRow[]> {
-  const { data, error } = await supabase
-    .from('ai_design_generations')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(200);
-  if (error) throw error;
-  return (data as GenerationRow[]) ?? [];
 }
 
 // ----------------------------------------------------------------------------

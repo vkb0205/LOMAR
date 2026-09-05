@@ -8,6 +8,7 @@ type LoginFormPanelProps = {
   loading: boolean;
   mode: AuthMode;
   onModeChange: (mode: AuthMode) => void;
+  onOAuthLogin: (provider: 'google' | 'facebook') => void;
   onSubmit: (event: React.FormEvent) => void;
   onValueChange: <Key extends keyof LoginFormValues>(key: Key, value: LoginFormValues[Key]) => void;
   success: boolean;
@@ -19,6 +20,7 @@ export function LoginFormPanel({
   loading,
   mode,
   onModeChange,
+  onOAuthLogin,
   onSubmit,
   onValueChange,
   success,
@@ -145,6 +147,28 @@ export function LoginFormPanel({
             )}
           </button>
         </form>
+
+        <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-widest text-gray-400">
+          <span className="h-px flex-1 bg-rose-100" />Hoặc<span className="h-px flex-1 bg-rose-100" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            disabled={loading || success}
+            onClick={() => onOAuthLogin('google')}
+            className="rounded-xl border border-gray-200 px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            disabled={loading || success}
+            onClick={() => onOAuthLogin('facebook')}
+            className="rounded-xl border border-blue-200 px-3 py-2.5 text-xs font-bold text-blue-700 transition hover:bg-blue-50 disabled:opacity-50"
+          >
+            Facebook
+          </button>
+        </div>
       </div>
     </div>
   );

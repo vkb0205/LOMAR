@@ -6,7 +6,7 @@ import {
   updateUserJourneyTaskStatus,
   updateUserVoucherStatus,
 } from '../services/dashboardService';
-import { DashboardTask, DashboardVoucher, SavedDesign } from '../types';
+import { DashboardTask, DashboardVoucher } from '../types';
 import { calculateDashboardProgress, getProgressGreeting } from '../utils/dashboardProgress';
 
 interface UseDashboardPageOptions {
@@ -20,7 +20,6 @@ export function useDashboardPage({
 }: UseDashboardPageOptions) {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [vouchers, setVouchers] = useState<DashboardVoucher[]>([]);
-  const [savedDesigns, setSavedDesigns] = useState<SavedDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStationId, setActiveStationId] = useState(DASHBOARD_STATIONS[0].id);
 
@@ -47,7 +46,6 @@ export function useDashboardPage({
 
         setTasks(dashboardData.tasks);
         setVouchers(dashboardData.vouchers);
-        setSavedDesigns(dashboardData.savedDesigns);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -113,7 +111,6 @@ export function useDashboardPage({
     greeting,
     loading,
     progress,
-    savedDesigns,
     setActiveStationId,
     stations: DASHBOARD_STATIONS,
     tasks,

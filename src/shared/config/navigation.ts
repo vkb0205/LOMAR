@@ -107,7 +107,7 @@ export const WORKSPACE_PATHS: StaticRoutePath[] = [
 export function audiencesForRole(accountRole: AccountRole | null | undefined): NavAudience[] {
   if (!accountRole) return ['public'];
   if (accountRole === 'admin') return ['public', 'couple', 'business', 'admin'];
-  if (accountRole === 'vendor_admin') return ['public', 'business'];
+  if (accountRole === 'vendor') return ['public', 'business'];
   return ['public', 'couple'];
 }
 
@@ -145,7 +145,7 @@ export function isWorkspacePath(pathname: string): boolean {
 }
 
 export function defaultPostLoginPath(accountRole: AccountRole | null | undefined): StaticRoutePath {
-  if (accountRole === 'vendor_admin') return ROUTES.businessIntelligence;
+  if (accountRole === 'vendor') return ROUTES.businessIntelligence;
   if (accountRole === 'admin') return ROUTES.admin;
   return ROUTES.dashboard;
 }
