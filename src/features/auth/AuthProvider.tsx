@@ -68,10 +68,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setUnauthenticatedHandler(() => {
-      void supabase.auth.signOut({ scope: 'local' });
-      setSession(null);
-      setUser(null);
+    let validatingSession = false;
+
+    setUnauthenticatedHandler(async () => {
+      // A backend 401 does not necessarily mean the Supabase session is bad:
+      // the API may be pointed at a different Supabase project or have stale
+      // JWT verification settings. Validate with Supabase before destroying a
+      // perfectly usable browser session.
+      if (validatingSession) return;
+      validatingSession = true;
+
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data.user) {
+          console.warn(
+            'The backend rejected a session that Supabase still considers valid. Check the backend Supabase/JWT configuration.'
+          );
+          return;
+        }
+
+        await supabase.auth.signOut({ scope: 'local' });
+        setSession(null);
+        setUser(null);
+      } finally {
+        validatingSession = false;
+      }
     });
     return () => setUnauthenticatedHandler(null);
   }, []);

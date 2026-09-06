@@ -1,0 +1,18 @@
+import { ScrollText } from 'lucide-react';
+import LegalPageLayout, { type LegalSection } from './LegalPageLayout';
+
+const sections: LegalSection[] = [
+  { title: 'Chấp nhận điều khoản', content: <p>Bằng việc truy cập hoặc sử dụng Hạnh Phúc Tới Nơi (LOMAR), bạn xác nhận đã đọc và đồng ý với các điều khoản này. Nếu không đồng ý, vui lòng không sử dụng dịch vụ.</p> },
+  { title: 'Tài khoản người dùng', content: <><p>Bạn chịu trách nhiệm cung cấp thông tin chính xác, bảo vệ phương thức đăng nhập và mọi hoạt động diễn ra trong tài khoản của mình. Hãy thông báo cho chúng tôi nếu bạn nghi ngờ tài khoản bị truy cập trái phép.</p><p>Khi đăng nhập qua Google hoặc nhà cung cấp khác, bạn cũng phải tuân thủ điều khoản của nhà cung cấp đó. LOMAR không tiếp nhận hoặc lưu mật khẩu Google của bạn.</p></> },
+  { title: 'Sử dụng dịch vụ', content: <><p>Bạn đồng ý không:</p><ul className="list-disc space-y-2 pl-5"><li>Sử dụng dịch vụ cho mục đích trái pháp luật, gian lận hoặc gây hại.</li><li>Xâm phạm quyền riêng tư, sở hữu trí tuệ hoặc quyền hợp pháp của người khác.</li><li>Đăng nội dung sai lệch, quấy rối, độc hại hoặc chứa mã gây nguy hiểm.</li><li>Can thiệp, dò quét, vượt qua biện pháp bảo mật hoặc làm gián đoạn hệ thống.</li><li>Tự động thu thập dữ liệu khi chưa có sự cho phép bằng văn bản.</li></ul></> },
+  { title: 'Nội dung và nhà cung cấp dịch vụ cưới', content: <p>Thông tin về địa điểm, dịch vụ, giá và ưu đãi có thể do đối tác hoặc cộng đồng cung cấp và có thể thay đổi. Bạn nên xác minh trực tiếp với nhà cung cấp trước khi đặt chỗ, ký hợp đồng hoặc thanh toán. LOMAR không phải là một bên trong giao dịch giữa bạn và nhà cung cấp, trừ khi được nêu rõ bằng văn bản.</p> },
+  { title: 'Tính năng trí tuệ nhân tạo', content: <p>Nội dung do AI tạo chỉ nhằm mục đích tham khảo và có thể không chính xác hoặc đầy đủ. Bạn cần tự đánh giá trước khi dựa vào đề xuất, đặc biệt đối với quyết định tài chính, pháp lý, sức khoẻ hoặc hợp đồng. Không nhập thông tin nhạy cảm không cần thiết vào công cụ tư vấn AI.</p> },
+  { title: 'Sở hữu trí tuệ', content: <p>Phần mềm, thiết kế, thương hiệu và nội dung do LOMAR cung cấp được bảo vệ theo pháp luật hiện hành. Bạn giữ quyền đối với nội dung mình tạo nhưng cấp cho LOMAR quyền cần thiết để lưu trữ, hiển thị và xử lý nội dung đó nhằm vận hành các tính năng bạn sử dụng.</p> },
+  { title: 'Tính sẵn có và giới hạn trách nhiệm', content: <><p>Dịch vụ được cung cấp theo tình trạng hiện có. Chúng tôi nỗ lực duy trì độ chính xác và tính sẵn có nhưng không cam kết dịch vụ luôn không gián đoạn hoặc không có lỗi.</p><p>Trong phạm vi pháp luật cho phép, LOMAR không chịu trách nhiệm cho thiệt hại gián tiếp phát sinh từ việc sử dụng thông tin của nhà cung cấp, nội dung cộng đồng, đề xuất AI hoặc dịch vụ của bên thứ ba.</p></> },
+  { title: 'Tạm ngừng, chấm dứt và thay đổi', content: <p>Chúng tôi có thể hạn chế hoặc chấm dứt quyền truy cập khi có vi phạm điều khoản, nguy cơ bảo mật hoặc yêu cầu pháp lý. Điều khoản có thể được cập nhật để phản ánh thay đổi của dịch vụ; ngày cập nhật mới nhất luôn được hiển thị ở đầu trang.</p> },
+  { title: 'Luật áp dụng và liên hệ', content: <p>Các điều khoản này được điều chỉnh theo pháp luật Việt Nam. Nếu có câu hỏi, vui lòng liên hệ <a className="font-semibold text-rose-deep underline" href="mailto:hello@hanhphuctoinoi.vn">hello@hanhphuctoinoi.vn</a>.</p> },
+];
+
+export default function TermsPage() {
+  return <LegalPageLayout eyebrow="Điều kiện sử dụng" title="Điều khoản sử dụng" description="Các nguyên tắc áp dụng khi bạn truy cập, tạo tài khoản và sử dụng dịch vụ của LOMAR." updatedAt="06/09/2026" icon={ScrollText} sections={sections} />;
+}

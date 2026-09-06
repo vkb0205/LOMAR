@@ -137,7 +137,7 @@ create policy bi_agent_definitions_admin_write on public.bi_agent_definitions
   using (public.is_admin())
   with check (public.is_admin());
 
--- Scoped tables: admin full access; vendor_admin on owned vendors; platform
+-- Scoped tables: admin full access; vendors on owned vendor rows; platform
 -- rows (vendor_id is null) are admin-only for writes and visible to admins.
 -- Vendor owners may read platform recommendations (vendor_id is null) as well
 -- as their own vendor-scoped rows.

@@ -16,7 +16,9 @@ export default function Layout() {
     pathname !== ROUTES.explore &&
     pathname !== ROUTES.map &&
     pathname !== ROUTES.businessIntelligence &&
-    pathname !== ROUTES.login;
+    pathname !== ROUTES.login &&
+    pathname !== ROUTES.privacy &&
+    pathname !== ROUTES.terms;
   const floatingContainerClass = showFloatingAssistant ? '' : 'hidden';
 
   return (

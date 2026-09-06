@@ -52,9 +52,11 @@ export class BackendError extends Error {
  * `setUnauthenticatedHandler` once to route this into the existing
  * re-auth/session-expired UX (T018).
  */
-let unauthenticatedHandler: (() => void) | null = null;
+let unauthenticatedHandler: (() => void | Promise<void>) | null = null;
 
-export function setUnauthenticatedHandler(handler: (() => void) | null): void {
+export function setUnauthenticatedHandler(
+  handler: (() => void | Promise<void>) | null
+): void {
   unauthenticatedHandler = handler;
 }
 
@@ -91,7 +93,10 @@ async function request<TResponse>(
   const errorBody = await parseErrorBody(response);
   const error = new BackendError(response.status, errorBody);
   if (error.isUnauthenticated) {
-    unauthenticatedHandler?.();
+    // Authentication recovery is intentionally fire-and-forget: callers still
+    // receive the original backend error while AuthProvider independently
+    // checks whether the Supabase session itself is invalid.
+    void unauthenticatedHandler?.();
   }
   throw error;
 }

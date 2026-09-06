@@ -122,18 +122,18 @@ export default function Footer() {
             &copy; {currentYear} Hạnh Phúc Tới Nơi · Bảo lưu mọi quyền.
           </p>
           <div className="flex items-center gap-6 text-xs font-medium text-canvas/50">
-            <a
-              href="mailto:hello@hanhphuctoinoi.vn?subject=Yêu+cầu%20về%20chính%20sách%20bảo%20mật"
+            <Link
+              to={ROUTES.privacy}
               className="transition-colors duration-500 hover:text-rose-soft"
             >
               Chính sách bảo mật
-            </a>
-            <a
-              href="mailto:hello@hanhphuctoinoi.vn?subject=Yêu+cầu%20về%20điều%20khoản%20sử%20dụng"
+            </Link>
+            <Link
+              to={ROUTES.terms}
               className="transition-colors duration-500 hover:text-rose-soft"
             >
               Điều khoản
-            </a>
+            </Link>
             <span className="inline-flex items-center gap-1.5">
               <Heart className="h-3 w-3 fill-current text-rose" strokeWidth={1.5} aria-hidden />
               Bé Song Hỷ

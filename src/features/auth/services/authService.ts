@@ -39,7 +39,13 @@ export async function signInWithOAuth(
 ): Promise<SignResult> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
-    options: redirectTo ? { redirectTo } : undefined,
+    options: {
+      ...(redirectTo ? { redirectTo } : {}),
+      // Supabase requires Facebook to return an email address when creating
+      // the Auth identity. Keep this explicit in addition to enabling the
+      // email permission in the Meta app's Authentication use case.
+      ...(provider === 'facebook' ? { scopes: 'email' } : {}),
+    },
   });
   return { error: error?.message ?? null };
 }

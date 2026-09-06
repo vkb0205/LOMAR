@@ -4,6 +4,8 @@ export const ROUTES = {
   map: '/map',
   blog: '/blog',
   guide: '/guide',
+  privacy: '/privacy',
+  terms: '/terms',
   dashboard: '/dashboard',
   businessIntelligence: '/business-intelligence',
   login: '/login',

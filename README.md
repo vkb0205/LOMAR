@@ -229,6 +229,44 @@ These are compiled into a public JavaScript bundle, so only ever use the
 anon/publishable key — never the service-role key. The build still succeeds
 without them, but auth-dependent features will silently fail at runtime.
 
+#### Google and Facebook sign-in
+
+The hosted Supabase project's provider callback URL is:
+
+```text
+https://kenjmgrmgysqvefkepel.supabase.co/auth/v1/callback
+```
+
+For the Google Auth Platform **Branding -> App domain** fields, use the
+public Render deployment consistently:
+
+| Field | URL |
+| --- | --- |
+| Application home page | `https://lomar.onrender.com/` |
+| Application privacy policy link | `https://lomar.onrender.com/privacy` |
+| Application terms of service link | `https://lomar.onrender.com/terms` |
+
+The privacy and terms routes are public and linked from the site footer. If
+GitHub Pages is used as the canonical deployment instead, use the corresponding
+`https://vkb0205.github.io/LOMAR/`, `/LOMAR/privacy`, and `/LOMAR/terms` URLs
+for all three fields rather than mixing deployment domains.
+
+- Create a Google OAuth client with application type **Web application**. Add
+  `https://vkb0205.github.io` and local development origins, add the callback
+  URL above as an authorized redirect URI, then enable Google under Supabase
+  **Authentication -> Sign In / Providers** with its client ID and secret.
+- In the Meta app, add the **Authentication and Account Creation** use case,
+  ensure both `public_profile` and `email` are ready for testing, and set the
+  same callback URL as a **Valid OAuth Redirect URI**. Then enable Facebook in
+  Supabase with the Meta App ID and App Secret.
+- For the local Supabase stack, copy the four
+  `SUPABASE_AUTH_EXTERNAL_*` variables from `.env.example` into the untracked
+  `.env`. Both providers use
+  `http://127.0.0.1:54321/auth/v1/callback` locally.
+
+Provider secrets belong only in Google/Meta, the Supabase dashboard, or the
+untracked local `.env`; never expose them through a `VITE_` variable.
+
 ### 5. Backend CORS
 
 The backend allowlists origins explicitly and never uses `*`. The Pages origin

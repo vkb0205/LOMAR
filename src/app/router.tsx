@@ -22,6 +22,8 @@ import BusinessIntelligence from '../features/business-intelligence/BusinessInte
 import RequireBusiness from '../features/business-intelligence/RequireBusiness';
 import MapPage from '../features/ai-consultant/MapPage';
 import RouteScrollManager from '../shared/layout/RouteScrollManager';
+import PrivacyPage from '../features/legal/PrivacyPage';
+import TermsPage from '../features/legal/TermsPage';
 
 // Router base path: configurable via VITE_BASE_PATH so the same bundle can be
 // deployed under any sub-path. Defaults to root ("/") when unset. The GitHub
@@ -48,6 +50,8 @@ export function AppRouter() {
           />
           <Route path="blog" element={<Blog />} />
           <Route path="guide" element={<Guide />} />
+          <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="terms" element={<TermsPage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="ai-consultant" element={<Navigate to={ROUTES.map} replace />} />
           <Route path="dashboard" element={<Dashboard />} />

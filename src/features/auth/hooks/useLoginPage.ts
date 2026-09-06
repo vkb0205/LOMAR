@@ -71,7 +71,11 @@ export function useLoginPage() {
   const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
     setLoading(true);
     setError('');
-    const redirectTo = `${window.location.origin}/login${window.location.search}`;
+    // BASE_URL includes the deployment sub-path (for example `/LOMAR/` on
+    // GitHub Pages). Using origin alone would send the OAuth response to the
+    // domain root, outside React Router's configured basename.
+    const callbackPath = `${import.meta.env.BASE_URL}login${window.location.search}`;
+    const redirectTo = new URL(callbackPath, window.location.origin).toString();
     const { error: oauthError } = await signInWithOAuth(provider, redirectTo);
     if (oauthError) {
       setError(oauthError);
