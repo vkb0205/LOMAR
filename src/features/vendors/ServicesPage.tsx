@@ -107,24 +107,22 @@ export default function Services() {
             </div>
           </section>
 
-          {/* Spacer keeps the result column width; the chat itself is fixed so it
-              stays visible while scrolling the whole page (sticky dies at the row's bottom edge). */}
-          <aside className="hidden w-full shrink-0 lg:block lg:w-[380px]">
-            <div className="fixed top-24 right-[max(1rem,calc((100vw_-_1400px)/2_+_1rem))] z-30 w-[380px]">
-              <AssistantChat
-                layout="sidebar"
-                title="Bé Song Hỷ"
-                subtitle="Gợi ý dịch vụ phù hợp"
-                input={chat.input}
-                isTyping={chat.isTyping}
-                messages={chat.messages}
-                messagesEndRef={chat.messagesEndRef}
-                scrollContainerRef={chat.scrollContainerRef}
-                retrievedServices={chat.retrievedServices}
-                onInputChange={chat.setInput}
-                onSubmit={chat.submitMessage}
-              />
-            </div>
+          {/* Sticky within this results row: it follows the viewport while vendor
+              cards scroll, then stops at the row boundary before later sections. */}
+          <aside className="hidden w-full shrink-0 self-start lg:sticky lg:top-24 lg:block lg:h-[calc(100dvh-7rem)] lg:w-[380px]">
+            <AssistantChat
+              layout="sidebar"
+              title="Bé Song Hỷ"
+              subtitle="Gợi ý dịch vụ phù hợp"
+              input={chat.input}
+              isTyping={chat.isTyping}
+              messages={chat.messages}
+              messagesEndRef={chat.messagesEndRef}
+              scrollContainerRef={chat.scrollContainerRef}
+              retrievedServices={chat.retrievedServices}
+              onInputChange={chat.setInput}
+              onSubmit={chat.submitMessage}
+            />
           </aside>
         </div>
 

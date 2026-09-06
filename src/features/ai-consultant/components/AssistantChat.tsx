@@ -43,7 +43,7 @@ export function AssistantChat({
   compact,
 }: AssistantChatProps) {
   const useCompact = compact ?? layout === 'sidebar';
-  const shell = 'h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)]';
+  const shell = 'h-full min-h-0';
 
   return (
     <div className={`flex flex-col overflow-hidden rounded-xl border border-hairline bg-canvas shadow-card ${shell} ${className}`}>

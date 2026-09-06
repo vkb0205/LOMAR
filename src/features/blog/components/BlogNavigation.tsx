@@ -20,14 +20,14 @@ export function BlogNavigation() {
       className="flex h-fit w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-[320px]"
     >
       {/* Nav island */}
-      <div className="no-scrollbar flex overflow-x-auto rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile lg:overflow-x-visible">
-        <div className="flex flex-row gap-1 rounded-bezel-inner bg-white p-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] lg:flex-col lg:p-3">
+      <div className="no-scrollbar flex w-full min-w-0 overflow-x-auto rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-tile lg:overflow-x-visible">
+        <div className="flex w-max min-w-full flex-row gap-1 rounded-bezel-inner bg-white p-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] lg:w-full lg:min-w-0 lg:flex-col lg:p-3">
           {navigationItems.map((item) => {
             const active = Boolean(item.active);
             return (
               <button
                 key={item.text}
-                className={`relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all duration-500 ease-fluid lg:gap-3 ${
+                className={`relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all duration-500 ease-fluid lg:w-full lg:min-w-0 lg:gap-3 ${
                   active
                     ? 'bg-ink text-canvas shadow-lift'
                     : 'text-ink/65 hover:bg-canvas hover:text-ink'
@@ -37,7 +37,7 @@ export function BlogNavigation() {
                   strokeWidth={1.5}
                   className={`h-4 w-4 lg:h-[18px] lg:w-[18px] ${active ? 'text-rose-soft' : 'text-sage'}`}
                 />
-                {item.text}
+                <span className="min-w-0 truncate text-left">{item.text}</span>
               </button>
             );
           })}

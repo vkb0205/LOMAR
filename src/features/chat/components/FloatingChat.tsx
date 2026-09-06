@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, X, Heart, Sparkles } from 'lucide-react';
+import { Send, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import {
   CONSULT_NETWORK_FALLBACK_MESSAGE,
@@ -189,40 +189,42 @@ export default function FloatingChat() {
             // Focus only on pointer devices; on phones this would summon the keyboard.
             if (window.matchMedia('(hover: hover)').matches) inputRef.current?.focus();
           }}
-          className="fixed bottom-6 right-6 z-50 flex h-[520px] max-h-[85dvh] w-[380px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-bezel bg-ink/5 p-1.5 ring-1 ring-ink/5 shadow-float"
+          className="fixed inset-x-3 bottom-3 z-50 flex h-[min(500px,calc(100dvh-1.5rem))] flex-col overflow-hidden rounded-[18px] border border-ink/10 bg-white shadow-float sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[380px]"
         >
-          <div className="flex shrink-0 items-center justify-between rounded-bezel-inner border-b border-ink/8 bg-white/95 p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <div className="relative h-10 w-10" ref={mascotRef}>
+          <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-ink/8 bg-white px-3 shadow-[0_2px_10px_rgba(28,61,46,0.08)]">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="relative h-10 w-10 shrink-0" ref={mascotRef}>
                 <InteractiveMascot isHovered={false} isOpen={true} />
+                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-sage" aria-hidden="true" />
               </div>
-              <div>
-                <h3 className="font-serif text-sm font-bold text-ink">Bé Song Hỷ</h3>
-                <p className="flex items-center gap-1 text-[9px] text-sage">
-                  <Heart strokeWidth={1.5} className="h-2 w-2 fill-current" /> Đồng hành cùng bạn
-                </p>
+              <div className="min-w-0 leading-tight">
+                <h3 className="truncate font-serif text-[15px] font-bold text-ink">Bé Song Hỷ</h3>
+                <p className="mt-0.5 text-[11px] font-medium text-sage">Đồng hành cùng bạn</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-rose-deep transition-colors duration-500 hover:bg-rose-mist"
-              aria-label="Đóng trò chuyện"
-            >
-              <X strokeWidth={1.5} className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 items-center gap-0.5 text-rose-deep">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-rose-mist"
+                aria-label="Đóng trò chuyện"
+              >
+                <X strokeWidth={1.8} className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          <div ref={scrollRef} className="scroll-area flex-1 space-y-4 overflow-y-auto overscroll-contain bg-canvas/70 p-4">
+          <div ref={scrollRef} className="scroll-area flex-1 space-y-3 overflow-y-auto overscroll-contain bg-rose-mist/45 px-3 py-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
                 {!msg.isUser && (
-                  <div className="mr-2 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-mist">
+                  <div className="mr-2 mt-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-mist">
                     <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
                   </div>
                 )}
-                <div className={`max-w-[80%] rounded-2xl p-3 text-xs font-medium leading-relaxed ${msg.isUser
-                  ? 'rounded-br-sm bg-cream text-ink-deep'
-                  : 'rounded-bl-sm border border-ink/8 bg-white text-ink shadow-card'
+                <div className={`max-w-[78%] rounded-[18px] px-3.5 py-2.5 text-[13px] font-medium leading-relaxed ${msg.isUser
+                  ? 'rounded-br-md bg-cream text-ink-deep'
+                  : 'rounded-bl-md bg-white text-ink shadow-[0_1px_2px_rgba(28,61,46,0.12)] ring-1 ring-ink/5'
                   }`}>
                   <div className="whitespace-pre-wrap">{msg.text}</div>
                   {!msg.isUser && msg.services && msg.services.length > 0 && (
@@ -242,32 +244,35 @@ export default function FloatingChat() {
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="mr-2 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-mist">
+                <div className="mr-2 mt-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-mist">
                   <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
                 </div>
-                <div className="rounded-2xl rounded-bl-sm border border-ink/8 bg-white p-3 text-xs text-ink shadow-card">
+                <div className="rounded-[18px] rounded-bl-md bg-white px-3.5 py-2.5 text-[13px] text-ink shadow-[0_1px_2px_rgba(28,61,46,0.12)] ring-1 ring-ink/5">
                   Bé Song Hỷ đang trả lời...
                 </div>
               </div>
             )}
           </div>
 
-          <div className="shrink-0 border-t border-ink/8 bg-white p-3">
+          <div className="shrink-0 border-t border-ink/8 bg-white px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleSendMessage()}
-                placeholder="Nhắn tin với Bé Song..."
-                disabled={isTyping}
-                className="flex-1 rounded-full bg-canvas px-4 py-2.5 text-xs text-ink outline-none ring-1 ring-ink/10 transition-shadow duration-500 placeholder:text-ink/40 focus:ring-rose/50 disabled:opacity-60"
-              />
+              <div className="flex min-w-0 flex-1 items-center rounded-full bg-canvas ring-1 ring-ink/10 transition-shadow focus-within:ring-rose/50">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleSendMessage()}
+                  placeholder="Nhắn tin với Bé Song..."
+                  disabled={isTyping}
+                  className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-xs text-ink outline-none placeholder:text-ink/40 disabled:opacity-60"
+                />
+              </div>
               <button
+                type="button"
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isTyping}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose text-white transition-all duration-500 ease-fluid hover:-translate-y-0.5 hover:bg-ink active:scale-95 disabled:opacity-50"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose text-white transition-all duration-300 hover:bg-ink active:scale-95 disabled:opacity-40"
                 aria-label="Gửi tin nhắn"
               >
                 <Send strokeWidth={1.5} className="h-4 w-4" />
