@@ -99,7 +99,7 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(28, 61, 46, 0.12);
+  background: rgba(251, 120, 161, 0.12);
 }
 
 .hvh-user-marker::before,
@@ -137,7 +137,7 @@
 }
 
 .hvh-popup strong {
-  color: #1c3d2e;
+  color: #4a1630;
   font-size: 14px;
 }
 
@@ -152,7 +152,7 @@
   overflow: hidden;
   border-radius: 12px;
   background: #fffdfa;
-  color: #1c3d2e;
+  color: #4a1630;
   font-family: inherit;
 }
 
@@ -179,14 +179,14 @@
 .hvh-rich-popup__price {
   border-radius: 999px;
   background: rgba(255, 253, 250, 0.95);
-  color: #1c3d2e;
+  color: #4a1630;
   font-size: 11px;
   font-weight: 600;
 }
 
 .hvh-rich-popup__rank {
   border-radius: 999px;
-  background: #17291f;
+  background: #4a1630;
   color: #fffdfa;
   font-size: 11px;
   font-weight: 700;
@@ -206,7 +206,7 @@
   top: 10px;
   z-index: 2;
   padding: 5px 8px;
-  box-shadow: 0 1px 3px rgba(28, 61, 46, 0.3);
+  box-shadow: 0 1px 3px rgba(251, 120, 161, 0.3);
 }
 
 .hvh-rich-popup__body {
@@ -222,7 +222,7 @@
 
 .hvh-rich-popup strong {
   display: block;
-  color: #1c3d2e;
+  color: #4a1630;
   font-size: 14px;
   line-height: 1.25;
 }
@@ -255,7 +255,7 @@
 }
 
 .hvh-rich-popup__rating b {
-  color: #1c3d2e;
+  color: #4a1630;
 }
 
 .hvh-rich-popup__rating small {
@@ -292,7 +292,7 @@
   border: 1px solid #e7dfd2;
   border-radius: 999px;
   background: #f5f0e6;
-  color: #1c3d2e;
+  color: #4a1630;
   padding: 3px 7px;
   font-size: 10px;
 }
@@ -313,7 +313,7 @@
   border-radius: 12px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(28, 61, 46, 0.12);
+  box-shadow: 0 4px 16px rgba(251, 120, 161, 0.12);
 }
 
 .maplibregl-popup-close-button {
@@ -330,7 +330,7 @@
 .maplibregl-ctrl-group {
   border-radius: 8px !important;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(28, 61, 46, 0.1);
+  box-shadow: 0 1px 3px rgba(251, 120, 161, 0.1);
 }
 
 .maplibregl-ctrl-group button {
@@ -344,11 +344,11 @@
 
 .maplibregl-ctrl-group button span::before,
 .maplibregl-ctrl-group button span::after {
-  background: #1c3d2e !important;
+  background: #4a1630 !important;
 }
 
 .maplibregl-ctrl-group button.maplibregl-ctrl-compass span::before {
-  border-color: #1c3d2e !important;
+  border-color: #4a1630 !important;
 }
 
 .maplibregl-canvas {

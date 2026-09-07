@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import mascotBody from '../../../assets/images/Mascot_new.png';
-// import mascotEye from '../../../assets/images/mascot_eye.png';
 
 interface InteractiveMascotProps {
   className?: string;
@@ -8,77 +7,83 @@ interface InteractiveMascotProps {
   isOpen?: boolean;
 }
 
+/**
+ * Bé Song Hỷ mascot.
+ *
+ * The current `Mascot_new.png` asset has the eyes baked into the illustration,
+ * so there is no separate eye sprite to track the cursor with (the old
+ * `mascot_eye.png` overlay was calibrated for the previous 1920x1080 mascot and
+ * no longer aligns). Instead the mascot is kept "alive" by animating the whole
+ * image:
+ *
+ *  - a slow idle breathing bob so it never looks frozen,
+ *  - a periodic blink (quick vertical squash),
+ *  - a friendly bounce when hovered,
+ *  - a subtle whole-body tilt that follows the cursor.
+ */
 export default function InteractiveMascot({ className = '', isHovered, isOpen }: InteractiveMascotProps) {
-  const eyeRef = useRef<HTMLDivElement>(null);
-  const pupilRef = useRef<HTMLImageElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  /*
+  // Whole-body cursor-follow tilt. Applied directly to the DOM node to avoid
+  // React re-renders on every mousemove. Works regardless of where the eyes
+  // are baked into the artwork.
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!eyeRef.current || !pupilRef.current) return;
+      const el = rootRef.current;
+      if (!el) return;
 
-      // Get exact center of the eye container
-      const rect = eyeRef.current.getBoundingClientRect();
-      const eyeCenterX = rect.left + rect.width / 2;
-      const eyeCenterY = rect.top + rect.height / 2;
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
 
-      // Calculate distance between mouse cursor and eye center
-      const deltaX = e.clientX - eyeCenterX;
-      const deltaY = e.clientY - eyeCenterY;
+      // Normalized offset from the mascot's center, clamped to a subtle range.
+      const dx = Math.max(-1, Math.min(1, (e.clientX - centerX) / (rect.width / 2)));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - centerY) / (rect.height / 2)));
 
-      // Calculate angle and distance
-      const angle = Math.atan2(deltaY, deltaX);
-      const distance = Math.hypot(deltaX, deltaY);
+      // Gentle 3D-ish tilt: rotateY follows horizontal, rotateX follows vertical.
+      const rotateY = dx * 10;
+      const rotateX = -dy * 8;
 
-      // Limit pupil displacement to keep the eye movement subtle and within bounds
-      const maxDistance = 3; // Maximum offset in pixels
-      // As distance increases, the pupil approaches maxDistance asymptotically and stays there
-      const limitedDistance = maxDistance * (1 - Math.exp(-distance / 80));
-
-      // Compute X and Y offsets
-      const pupilX = Math.cos(angle) * limitedDistance;
-      const pupilY = Math.sin(angle) * limitedDistance;
-
-      // Apply transform directly to avoid React re-renders for high performance
-      pupilRef.current.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+      el.style.transform = `perspective(400px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
-  */
+
+  // Reset the tilt when the mascot is no longer on screen (panel closed).
+  useEffect(() => {
+    if (!isOpen && rootRef.current) {
+      rootRef.current.style.transform = '';
+    }
+  }, [isOpen]);
 
   return (
-    <div className={`relative select-none ${className}`}>
-      {/* Mascot Body */}
-      <img
-        src={mascotBody}
-        alt="Mascot Body"
-        className="w-full h-full object-contain pointer-events-none"
-      />
-
-      {/* Eye Socket Container (Calibrated center of the mascot's eye socket) */}
-      {/*
+    <div
+      ref={rootRef}
+      className={`relative select-none will-change-transform ${className}`}
+      style={{ transformStyle: 'preserve-3d' }}
+    >
+      {/* Idle breathing bob + hover bounce + periodic blink, layered on the image. */}
       <div
-        ref={eyeRef}
-        className="absolute left-[33.125%] top-[37.09%] w-[12%] h-[10.84%] overflow-hidden rounded-full pointer-events-none"
+        className="h-full w-full"
+        style={{
+          animation: [
+            'mascot-idle-bob 3.2s ease-in-out infinite',
+            isHovered ? 'mascot-hover-bounce 0.7s ease-fluid' : '',
+            'mascot-blink 4.5s ease-in-out infinite',
+          ]
+            .filter(Boolean)
+            .join(', '),
+        }}
       >
         <img
-          ref={pupilRef}
-          src={mascotEye}
-          alt="Mascot Eye"
-          className="absolute transition-transform duration-75 ease-out max-w-none pointer-events-none"
-          style={{
-            width: '1034.34%',
-            height: '922.52%',
-            left: '-350.42%',
-            top: '-341.35%',
-          }}
+          src={mascotBody}
+          alt="Bé Song Hỷ"
+          className="h-full w-full object-contain pointer-events-none"
+          draggable={false}
         />
       </div>
-      */}
     </div>
   );
 }

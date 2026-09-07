@@ -7,12 +7,12 @@
 
   /* ——— Editorial Luxury palette (single source of truth, public site) ——— */
   --color-canvas: #fffdfa; /* warm cream page ground */
-  --color-ink: #1c3d2e; /* deep espresso-green brand ink */
-  --color-ink-soft: #2a523c;
-  --color-ink-deep: #17291f;
-  --color-forest: #385c1e;
-  --color-sage: #7c9a5a;
-  --color-sage-mist: #e8f0da;
+  --color-ink: #4a1630; /* deep rose brand ink */
+  --color-ink-soft: #7a2b4d;
+  --color-ink-deep: #351022;
+  --color-forest: #fb78a1;
+  --color-sage: #e4a3b6;
+  --color-sage-mist: #fbe9ee;
   --color-rose: #fb78a1;
   --color-rose-bright: #e4a3b6;
   --color-rose-deep: #a4506b;
@@ -66,7 +66,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #7c9a5a;
+    outline: 2px solid #fb78a1;
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -109,7 +109,7 @@
   /* Thin, calm scrollbars (6px, hairline thumb) */
   .scroll-area {
     scrollbar-width: thin;
-    scrollbar-color: rgba(28, 61, 46, 0.2) transparent;
+    scrollbar-color: rgba(251, 120, 161, 0.2) transparent;
   }
   .scroll-area::-webkit-scrollbar {
     width: 6px;
@@ -119,11 +119,11 @@
     background: transparent;
   }
   .scroll-area::-webkit-scrollbar-thumb {
-    background: rgba(28, 61, 46, 0.16);
+    background: rgba(251, 120, 161, 0.16);
     border-radius: 9999px;
   }
   .scroll-area:hover::-webkit-scrollbar-thumb {
-    background: rgba(28, 61, 46, 0.32);
+    background: rgba(251, 120, 161, 0.32);
   }
 }
 
@@ -133,5 +133,50 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+/* ——— Bé Song Hỷ mascot "alive" animations ——— */
+
+/* Gentle idle breathing: a slow vertical bob so the mascot never looks frozen. */
+@keyframes mascot-idle-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Periodic blink: a quick vertical squash of the whole mascot. */
+@keyframes mascot-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.06);
+  }
+  98% {
+    transform: scaleY(1);
+  }
+}
+
+/* Hover reaction: a friendly bounce when the cursor is over the launcher. */
+@keyframes mascot-hover-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-6px) scale(1.06);
+  }
+  55% {
+    transform: translateY(0) scale(0.98);
+  }
+  75% {
+    transform: translateY(-3px) scale(1.03);
   }
 }

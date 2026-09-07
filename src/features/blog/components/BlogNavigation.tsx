@@ -1,10 +1,9 @@
-import { Bookmark, Clock, Flame, Folder, Hash, Heart } from 'lucide-react';
+import { Bookmark, Clock, Folder, Hash, Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EASE } from '../../../shared/ui/motion';
 
 const navigationItems = [
-  { icon: Flame, text: 'Sắp Xếp Theo', active: true },
-  { icon: Clock, text: 'Mới Nhất' },
+  { icon: Clock, text: 'Mới Nhất', active: true },
   { icon: Heart, text: 'Phổ Biến' },
   { icon: Folder, text: 'Danh Mục' },
   { icon: Hash, text: 'Chủ Đề' },

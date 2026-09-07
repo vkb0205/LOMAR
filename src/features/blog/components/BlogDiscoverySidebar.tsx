@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EASE } from '../../../shared/ui/motion';
 
@@ -31,7 +31,12 @@ const popularTopics = [
   'Thiệp Cưới',
 ];
 
-export function BlogDiscoverySidebar() {
+interface BlogDiscoverySidebarProps {
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
+}
+
+export function BlogDiscoverySidebar({ searchQuery, onSearchQueryChange }: BlogDiscoverySidebarProps) {
   return (
     <motion.aside
       initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
@@ -44,10 +49,23 @@ export function BlogDiscoverySidebar() {
         <div className="flex w-full items-center rounded-bezel-inner bg-white px-4 py-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
           <Search strokeWidth={1.5} className="mr-2.5 h-4 w-4 shrink-0 text-sage" />
           <input
-            type="text"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
             placeholder="Tìm kiếm bài viết..."
-            className="flex-1 border-none bg-transparent text-xs text-ink outline-none placeholder:text-ink/40"
+            aria-label="Tìm kiếm bài viết"
+            className="min-w-0 flex-1 border-none bg-transparent text-xs text-ink outline-none placeholder:text-ink/40"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchQueryChange('')}
+              className="ml-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-ink/45 transition-colors hover:bg-rose-mist hover:text-ink"
+              aria-label="Xóa tìm kiếm"
+            >
+              <X strokeWidth={1.75} className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

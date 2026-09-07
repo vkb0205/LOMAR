@@ -28,7 +28,7 @@ export function StationPanel({ station, task, onToggleTask }: StationPanelProps)
             <h2 className="text-xl font-bold text-[#1B2C40] font-serif mt-1">{station.name}</h2>
           </div>
         </div>
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-[#F2BFC8] border border-rose-100/30'
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-center self-start md:self-auto ${isCompleted ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-rose-50 text-[#F2BFC8] border border-rose-100/30'
           }`}
         >
           {isCompleted ? 'Trạng thái: Đã hoàn thành' : 'Trạng thái: Đang chờ'}
@@ -39,7 +39,7 @@ export function StationPanel({ station, task, onToggleTask }: StationPanelProps)
         <p className="text-xs text-[#1B2C40]/70 leading-relaxed font-medium">{station.description}</p>
 
         <div className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${isCompleted
-          ? 'bg-emerald-50/30 border-emerald-100/50'
+          ? 'bg-rose-50/30 border-rose-100/50'
           : 'bg-rose-50/10 border-rose-100/30'
           }`}
         >
@@ -47,14 +47,14 @@ export function StationPanel({ station, task, onToggleTask }: StationPanelProps)
             <button
               onClick={() => task && onToggleTask(task)}
               className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm active:scale-95 ${isCompleted
-                ? 'border-emerald-500 bg-emerald-500 text-white'
+                ? 'border-rose bg-rose text-white'
                 : 'border-rose-300 hover:border-[#F2BFC8] bg-white'
                 }`}
             >
               {isCompleted && <CheckCircle2 className="w-5 h-5 text-white" />}
             </button>
             <div>
-              <h4 className={`text-sm font-bold ${isCompleted ? 'text-emerald-800' : 'text-[#1B2C40]'}`}>
+              <h4 className={`text-sm font-bold ${isCompleted ? 'text-rose-800' : 'text-[#1B2C40]'}`}>
                 {task?.name || 'Nhiệm vụ'}
               </h4>
               <span className="text-[10px] text-gray-400 font-medium">

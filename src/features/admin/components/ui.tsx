@@ -9,13 +9,13 @@ import React from 'react';
 
 const STATUS_STYLES: Record<string, string> = {
   // positive / active
-  active: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  published: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  succeeded: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  booked: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  unlocked: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  redeemed: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  active: 'bg-rose-50 text-rose-700 border-rose-100',
+  published: 'bg-rose-50 text-rose-700 border-rose-100',
+  completed: 'bg-rose-50 text-rose-700 border-rose-100',
+  succeeded: 'bg-rose-50 text-rose-700 border-rose-100',
+  booked: 'bg-rose-50 text-rose-700 border-rose-100',
+  unlocked: 'bg-rose-50 text-rose-700 border-rose-100',
+  redeemed: 'bg-rose-50 text-rose-700 border-rose-100',
   admin: 'bg-indigo-50 text-indigo-700 border-indigo-100',
   // neutral / pending
   draft: 'bg-gray-100 text-gray-600 border-gray-200',
