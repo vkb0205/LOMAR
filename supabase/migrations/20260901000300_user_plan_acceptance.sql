@@ -20,7 +20,9 @@
 --   * The view is SECURITY INVOKER so it inherits the caller's RLS on
 --     `user_plan_items` (FR-006) — it never grants read of another user's row.
 --
--- Replay-safe / idempotent: guarded with IF NOT EXISTS / CREATE OR REPLACE.
+-- Replay-safe / idempotent: this migration may be repaired into a database
+-- where the later 20260902000000 migration already created equivalent
+-- constraints, indexes, policies, and the accepted-plan view.
 -- ============================================================================
 
 begin;
@@ -49,23 +51,47 @@ comment on table public.user_plan_items is
 
 -- FR-002: exactly one reference per item_type — structurally impossible to
 -- store both service_id and plan_id, or the wrong column for the type.
-alter table public.user_plan_items
-  add constraint user_plan_items_item_ref_check
-  check (
-    (item_type = 'service' and service_id is not null and plan_id is null)
-    or
-    (item_type = 'plan' and plan_id is not null and service_id is null)
-  );
+do $do$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.user_plan_items'::regclass
+      and conname in (
+        'user_plan_items_item_ref_check',
+        'user_plan_items_type_id_check'
+      )
+  ) then
+    alter table public.user_plan_items
+      add constraint user_plan_items_item_ref_check
+      check (
+        (item_type = 'service' and service_id is not null and plan_id is null)
+        or
+        (item_type = 'plan' and plan_id is not null and service_id is null)
+      );
+  end if;
+end
+$do$;
 
 -- FR-004: idempotent upsert per (user, item). A partial unique index allows
 -- multiple NULLs while enforcing a single accepted row per service/plan.
-create unique index if not exists user_plan_items_user_service_idx
-  on public.user_plan_items (user_id, service_id)
-  where service_id is not null;
+do $do$
+begin
+  if to_regclass('public.user_plan_items_user_service_idx') is null
+     and to_regclass('public.user_plan_items_user_service_uniq') is null then
+    create unique index user_plan_items_user_service_idx
+      on public.user_plan_items (user_id, service_id)
+      where service_id is not null;
+  end if;
 
-create unique index if not exists user_plan_items_user_plan_idx
-  on public.user_plan_items (user_id, plan_id)
-  where plan_id is not null;
+  if to_regclass('public.user_plan_items_user_plan_idx') is null
+     and to_regclass('public.user_plan_items_user_plan_uniq') is null then
+    create unique index user_plan_items_user_plan_idx
+      on public.user_plan_items (user_id, plan_id)
+      where plan_id is not null;
+  end if;
+end
+$do$;
 
 -- Supporting indexes for the owner-scoped read path and the view's join.
 create index if not exists user_plan_items_user_status_idx
@@ -91,12 +117,11 @@ as
 select
   upi.user_id,
   upi.item_type,
-  upi.service_id,
-  upi.plan_id,
-  upi.status,
   coalesce(s.category, wp.style) as category,
+  upi.service_id,
   s.name   as service_name,
-  s.base_price as service_price,
+  coalesce(upi.unit_price, s.base_price) as service_price,
+  upi.plan_id,
   wp.name  as plan_name,
   upi.accepted_at
 from public.user_plan_items upi
@@ -115,28 +140,43 @@ comment on view public.v_user_accepted_plan is
 alter table public.user_plan_items enable row level security;
 
 drop policy if exists "Users can view own plan items" on public.user_plan_items;
-create policy "Users can view own plan items"
-  on public.user_plan_items
-  for select
-  using (auth.uid() = user_id);
-
 drop policy if exists "Users can insert own plan items" on public.user_plan_items;
-create policy "Users can insert own plan items"
-  on public.user_plan_items
-  for insert
-  with check (auth.uid() = user_id);
-
 drop policy if exists "Users can update own plan items" on public.user_plan_items;
-create policy "Users can update own plan items"
-  on public.user_plan_items
-  for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
 drop policy if exists "Users can delete own plan items" on public.user_plan_items;
-create policy "Users can delete own plan items"
-  on public.user_plan_items
-  for delete
-  using (auth.uid() = user_id);
+
+do $do$
+begin
+  -- The later runtime migration consolidates these into one owner policy. Do
+  -- not add four redundant permissive policies when repairing old history.
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'user_plan_items'
+      and policyname = 'owner user_plan_items'
+  ) then
+    create policy "Users can view own plan items"
+      on public.user_plan_items
+      for select to authenticated
+      using ((select auth.uid()) = user_id);
+
+    create policy "Users can insert own plan items"
+      on public.user_plan_items
+      for insert to authenticated
+      with check ((select auth.uid()) = user_id);
+
+    create policy "Users can update own plan items"
+      on public.user_plan_items
+      for update to authenticated
+      using ((select auth.uid()) = user_id)
+      with check ((select auth.uid()) = user_id);
+
+    create policy "Users can delete own plan items"
+      on public.user_plan_items
+      for delete to authenticated
+      using ((select auth.uid()) = user_id);
+  end if;
+end
+$do$;
 
 commit;

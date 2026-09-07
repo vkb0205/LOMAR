@@ -91,7 +91,8 @@ create table if not exists public.bi_activities (
   vendor_id   uuid,
   title       text not null,
   detail      text,
-  kind        text,
+  kind        text not null default 'system'
+              check (kind in ('agent', 'report', 'action', 'system')),
   occurred_at timestamptz not null default now(),
   created_by  text
 );
@@ -110,7 +111,8 @@ create table if not exists public.bi_reports (
   vendor_id   uuid,
   title       text not null,
   period      text,
-  status      text not null default 'draft',
+  status      text not null default 'ready'
+              check (status in ('ready', 'generating')),
   summary     text,
   payload     jsonb not null default '{}'::jsonb,
   created_by  text,
@@ -158,12 +160,12 @@ values
 on conflict (id) do nothing;
 insert into public.bi_activities (id, vendor_id, title, detail, kind, occurred_at, created_by)
 values
-  ('72000000-0000-0000-0000-000000000001', null, 'Seed BI demo', 'Hoàn tất dữ liệu demo cho khu vực BI.', 'seed', now(), 'admin'),
-  ('72000000-0000-0000-0000-000000000002', null, 'Pipeline mới', 'Một lead Stage 1 mới được tạo.', 'lead', now() - interval '1 hour', 'admin')
+  ('72000000-0000-0000-0000-000000000001', null, 'Seed BI demo', 'Hoàn tất dữ liệu demo cho khu vực BI.', 'system', now(), 'admin'),
+  ('72000000-0000-0000-0000-000000000002', null, 'Pipeline mới', 'Một lead Stage 1 mới được tạo.', 'system', now() - interval '1 hour', 'admin')
 on conflict (id) do nothing;
 insert into public.bi_reports (id, vendor_id, title, period, status, summary, payload, created_by, created_at)
 values
-  ('73000000-0000-0000-0000-000000000001', null, 'Báo cáo tuần demo', '2026-08-31/2026-09-06', 'completed', 'Lead ổn định, pipeline tăng nhẹ.', '{"leads": 40, "pipelineValue": 3200000000}'::jsonb, 'admin', now() - interval '12 hours')
+  ('73000000-0000-0000-0000-000000000001', null, 'Báo cáo tuần demo', '2026-08-31/2026-09-06', 'ready', 'Lead ổn định, pipeline tăng nhẹ.', '{"leads": 40, "pipelineValue": 3200000000}'::jsonb, 'admin', now() - interval '12 hours')
 on conflict (id) do nothing;
 -- ---------------------------------------------------------------------------
 -- Wedding plans + items

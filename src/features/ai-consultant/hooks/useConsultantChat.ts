@@ -4,7 +4,7 @@ import {
   CONSULT_NETWORK_FALLBACK_MESSAGE,
   requestConsultReply,
 } from '../services/aiConsultantService';
-import { fetchConsultantMessages, insertConsultantMessage } from '../services/chatMessageRepository';
+import { fetchConsultantMessages, sendConsultantMessage } from '../services/chatMessageRepository';
 import type { ConsultantMessage, RetrievedService } from '../types';
 
 export type ConsultantGreeting = 'services';
@@ -48,14 +48,19 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
         return;
       }
 
-      const chatHistory = await fetchConsultantMessages(userId);
-      if (!active) return;
+      try {
+        const chatHistory = await fetchConsultantMessages(userId);
+        if (!active) return;
 
-      setMessages(
-        chatHistory.length > 0
-          ? chatHistory
-          : [buildDefaultMessage(greeting, user?.name)],
-      );
+        setMessages(
+          chatHistory.length > 0
+            ? [buildDefaultMessage(greeting, user?.name), ...chatHistory]
+            : [buildDefaultMessage(greeting, user?.name)],
+        );
+      } catch (error) {
+        console.error('Failed to load consultant history', error);
+        if (active) setMessages([buildDefaultMessage(greeting, user?.name)]);
+      }
     }
 
     void loadMessages();
@@ -85,22 +90,36 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
     setInput('');
     setIsTyping(true);
 
-    await insertConsultantMessage(userId, 'user', content);
-
     try {
-      const history = [...messages, userMessage]
-        .filter(m => m.id !== 'default' && m.content.trim())
-        .slice(-10)
-        .map(m => ({ role: m.role, content: m.content }));
-      const { reply, retrievedServices: turnServices } = await requestConsultReply(content, history);
-      const assistantMessage: ConsultantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: reply,
-      };
-      setMessages(previous => [...previous, assistantMessage]);
-      if (turnServices.length > 0) setRetrievedServices(turnServices);
-      await insertConsultantMessage(userId, 'assistant', reply);
+      if (userId) {
+        // Logged-in couples use the durable thread endpoint so history survives
+        // page reloads. The backend stores both turns and returns the exchange.
+        const exchange = await sendConsultantMessage(content);
+        setMessages(previous => [
+          ...previous,
+          {
+            id: exchange.assistantMessage.id,
+            role: 'assistant',
+            content: exchange.assistantMessage.content,
+          },
+        ]);
+        if (exchange.retrievedServices.length > 0) {
+          setRetrievedServices(exchange.retrievedServices);
+        }
+      } else {
+        const history = [...messages, userMessage]
+          .filter(m => m.id !== 'default' && m.content.trim())
+          .slice(-10)
+          .map(m => ({ role: m.role, content: m.content }));
+        const { reply, retrievedServices: turnServices } = await requestConsultReply(content, history);
+        const assistantMessage: ConsultantMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: reply,
+        };
+        setMessages(previous => [...previous, assistantMessage]);
+        if (turnServices.length > 0) setRetrievedServices(turnServices);
+      }
     } catch (error) {
       console.error('Consult request failed', error);
       setMessages(previous => [
@@ -133,3 +152,4 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
     submitMessage,
   };
 }
+

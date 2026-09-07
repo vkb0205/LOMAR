@@ -8,6 +8,7 @@ import {
   requestConsultReply,
   type StoredConsultMessage,
 } from '../../ai-consultant/services/aiConsultantService';
+import { fetchConsultantMessages, sendConsultantMessage } from '../../ai-consultant/services/chatMessageRepository';
 import type { RetrievedService } from '../../ai-consultant/types';
 import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from '../openAssistant';
 import InteractiveMascot from './InteractiveMascot';
@@ -51,6 +52,13 @@ function toFloatingMessage(row: StoredConsultMessage): FloatingMessage {
   };
 }
 
+function toFloatingMessageFromThread(row: { id: string; role: 'user' | 'assistant'; content: string }): FloatingMessage {
+  return {
+    text: row.content,
+    isUser: row.role === 'user',
+  };
+}
+
 export default function FloatingChat() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -73,9 +81,20 @@ export default function FloatingChat() {
     setMessages([{ text: DEFAULT_GREETING, isUser: false }]);
 
     async function hydrate() {
+      if (userId) {
+        try {
+          const stored = await fetchConsultantMessages(userId);
+          if (!active || stored.length === 0) return;
+          setMessages([{ text: DEFAULT_GREETING, isUser: false }, ...stored.map(toFloatingMessageFromThread)]);
+        } catch (error) {
+          console.error('Failed to load floating chat history', error);
+        }
+        return;
+      }
+
       const stored = await loadConsultantHistory();
       if (!active || stored.length === 0) return;
-      setMessages(stored.map(toFloatingMessage));
+      setMessages([{ text: DEFAULT_GREETING, isUser: false }, ...stored.map(toFloatingMessage)]);
     }
 
     void hydrate();
@@ -122,23 +141,37 @@ export default function FloatingChat() {
     setIsTyping(true);
 
     try {
-      const history = nextMessages
-        .filter(m => m.text.trim() && m.text !== DEFAULT_GREETING)
-        .slice(-10)
-        .map(m => ({
-          role: (m.isUser ? 'user' : 'assistant') as 'user' | 'assistant',
-          content: m.text,
-        }));
-      const { reply, retrievedServices } = await requestConsultReply(userText, history);
-      const botText = reply.trim() || CONSULT_NETWORK_FALLBACK_MESSAGE;
-      setMessages(prev => [
-        ...prev,
-        {
-          text: botText,
-          isUser: false,
-          services: retrievedServices.length > 0 ? retrievedServices : undefined,
-        },
-      ]);
+      if (userId) {
+        // Logged-in couples use the durable thread endpoint so history survives
+        // page reloads. The backend stores both turns and returns the exchange.
+        const exchange = await sendConsultantMessage(userText);
+        setMessages(prev => [
+          ...prev,
+          {
+            text: exchange.assistantMessage.content,
+            isUser: false,
+            services: exchange.retrievedServices.length > 0 ? exchange.retrievedServices : undefined,
+          },
+        ]);
+      } else {
+        const history = nextMessages
+          .filter(m => m.text.trim() && m.text !== DEFAULT_GREETING)
+          .slice(-10)
+          .map(m => ({
+            role: (m.isUser ? 'user' : 'assistant') as 'user' | 'assistant',
+            content: m.text,
+          }));
+        const { reply, retrievedServices } = await requestConsultReply(userText, history);
+        const botText = reply.trim() || CONSULT_NETWORK_FALLBACK_MESSAGE;
+        setMessages(prev => [
+          ...prev,
+          {
+            text: botText,
+            isUser: false,
+            services: retrievedServices.length > 0 ? retrievedServices : undefined,
+          },
+        ]);
+      }
     } catch (error) {
       console.error('Floating chat request failed', error);
       setMessages(prev => [
@@ -284,3 +317,4 @@ export default function FloatingChat() {
     </AnimatePresence>
   );
 }
+
