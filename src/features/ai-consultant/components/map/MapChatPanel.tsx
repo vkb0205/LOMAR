@@ -8,7 +8,6 @@ interface MapChatPanelProps {
   vendors: MapVendor[];
   highlightedIds: string[];
   onHighlight: (ids: string[]) => void;
-  onSelectVendor: (id: string | null) => void;
   onClose: () => void;
 }
 
@@ -17,7 +16,6 @@ export function MapChatPanel({
   vendors,
   highlightedIds,
   onHighlight,
-  onSelectVendor,
   onClose,
 }: MapChatPanelProps) {
   const chat = useConsultantChat('map');
@@ -33,8 +31,7 @@ export function MapChatPanel({
     );
 
     onHighlight(suggestedIds);
-    onSelectVendor(suggestedIds[0] ?? null);
-  }, [chat.retrievedServices, mapVendorIds, onHighlight, onSelectVendor]);
+  }, [chat.retrievedServices, mapVendorIds, onHighlight]);
 
   return (
     <div className="relative h-full">

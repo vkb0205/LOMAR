@@ -8,6 +8,7 @@ import { fetchMapVendors, type MapVendor } from './services/mapVendorService';
 import { ROUTES } from '../../shared/config/routes';
 import { Link } from 'react-router-dom';
 import { EASE } from '../../shared/ui/motion';
+import { orderUnidirectionalRoute } from './utils/mapRoute';
 
 /**
  * Bản đồ Hạnh Phúc — interactive district map for Hồ Văn Huê.
@@ -29,11 +30,32 @@ export default function MapPage() {
     () => typeof window === 'undefined' || window.innerWidth >= 1024,
   );
 
-  const selectedVendor = selectedId ? vendors.find(vendor => vendor.id === selectedId) : null;
   const categories = useMemo(
     () => Array.from(new Set(vendors.map(vendor => vendor.category))).sort((a, b) => a.localeCompare(b, 'vi')),
     [vendors],
   );
+  const visibleVendors = useMemo(() => {
+    const hasAiSuggestions = highlightedIds.length > 0;
+    const hasActiveFilters = activeFilters.length > 0;
+
+    // Keep the initial, unconstrained map useful. Once the AI or the user
+    // narrows the map, only vendors belonging to either result set remain.
+    if (!hasAiSuggestions && !hasActiveFilters) return vendors;
+
+    const suggestedIds = new Set(highlightedIds);
+    return vendors.filter(
+      vendor => suggestedIds.has(vendor.id) || activeFilters.includes(vendor.category),
+    );
+  }, [activeFilters, highlightedIds, vendors]);
+  const selectedVendor = selectedId
+    ? visibleVendors.find(vendor => vendor.id === selectedId)
+    : null;
+
+  useEffect(() => {
+    if (selectedId && !visibleVendors.some(vendor => vendor.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [selectedId, visibleVendors]);
 
   useEffect(() => {
     let active = true;
@@ -62,6 +84,12 @@ export default function MapPage() {
       previous.includes(category) ? previous.filter(item => item !== category) : [...previous, category],
     );
   }, []);
+
+  const handleHighlight = useCallback((ids: string[]) => {
+    const orderedIds = orderUnidirectionalRoute(vendors, ids);
+    setHighlightedIds(orderedIds);
+    setSelectedId(orderedIds[0] ?? null);
+  }, [vendors]);
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] w-full flex-col bg-canvas font-sans text-ink md:min-h-[calc(100dvh-4.25rem)]">
@@ -111,8 +139,7 @@ export default function MapPage() {
         <div className="relative flex h-[calc(100dvh-17rem)] min-h-[560px] w-full gap-4 overflow-hidden md:gap-6">
           <main className="relative min-w-0 flex-1 overflow-hidden">
             <HoVanHueMap
-              vendors={vendors}
-              activeFilters={activeFilters}
+              vendors={visibleVendors}
               highlightedIds={highlightedIds}
               selectedId={selectedId}
               onSelectVendor={setSelectedId}
@@ -189,8 +216,7 @@ export default function MapPage() {
                 <MapChatPanel
                   vendors={vendors}
                   highlightedIds={highlightedIds}
-                  onHighlight={setHighlightedIds}
-                  onSelectVendor={setSelectedId}
+                  onHighlight={handleHighlight}
                   onClose={() => setPanelOpen(false)}
                 />
               </div>

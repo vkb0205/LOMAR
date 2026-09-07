@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl, { GeoJSONSource, Map as MapLibreMap, Marker, type StyleSpecification } from 'maplibre-gl';
 import type { MapVendor } from '../../services/mapVendorService';
 import './map.css';
@@ -8,7 +8,6 @@ interface HoVanHueMapProps {
   vendors: MapVendor[];
   highlightedIds: string[];
   selectedId: string | null;
-  activeFilters: string[];
   onSelectVendor: (id: string | null) => void;
 }
 
@@ -78,17 +77,13 @@ function createVendorMarker(vendor: MapVendor, highlighted: boolean, selected: b
   return element;
 }
 
-export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters, onSelectVendor }: HoVanHueMapProps) {
+export function HoVanHueMap({ vendors, highlightedIds, selectedId, onSelectVendor }: HoVanHueMapProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const filteredVendors = useMemo(
-    () => vendors.filter(vendor => activeFilters.length === 0 || activeFilters.includes(vendor.category)),
-    [activeFilters, vendors],
-  );
 
   useEffect(() => {
     if (!mapElementRef.current || mapRef.current) return;
@@ -264,7 +259,7 @@ export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters
     markersRef.current = [];
     const bounds = new maplibregl.LngLatBounds();
 
-    filteredVendors.forEach(vendor => {
+    vendors.forEach(vendor => {
       const highlighted = highlightedIds.includes(vendor.id);
       const selected = selectedId === vendor.id;
       const rank = highlighted ? highlightedIds.indexOf(vendor.id) + 1 : null;
@@ -292,7 +287,7 @@ export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters
     } else if (!bounds.isEmpty()) {
       map.fitBounds(bounds, { padding: 58, maxZoom: highlightedIds.length > 0 ? 17.5 : 16.7 });
     }
-  }, [filteredVendors, highlightedIds, mapReady, onSelectVendor, selectedId, vendors]);
+  }, [highlightedIds, mapReady, onSelectVendor, selectedId, vendors]);
 
   const locateMe = () => {
     if (!navigator.geolocation || !mapRef.current) return;
