@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Sparkles, X } from 'lucide-react';
+import { MapPin, Send, Sparkles, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth';
 import {
   CONSULT_NETWORK_FALLBACK_MESSAGE,
   requestConsultReply,
 } from '../../ai-consultant/services/aiConsultantService';
 import { fetchConsultantMessages, sendConsultantMessage } from '../../ai-consultant/services/chatMessageRepository';
+import { FALLBACK_VENDOR_IMAGE } from '../../ai-consultant/components/RetrievedServiceRow';
 import type { RetrievedService } from '../../ai-consultant/types';
+import { ROUTES } from '../../../shared/config/routes';
+import { formatServicePrice } from '../../../shared/utils/formatServicePrice';
 import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from '../openAssistant';
 import InteractiveMascot from './InteractiveMascot';
 
@@ -224,21 +228,61 @@ export default function FloatingChat() {
                     <Sparkles strokeWidth={1.5} className="h-4 w-4 text-rose-deep" />
                   </div>
                 )}
-                <div className={`max-w-[78%] rounded-[18px] px-3.5 py-2.5 text-[13px] font-medium leading-relaxed ${msg.isUser
+                <div className={`${!msg.isUser && msg.services?.length ? 'max-w-[88%]' : 'max-w-[78%]'} rounded-[18px] px-3.5 py-2.5 text-[13px] font-medium leading-relaxed ${msg.isUser
                   ? 'rounded-br-md bg-cream text-ink-deep'
                   : 'rounded-bl-md bg-white text-ink shadow-[0_1px_2px_rgba(28,61,46,0.12)] ring-1 ring-ink/5'
                   }`}>
                   <div className="whitespace-pre-wrap">{msg.text}</div>
                   {!msg.isUser && msg.services && msg.services.length > 0 && (
-                    <ul className="mt-2 space-y-1 border-t border-ink/8 pt-2 text-[11px] text-ink/70">
-                      {msg.services.map(service => (
-                        <li key={service.id} className="truncate">
-                          - {service.name || service.id}
-                          {service.basePrice != null
-                            ? ` · ${service.basePrice.toLocaleString('vi-VN')}${service.currency ? ` ${service.currency}` : ''}`
-                            : ''}
+                    <ul className="mt-2 space-y-2 border-t border-ink/8 pt-2 text-[11px] text-ink/70">
+                      {msg.services.map(service => {
+                        const price = formatServicePrice(service);
+                        return (
+                        <li key={service.id}>
+                          {service.vendorId ? (
+                            <Link
+                              to={ROUTES.vendorDetail(service.vendorId)}
+                              className="flex gap-2 rounded-xl bg-rose-mist/55 p-2 transition-colors hover:bg-rose-mist focus:outline-none focus:ring-2 focus:ring-rose/40"
+                            >
+                              <img
+                                src={service.vendorImageUrl || service.thumbnailUrl || FALLBACK_VENDOR_IMAGE}
+                                alt={`Hình ảnh ${service.vendorName || service.name || 'nhà cung cấp'}`}
+                                loading="lazy"
+                                onError={event => {
+                                  event.currentTarget.onerror = null;
+                                  event.currentTarget.src = FALLBACK_VENDOR_IMAGE;
+                                }}
+                                className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                              />
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-semibold text-ink">
+                                  {service.vendorName || service.name || service.id}
+                                </span>
+                                {service.suggestionType !== 'vendor' && service.vendorName && (
+                                  <span className="block truncate text-ink/60">{service.name}</span>
+                                )}
+                                <span className="mt-1 flex items-start gap-1 leading-snug text-ink/60">
+                                  <MapPin strokeWidth={1.75} className="mt-0.5 h-3 w-3 shrink-0 text-rose-deep" />
+                                  <span className="line-clamp-2">
+                                    {service.vendorAddress || 'Chưa cập nhật địa chỉ'}
+                                  </span>
+                                </span>
+                                {price && service.suggestionType !== 'vendor' && (
+                                  <span className="mt-1 block font-mono font-semibold text-forest">
+                                    {price}
+                                  </span>
+                                )}
+                              </span>
+                            </Link>
+                          ) : (
+                            <span className="block truncate">
+                              - {service.name || service.id}
+                              {price ? ` · ${price}` : ''}
+                            </span>
+                          )}
                         </li>
-                      ))}
+                        );
+                      })}
                     </ul>
                   )}
                 </div>

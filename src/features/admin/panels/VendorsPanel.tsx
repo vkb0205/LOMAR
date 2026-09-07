@@ -9,6 +9,7 @@ import {
   deleteService,
 } from '../services/adminService';
 import { Database } from '../../../shared/types/database';
+import { formatServicePrice } from '../../../shared/utils/formatServicePrice';
 import {
   PanelHeader,
   AdminCard,
@@ -263,7 +264,13 @@ export default function VendorsPanel() {
                       {vendorName(row.vendor_id)}
                     </td>
                     <td className="px-4 py-3 text-[#1B2C40]/70">
-                      {row.base_price.toLocaleString('vi-VN')} {row.currency}
+                      {formatServicePrice({
+                        basePrice: row.base_price,
+                        maxPrice: row.max_price,
+                        priceUnit: row.price_unit,
+                        priceDisplay: row.price_display,
+                        currency: row.currency,
+                      }) ?? '—'}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={row.status} />

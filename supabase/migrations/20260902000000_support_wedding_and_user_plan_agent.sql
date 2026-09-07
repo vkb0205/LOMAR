@@ -21,6 +21,7 @@ begin
   return new;
 end;
 $$;
+revoke all on function public.lomar_touch_updated_at() from public, anon, authenticated, service_role;
 -- ---------------------------------------------------------------------------
 -- Wedding plans: curated bundles of catalog services offered to couples.
 -- ---------------------------------------------------------------------------
@@ -158,6 +159,12 @@ $do$;
 alter table public.wedding_plans enable row level security;
 alter table public.wedding_plan_items enable row level security;
 alter table public.user_plan_items enable row level security;
+-- Replace the earlier equivalent policy names so only one permissive policy
+-- is evaluated for each role/action combination.
+drop policy if exists "admin manage wedding_plans" on public.wedding_plans;
+drop policy if exists "public select active wedding_plans" on public.wedding_plans;
+drop policy if exists "admin manage wedding_plan_items" on public.wedding_plan_items;
+drop policy if exists "public select active wedding_plan_items" on public.wedding_plan_items;
 create policy "admin all wedding_plans" on public.wedding_plans
   for all using (public.is_admin());
 create policy "pub read wedding_plans active" on public.wedding_plans

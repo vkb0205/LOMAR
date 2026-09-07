@@ -7,13 +7,20 @@ import {
 import { fetchConsultantMessages, sendConsultantMessage } from '../services/chatMessageRepository';
 import type { ConsultantMessage, RetrievedService } from '../types';
 
-export type ConsultantGreeting = 'services';
+export type ConsultantGreeting = 'services' | 'map';
 
 function buildDefaultMessage(
   greeting: ConsultantGreeting,
   userName?: string | null,
 ): ConsultantMessage {
   const name = userName || 'bạn';
+  if (greeting === 'map') {
+    return {
+      id: 'default',
+      role: 'assistant',
+      content: `Chào ${name}! Mình là Bé Song Hỷ. Hãy cho mình biết phong cách, ngân sách hoặc dịch vụ bạn cần; mình sẽ tìm các nhà cung cấp phù hợp và ghim họ lên bản đồ.`,
+    };
+  }
   if (greeting === 'services') {
     return {
       id: 'default',
@@ -88,6 +95,7 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
 
     setMessages(previous => [...previous, userMessage]);
     setInput('');
+    setRetrievedServices([]);
     setIsTyping(true);
 
     try {
@@ -103,9 +111,7 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
             content: exchange.assistantMessage.content,
           },
         ]);
-        if (exchange.retrievedServices.length > 0) {
-          setRetrievedServices(exchange.retrievedServices);
-        }
+        setRetrievedServices(exchange.retrievedServices);
       } else {
         const history = [...messages, userMessage]
           .filter(m => m.id !== 'default' && m.content.trim())
@@ -118,7 +124,7 @@ export function useConsultantChat(greeting: ConsultantGreeting = 'services') {
           content: reply,
         };
         setMessages(previous => [...previous, assistantMessage]);
-        if (turnServices.length > 0) setRetrievedServices(turnServices);
+        setRetrievedServices(turnServices);
       }
     } catch (error) {
       console.error('Consult request failed', error);

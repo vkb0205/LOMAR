@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rimraf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "catalog:validate": "node scripts/validateVendorCatalog.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { openContextualAssistant } from '../../chat/openAssistant';
 import type { VendorDetailService } from '../types';
 import { EASE } from '../../../shared/ui/motion';
+import { formatServicePrice } from '../../../shared/utils/formatServicePrice';
 
 interface VendorServiceCardProps {
   index: number;
@@ -10,6 +11,14 @@ interface VendorServiceCardProps {
 }
 
 export function VendorServiceCard({ index, service }: VendorServiceCardProps) {
+  const price = formatServicePrice({
+    basePrice: service.base_price,
+    maxPrice: service.max_price,
+    priceUnit: service.price_unit,
+    priceDisplay: service.price_display,
+    currency: service.currency,
+  });
+
   return (
     <motion.div
       key={service.id}
@@ -47,8 +56,7 @@ export function VendorServiceCard({ index, service }: VendorServiceCardProps) {
           </h3>
           <div className="mt-auto flex items-center justify-between gap-3">
             <span className="font-bold text-ink">
-              {Number(service.base_price).toLocaleString('vi-VN')}{' '}
-              <span className="text-[10px] font-normal">VND</span>
+              {price ?? 'Liên hệ'}
             </span>
             <button
               type="button"

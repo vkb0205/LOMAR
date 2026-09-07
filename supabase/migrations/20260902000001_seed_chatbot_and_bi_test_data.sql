@@ -123,16 +123,9 @@ alter table public.bi_agent_runs enable row level security;
 alter table public.bi_activities enable row level security;
 alter table public.bi_recommendations enable row level security;
 alter table public.bi_reports enable row level security;
-create policy "admin all bi_agent_definitions" on public.bi_agent_definitions
-  for all using (public.is_admin());
-create policy "admin all bi_agent_runs" on public.bi_agent_runs
-  for all using (public.is_admin());
-create policy "admin all bi_activities" on public.bi_activities
-  for all using (public.is_admin());
-create policy "admin all bi_recommendations" on public.bi_recommendations
-  for all using (public.is_admin());
-create policy "admin all bi_reports" on public.bi_reports
-  for all using (public.is_admin());
+-- Access policies are defined by 20260820000100_business_intelligence.sql.
+-- Do not add a second set here: duplicate permissive policies make every BI
+-- request evaluate both policy families and trigger Supabase advisor warnings.
 grant select, insert, update, delete on public.bi_agent_definitions to authenticated;
 grant select, insert, update, delete on public.bi_agent_runs to authenticated;
 grant select, insert, update, delete on public.bi_activities to authenticated;

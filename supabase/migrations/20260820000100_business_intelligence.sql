@@ -28,8 +28,8 @@ as $$
   );
 $$;
 
-revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to anon, authenticated;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
 
 -- Owned-vendor helper (vendors.owner_id = auth.uid()).
 create or replace function public.bi_owned_vendor_ids()
@@ -63,7 +63,8 @@ create table if not exists public.bi_agent_runs (
   id uuid primary key default gen_random_uuid(),
   agent_id text not null references public.bi_agent_definitions(id) on delete cascade,
   vendor_id uuid references public.vendors(id) on delete cascade,
-  triggered_by uuid references public.profiles(id) on delete set null,
+  -- Actor labels may be a profile UUID or a system identity such as "admin".
+  triggered_by text,
   status text not null default 'ready'
     check (status in ('ready', 'running', 'completed', 'approval_required', 'failed')),
   finding text,
@@ -79,7 +80,7 @@ create table if not exists public.bi_activities (
   kind text not null default 'system'
     check (kind in ('agent', 'report', 'action', 'system')),
   occurred_at timestamptz not null default now(),
-  created_by uuid references public.profiles(id) on delete set null
+  created_by text
 );
 
 create table if not exists public.bi_recommendations (
@@ -102,7 +103,7 @@ create table if not exists public.bi_reports (
     check (status in ('ready', 'generating')),
   summary text not null default '',
   payload jsonb not null default '{}'::jsonb,
-  created_by uuid references public.profiles(id) on delete set null,
+  created_by text,
   created_at timestamptz not null default now()
 );
 
@@ -331,10 +332,17 @@ begin
     and sr.created_at < v_start
     and (p_vendor_id is null or sr.vendor_id = p_vendor_id);
 
-  select coalesce(json_agg(row_to_json(t) order by t.day), '[]'::json)
+  select coalesce(
+    json_agg(
+      json_build_object('label', t.label, 'value', t.value)
+      order by t.day
+    ),
+    '[]'::json
+  )
   into v_trend
   from (
     select
+      d.day,
       to_char(d.day, 'DD/MM') as label,
       coalesce(c.cnt, 0)::float as value
     from generate_series(

@@ -1,9 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MessageCircle, Route } from 'lucide-react';
 import { motion } from 'motion/react';
 import { HoVanHueMap } from './components/map/HoVanHueMap';
 import { MapChatPanel } from './components/map/MapChatPanel';
-import { categoryMeta, vendors, type VendorCategory } from './data/hoVanHueVendors';
+import { fetchMapVendors, type MapVendor } from './services/mapVendorService';
 import { ROUTES } from '../../shared/config/routes';
 import { Link } from 'react-router-dom';
 import { EASE } from '../../shared/ui/motion';
@@ -19,16 +19,44 @@ import { EASE } from '../../shared/ui/motion';
 export default function MapPage() {
   const [highlightedIds, setHighlightedIds] = useState<string[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [activeFilters, setActiveFilters] = useState<VendorCategory[]>([]);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [vendors, setVendors] = useState<MapVendor[]>([]);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(true);
+  const [vendorError, setVendorError] = useState<string | null>(null);
   // Map-first on small screens; the consultant panel opens from the FAB.
   const [panelOpen, setPanelOpen] = useState(
     () => typeof window === 'undefined' || window.innerWidth >= 1024,
   );
 
   const selectedVendor = selectedId ? vendors.find(vendor => vendor.id === selectedId) : null;
-  const categories = Object.entries(categoryMeta) as [VendorCategory, typeof categoryMeta[VendorCategory]][];
+  const categories = useMemo(
+    () => Array.from(new Set(vendors.map(vendor => vendor.category))).sort((a, b) => a.localeCompare(b, 'vi')),
+    [vendors],
+  );
 
-  const handleToggleFilter = useCallback((category: VendorCategory) => {
+  useEffect(() => {
+    let active = true;
+    setIsLoadingVendors(true);
+    setVendorError(null);
+
+    fetchMapVendors()
+      .then(rows => {
+        if (active) setVendors(rows);
+      })
+      .catch(error => {
+        console.error('Failed to load map vendors', error);
+        if (active) setVendorError('Không thể tải dữ liệu nhà cung cấp. Vui lòng thử lại sau.');
+      })
+      .finally(() => {
+        if (active) setIsLoadingVendors(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleToggleFilter = useCallback((category: string) => {
     setActiveFilters(previous =>
       previous.includes(category) ? previous.filter(item => item !== category) : [...previous, category],
     );
@@ -55,7 +83,7 @@ export default function MapPage() {
 
           {/* Category filter pills — ink when active, hairline ghost when not */}
           <div className="no-scrollbar flex flex-wrap items-center gap-1.5 md:justify-end">
-            {categories.map(([category, meta]) => {
+            {categories.map(category => {
               const active = activeFilters.length === 0 || activeFilters.includes(category);
               return (
                 <button
@@ -69,8 +97,7 @@ export default function MapPage() {
                       : 'border-hairline text-muted hover:bg-surface-soft hover:text-ink'
                   }`}
                 >
-                  <span aria-hidden>{meta.icon}</span>
-                  <span className="whitespace-nowrap">{meta.label}</span>
+                  <span className="whitespace-nowrap">{category}</span>
                 </button>
               );
             })}
@@ -83,11 +110,22 @@ export default function MapPage() {
         <div className="relative flex h-[calc(100dvh-17rem)] min-h-[560px] w-full gap-4 overflow-hidden md:gap-6">
           <main className="relative min-w-0 flex-1 overflow-hidden">
             <HoVanHueMap
+              vendors={vendors}
               activeFilters={activeFilters}
               highlightedIds={highlightedIds}
               selectedId={selectedId}
               onSelectVendor={setSelectedId}
             />
+
+            {(isLoadingVendors || vendorError || (!isLoadingVendors && vendors.length === 0)) && (
+              <div className="pointer-events-none absolute inset-x-4 top-16 z-[620] flex justify-center">
+                <p className="rounded-lg border border-hairline bg-canvas px-4 py-2 text-xs text-muted shadow-card">
+                  {isLoadingVendors
+                    ? 'Đang tải nhà cung cấp…'
+                    : vendorError ?? 'Chưa có nhà cung cấp nào có vị trí bản đồ.'}
+                </p>
+              </div>
+            )}
 
             {/* Route status chip — hairline paper card */}
             <div className="pointer-events-none absolute left-1/2 top-4 z-[600] -translate-x-1/2 px-4">
@@ -142,6 +180,7 @@ export default function MapPage() {
             {panelOpen && (
               <div className="h-full w-full">
                 <MapChatPanel
+                  vendors={vendors}
                   highlightedIds={highlightedIds}
                   onHighlight={setHighlightedIds}
                   onSelectVendor={setSelectedId}

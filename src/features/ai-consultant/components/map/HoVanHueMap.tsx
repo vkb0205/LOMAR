@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl, { GeoJSONSource, Map as MapLibreMap, Marker, Popup, type StyleSpecification } from 'maplibre-gl';
-import { categoryMeta, vendors, type HoVanHueVendor, type VendorCategory } from '../../data/hoVanHueVendors';
+import type { MapVendor } from '../../services/mapVendorService';
 import './map.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface HoVanHueMapProps {
+  vendors: MapVendor[];
   highlightedIds: string[];
   selectedId: string | null;
-  activeFilters: VendorCategory[];
+  activeFilters: string[];
   onSelectVendor: (id: string | null) => void;
 }
 
@@ -23,10 +24,10 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#039;');
 }
 
-function routeGeoJson(highlightedIds: string[]): GeoJSON.Feature<GeoJSON.LineString> {
+function routeGeoJson(vendors: MapVendor[], highlightedIds: string[]): GeoJSON.Feature<GeoJSON.LineString> {
   const orderedVendors = highlightedIds
     .map(id => vendors.find(vendor => vendor.id === id))
-    .filter((vendor): vendor is HoVanHueVendor => Boolean(vendor));
+    .filter((vendor): vendor is MapVendor => Boolean(vendor));
   const vendorCoordinates = orderedVendors.map(vendor => [vendor.lng, vendor.lat] as [number, number]);
 
   return {
@@ -44,29 +45,38 @@ function routeGeoJson(highlightedIds: string[]): GeoJSON.Feature<GeoJSON.LineStr
   };
 }
 
-function createVendorMarker(vendor: HoVanHueVendor, highlighted: boolean, selected: boolean, rank: number | null): HTMLDivElement {
-  const meta = categoryMeta[vendor.category];
+function categoryAppearance(category: string) {
+  const hue = Array.from(category).reduce((value, character) => value + character.charCodeAt(0), 0) % 360;
+  return {
+    icon: category.trim().charAt(0).toLocaleUpperCase('vi-VN') || '•',
+    color: `hsl(${hue} 38% 48%)`,
+    bg: `hsl(${hue} 55% 94%)`,
+  };
+}
+
+function createVendorMarker(vendor: MapVendor, highlighted: boolean, selected: boolean, rank: number | null): HTMLDivElement {
+  const appearance = categoryAppearance(vendor.category);
   const element = document.createElement('div');
   element.className = `hvh-vendor-marker${highlighted ? ' hvh-vendor-marker--highlighted' : ''}${selected ? ' hvh-vendor-marker--selected' : ''}`;
-  element.style.setProperty('--vendor-color', meta.color);
-  element.style.setProperty('--vendor-bg', meta.bg);
-  element.setAttribute('aria-label', `${vendor.name} ${meta.label}`);
+  element.style.setProperty('--vendor-color', appearance.color);
+  element.style.setProperty('--vendor-bg', appearance.bg);
+  element.setAttribute('aria-label', `${vendor.name} ${vendor.category}`);
   element.innerHTML = `
     <span class="hvh-vendor-marker__pulse"></span>
-    <span class="hvh-vendor-marker__icon">${meta.icon}</span>
+    <span class="hvh-vendor-marker__icon">${escapeHtml(appearance.icon)}</span>
     ${rank ? `<span class="hvh-vendor-marker__rank">${rank}</span>` : ''}
   `;
   return element;
 }
 
-function popupHtml(vendor: HoVanHueVendor, highlighted: boolean, rank: number | null): string {
-  const meta = categoryMeta[vendor.category];
+function popupHtml(vendor: MapVendor, highlighted: boolean, rank: number | null): string {
+  const appearance = categoryAppearance(vendor.category);
   const stars = '★'.repeat(Math.floor(vendor.rating));
   return `
     <div class="hvh-rich-popup">
       <div class="hvh-rich-popup__image">
-        <img src="${escapeHtml(vendor.image)}" alt="${escapeHtml(vendor.name)}" />
-        <span class="hvh-rich-popup__category">${meta.icon} ${escapeHtml(meta.label)}</span>
+        ${vendor.image ? `<img src="${escapeHtml(vendor.image)}" alt="${escapeHtml(vendor.name)}" />` : ''}
+        <span class="hvh-rich-popup__category">${escapeHtml(appearance.icon)} ${escapeHtml(vendor.category)}</span>
         ${highlighted && rank ? `<span class="hvh-rich-popup__rank">#${rank} đề xuất</span>` : ''}
       </div>
       <div class="hvh-rich-popup__body">
@@ -75,18 +85,18 @@ function popupHtml(vendor: HoVanHueVendor, highlighted: boolean, rank: number | 
             <strong>${escapeHtml(vendor.name)}</strong>
             <small>${escapeHtml(vendor.address)}</small>
           </div>
-          <span class="hvh-rich-popup__price">${escapeHtml(vendor.priceRange)}</span>
+          ${vendor.priceRange ? `<span class="hvh-rich-popup__price">${escapeHtml(vendor.priceRange)}</span>` : ''}
         </div>
         <div class="hvh-rich-popup__rating"><span>${stars}</span><b>${vendor.rating}</b><small>(${vendor.reviews})</small></div>
         <p>${escapeHtml(vendor.description)}</p>
-        <div class="hvh-rich-popup__details"><span>📞 ${escapeHtml(vendor.phone)}</span><span>🕐 ${escapeHtml(vendor.hours)}</span></div>
+        ${(vendor.phone || vendor.hours) ? `<div class="hvh-rich-popup__details">${vendor.phone ? `<span>📞 ${escapeHtml(vendor.phone)}</span>` : ''}${vendor.hours ? `<span>🕐 ${escapeHtml(vendor.hours)}</span>` : ''}</div>` : ''}
         <div class="hvh-rich-popup__chips">${vendor.specialties.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>
       </div>
     </div>
   `;
 }
 
-export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelectVendor }: HoVanHueMapProps) {
+export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters, onSelectVendor }: HoVanHueMapProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
@@ -95,7 +105,7 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
   const [mapError, setMapError] = useState<string | null>(null);
   const filteredVendors = useMemo(
     () => vendors.filter(vendor => activeFilters.length === 0 || activeFilters.includes(vendor.category)),
-    [activeFilters],
+    [activeFilters, vendors],
   );
 
   useEffect(() => {
@@ -218,7 +228,7 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
         }
       });
 
-      map.addSource('recommended-route', { type: 'geojson', data: routeGeoJson([]) });
+      map.addSource('recommended-route', { type: 'geojson', data: routeGeoJson([], []) });
       map.addLayer({
         id: 'recommended-route-casing',
         type: 'line',
@@ -266,7 +276,7 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
     if (!mapReady || !map) return;
 
     const source = map.getSource('recommended-route') as GeoJSONSource | undefined;
-    source?.setData(routeGeoJson(highlightedIds));
+    source?.setData(routeGeoJson(vendors, highlightedIds));
 
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
@@ -288,11 +298,11 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
 
     highlightedIds
       .map(id => vendors.find(vendor => vendor.id === id))
-      .filter((vendor): vendor is HoVanHueVendor => Boolean(vendor))
+      .filter((vendor): vendor is MapVendor => Boolean(vendor))
       .forEach(vendor => bounds.extend([vendor.lng, vendor.lat]));
 
     if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 58, maxZoom: highlightedIds.length > 0 ? 17.5 : 16.7 });
-  }, [activeFilters, filteredVendors, highlightedIds, mapReady, onSelectVendor, selectedId]);
+  }, [filteredVendors, highlightedIds, mapReady, onSelectVendor, selectedId, vendors]);
 
   const locateMe = () => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -356,4 +366,4 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
   );
 }
 
-export type { HoVanHueVendor as WeddingLocation, VendorCategory };
+export type { MapVendor as WeddingLocation };

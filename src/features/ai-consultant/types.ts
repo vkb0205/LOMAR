@@ -27,9 +27,16 @@ export interface RetrievedService {
   name?: string | null;
   category?: string | null;
   basePrice?: number | null;
+  maxPrice?: number | null;
+  priceUnit?: string | null;
+  priceDisplay?: string | null;
   currency?: string | null;
   thumbnailUrl?: string | null;
   vendorId?: string | null;
+  vendorName?: string | null;
+  vendorImageUrl?: string | null;
+  vendorAddress?: string | null;
+  suggestionType?: 'service' | 'vendor' | 'plan';
 }
 
 export interface ConsultResponse {

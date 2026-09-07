@@ -44,6 +44,7 @@ export function AssistantChat({
 }: AssistantChatProps) {
   const useCompact = compact ?? layout === 'sidebar';
   const shell = 'h-full min-h-0';
+  const hasVendorSuggestions = retrievedServices.some(service => service.vendorId);
 
   return (
     <div className={`flex flex-col overflow-hidden rounded-xl border border-hairline bg-canvas shadow-card ${shell} ${className}`}>
@@ -73,7 +74,9 @@ export function AssistantChat({
         <div ref={messagesEndRef} />
       </div>
 
-      <RetrievedServiceRow services={retrievedServices} />
+      <section aria-label={hasVendorSuggestions ? 'Nhà cung cấp được gợi ý' : 'Dịch vụ được gợi ý'}>
+        <RetrievedServiceRow services={retrievedServices} />
+      </section>
 
       <form onSubmit={onSubmit} className="shrink-0 border-t border-hairline bg-canvas p-3">
         <div className="flex items-center gap-2">

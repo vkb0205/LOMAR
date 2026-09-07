@@ -430,39 +430,48 @@ export type Database = {
       }
       services: {
         Row: {
-          base_price: number
+          base_price: number | null
           category: string
           created_at: string
           currency: string
           description: string | null
           id: string
+          max_price: number | null
           name: string
+          price_display: string | null
+          price_unit: string | null
           status: string
           thumbnail_url: string | null
           updated_at: string
           vendor_id: string
         }
         Insert: {
-          base_price: number
+          base_price?: number | null
           category: string
           created_at?: string
           currency?: string
           description?: string | null
           id?: string
+          max_price?: number | null
           name: string
+          price_display?: string | null
+          price_unit?: string | null
           status?: string
           thumbnail_url?: string | null
           updated_at?: string
           vendor_id: string
         }
         Update: {
-          base_price?: number
+          base_price?: number | null
           category?: string
           created_at?: string
           currency?: string
           description?: string | null
           id?: string
+          max_price?: number | null
           name?: string
+          price_display?: string | null
+          price_unit?: string | null
           status?: string
           thumbnail_url?: string | null
           updated_at?: string
@@ -602,13 +611,18 @@ export type Database = {
           email: string | null
           id: string
           image_url: string | null
+          latitude: number | null
+          longitude: number | null
           name: string
           owner_id: string | null
           phone: string | null
+          price_tier: string | null
           rating_avg: number
           rating_count: number
           slug: string
+          specialties: string[]
           status: string
+          business_hours: string | null
           updated_at: string
           website_url: string | null
         }
@@ -621,13 +635,18 @@ export type Database = {
           email?: string | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name: string
           owner_id?: string | null
           phone?: string | null
+          price_tier?: string | null
           rating_avg?: number
           rating_count?: number
           slug: string
+          specialties?: string[]
           status?: string
+          business_hours?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -640,13 +659,18 @@ export type Database = {
           email?: string | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           owner_id?: string | null
           phone?: string | null
+          price_tier?: string | null
           rating_avg?: number
           rating_count?: number
           slug?: string
+          specialties?: string[]
           status?: string
+          business_hours?: string | null
           updated_at?: string
           website_url?: string | null
         }
