@@ -4,9 +4,7 @@ import { Send, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import {
   CONSULT_NETWORK_FALLBACK_MESSAGE,
-  loadConsultantHistory,
   requestConsultReply,
-  type StoredConsultMessage,
 } from '../../ai-consultant/services/aiConsultantService';
 import { fetchConsultantMessages, sendConsultantMessage } from '../../ai-consultant/services/chatMessageRepository';
 import type { RetrievedService } from '../../ai-consultant/types';
@@ -22,36 +20,6 @@ type FloatingMessage = {
   services?: RetrievedService[];
 };
 
-function metadataServices(metadata: Record<string, unknown> | undefined): RetrievedService[] | undefined {
-  const raw = metadata?.retrieved_services;
-  if (!Array.isArray(raw)) return undefined;
-
-  const mapped: RetrievedService[] = [];
-  for (const entry of raw) {
-    if (!entry || typeof entry !== 'object') continue;
-    const row = entry as Record<string, unknown>;
-    if (typeof row.id !== 'string') continue;
-    mapped.push({
-      id: row.id,
-      name: typeof row.name === 'string' ? row.name : null,
-      category: typeof row.category === 'string' ? row.category : null,
-      basePrice: typeof row.base_price === 'number' ? row.base_price : null,
-      currency: typeof row.currency === 'string' ? row.currency : null,
-      thumbnailUrl: typeof row.thumbnail_url === 'string' ? row.thumbnail_url : null,
-      vendorId: typeof row.vendor_id === 'string' ? row.vendor_id : null,
-    });
-  }
-  return mapped.length > 0 ? mapped : undefined;
-}
-
-function toFloatingMessage(row: StoredConsultMessage): FloatingMessage {
-  return {
-    text: row.content,
-    isUser: row.role === 'user',
-    services: metadataServices(row.metadata),
-  };
-}
-
 function toFloatingMessageFromThread(row: { id: string; role: 'user' | 'assistant'; content: string }): FloatingMessage {
   return {
     text: row.content,
@@ -60,7 +28,7 @@ function toFloatingMessageFromThread(row: { id: string; role: 'user' | 'assistan
 }
 
 export default function FloatingChat() {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const userId = user?.id ?? null;
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -77,31 +45,32 @@ export default function FloatingChat() {
   useEffect(() => {
     // Auth change should start a clean context, but logged-in couples rehydrate
     // the previous DB-backed thread so page reloads don't wipe history.
+    // Wait for session bootstrap: during this window `user` is temporarily
+    // null even though the Supabase access token is already available.
+    if (authLoading) return;
+
     let active = true;
     setMessages([{ text: DEFAULT_GREETING, isUser: false }]);
 
     async function hydrate() {
-      if (userId) {
-        try {
-          const stored = await fetchConsultantMessages(userId);
-          if (!active || stored.length === 0) return;
-          setMessages([{ text: DEFAULT_GREETING, isUser: false }, ...stored.map(toFloatingMessageFromThread)]);
-        } catch (error) {
-          console.error('Failed to load floating chat history', error);
-        }
-        return;
-      }
+      // Anonymous consultant sessions are process-local and are not durable
+      // chat-thread UUIDs. Their id must never be sent to /chat/threads/....
+      if (!userId) return;
 
-      const stored = await loadConsultantHistory();
-      if (!active || stored.length === 0) return;
-      setMessages([{ text: DEFAULT_GREETING, isUser: false }, ...stored.map(toFloatingMessage)]);
+      try {
+        const stored = await fetchConsultantMessages(userId);
+        if (!active || stored.length === 0) return;
+        setMessages([{ text: DEFAULT_GREETING, isUser: false }, ...stored.map(toFloatingMessageFromThread)]);
+      } catch (error) {
+        console.error('Failed to load floating chat history', error);
+      }
     }
 
     void hydrate();
     return () => {
       active = false;
     };
-  }, [userId]);
+  }, [authLoading, userId]);
 
   useEffect(() => {
     // Scroll only the message list; scrollIntoView on a fixed panel also
