@@ -5,14 +5,21 @@ const DEVELOPMENT_BACKEND_URL = (
   .replace(/\/+$/, '');
 
 const PRODUCTION_BACKEND_URL = (
-  import.meta.env.VITE_PRODUCTION_BACKEND_URL || ''
+  import.meta.env.VITE_BACKEND_URL || ''
 )
   .trim()
   .replace(/\/+$/, '');
 
+// Last-resort base URL for production builds. Relative /api/... paths only
+// resolve through the Vite dev proxy; in a static deploy they hit the static
+// host itself and 404, which surfaces as silently empty data rather than an
+// obvious failure. Defaulting to the real API keeps a deployment that was
+// built without VITE_BACKEND_URL functional.
+const PRODUCTION_FALLBACK_BACKEND_URL = 'https://lomar-backend.onrender.com';
+
 function resolveBackendBaseUrl(): string {
   if (import.meta.env.PROD) {
-    return PRODUCTION_BACKEND_URL;
+    return PRODUCTION_BACKEND_URL || PRODUCTION_FALLBACK_BACKEND_URL;
   }
   return DEVELOPMENT_BACKEND_URL;
 }

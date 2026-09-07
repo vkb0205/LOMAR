@@ -24,6 +24,10 @@ const REQUIRED_PROD_ENV_VARS = [
         key: 'VITE_SUPABASE_ANON_KEY',
         why: 'Browser Supabase anon/publishable key. Must be the anon key — never the service-role key, which would be readable by every visitor.',
     },
+    {
+        key: 'VITE_BACKEND_URL',
+        why: 'Absolute URL of the FastAPI backend. Without it, production API calls fall back to relative /api/... paths that only resolve through the Vite dev proxy, so a static deploy silently returns HTML instead of JSON.',
+    },
 ];
 
 /**
