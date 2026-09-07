@@ -30,7 +30,7 @@ export function StationTabs({ activeStationId, stations, tasks, onChange }: Stat
             <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : station.color}`} />
             <span>{station.name}</span>
             {isCompleted && (
-              <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-500 fill-white'}`} />
+              <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-rose fill-white'}`} />
             )}
           </button>
         );

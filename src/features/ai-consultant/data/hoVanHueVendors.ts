@@ -20,9 +20,9 @@ export interface HoVanHueVendor {
 
 export const categoryMeta: Record<VendorCategory, { label: string; icon: string; color: string; bg: string }> = {
   dress: { label: 'Váy cưới', icon: '👗', color: '#a4506b', bg: '#fbe9ee' },
-  photography: { label: 'Chụp ảnh', icon: '📸', color: '#1c3d2e', bg: '#e8f0da' },
+  photography: { label: 'Chụp ảnh', icon: '📸', color: '#fb78a1', bg: '#fbe9ee' },
   makeup: { label: 'Trang điểm', icon: '💄', color: '#b8862b', bg: '#ffe9c9' },
-  flowers: { label: 'Hoa cưới', icon: '🌸', color: '#7c9a5a', bg: '#f1f6e8' },
+  flowers: { label: 'Hoa cưới', icon: '🌸', color: '#e4a3b6', bg: '#fbe9ee' },
 };
 
 export const vendors: HoVanHueVendor[] = [

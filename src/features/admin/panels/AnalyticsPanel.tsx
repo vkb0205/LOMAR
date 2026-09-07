@@ -35,7 +35,7 @@ const BEHAVIOUR_RULES: Record<
   high_intent: {
     label: 'Ý định cao',
     description: 'Đã xem Tùy chỉnh, AI Consultant hoặc trang nhà cung cấp.',
-    color: 'bg-emerald-500',
+    color: 'bg-rose',
   },
   engaged: {
     label: 'Tương tác tốt',

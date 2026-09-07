@@ -123,7 +123,7 @@ export function HoVanHueMap({ highlightedIds, selectedId, activeFilters, onSelec
         background: '#fffdfa',
         land: '#fffdfa',
         residential: '#f4f1e8',
-        park: '#e8f0da',
+        park: '#fbe9ee',
         water: '#dceaf0',
         waterLine: '#c6dce4',
         building: '#ece8dd',

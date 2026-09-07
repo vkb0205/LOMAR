@@ -24,9 +24,9 @@ export function AuthStatusMessage({ error, success }: AuthStatusMessageProps) {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2 mb-2"
+            className="bg-rose-50 border border-rose-100 text-rose-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2 mb-2"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-4 h-4 text-rose" />
             Đăng nhập thành công! Đang chuyển hướng...
           </motion.div>
         )}
