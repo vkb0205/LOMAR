@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import locations from '../../data/ho-van-hue-wedding-dresses.json';
+import { FEEDBACK_WEB_SHOPS } from '../../data/feedback-web-shops';
 
 interface WeddingLocation {
   id: string;
@@ -19,7 +19,18 @@ interface LocationListProps {
 export function LocationList({ selectedId, onSelect }: LocationListProps) {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('all');
-  const allLocations = locations as WeddingLocation[];
+  const allLocations = useMemo<WeddingLocation[]>(
+    () => FEEDBACK_WEB_SHOPS.map(location => ({
+      id: location.id,
+      name: location.name,
+      type: location.category,
+      address: location.address,
+      lat: location.lat,
+      lng: location.lng,
+      phone: '',
+    })),
+    [],
+  );
 
   const types = useMemo(() => Array.from(new Set(allLocations.map(item => item.type))), [allLocations]);
   const filtered = useMemo(() => {

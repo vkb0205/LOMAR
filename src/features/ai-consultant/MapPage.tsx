@@ -3,6 +3,7 @@ import { MessageCircle, Route } from 'lucide-react';
 import { motion } from 'motion/react';
 import { HoVanHueMap } from './components/map/HoVanHueMap';
 import { MapChatPanel } from './components/map/MapChatPanel';
+import { MapVendorCard } from './components/map/MapVendorCard';
 import { fetchMapVendors, type MapVendor } from './services/mapVendorService';
 import { ROUTES } from '../../shared/config/routes';
 import { Link } from 'react-router-dom';
@@ -127,6 +128,12 @@ export default function MapPage() {
               </div>
             )}
 
+            {selectedVendor && (
+              <div className="pointer-events-none absolute inset-x-4 bottom-4 z-[640] flex justify-start sm:bottom-5">
+                <MapVendorCard vendor={selectedVendor} onClose={() => setSelectedId(null)} />
+              </div>
+            )}
+
             {/* Route status chip — hairline paper card */}
             <div className="pointer-events-none absolute left-1/2 top-4 z-[600] -translate-x-1/2 px-4">
               <div className="flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink shadow-card">
@@ -143,7 +150,7 @@ export default function MapPage() {
 
             {/* Route legend, only when a route exists */}
             {highlightedIds.length > 0 && (
-              <div className="absolute bottom-6 left-4 z-[550] flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 shadow-card">
+              <div className="absolute bottom-20 right-4 z-[550] flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 shadow-card lg:bottom-6">
                 <div
                   className="h-0.5 w-6 rounded"
                   style={{

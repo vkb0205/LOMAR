@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import maplibregl, { GeoJSONSource, Map as MapLibreMap, Marker, Popup, type StyleSpecification } from 'maplibre-gl';
+import maplibregl, { GeoJSONSource, Map as MapLibreMap, Marker, type StyleSpecification } from 'maplibre-gl';
 import type { MapVendor } from '../../services/mapVendorService';
 import './map.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -14,15 +14,6 @@ interface HoVanHueMapProps {
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 const HCMC_CENTER: [number, number] = [106.6763, 10.8008];
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 function routeGeoJson(vendors: MapVendor[], highlightedIds: string[]): GeoJSON.Feature<GeoJSON.LineString> {
   const orderedVendors = highlightedIds
@@ -45,12 +36,30 @@ function routeGeoJson(vendors: MapVendor[], highlightedIds: string[]): GeoJSON.F
   };
 }
 
+const CATEGORY_ICON_SVGS = {
+  camera: '<svg class="hvh-category-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L8 2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2.5z"/><circle cx="12" cy="12" r="3"/></svg>',
+  aperture: '<svg class="hvh-category-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m14.31 8 5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16 3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>',
+  dress: '<svg class="hvh-category-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 2 4 3 4-3 2 4-2 3 3 11H5L8 9 6 6z"/><path d="M8 9h8"/></svg>',
+  makeup: '<svg class="hvh-category-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9z"/><path d="m19 16-.9 2.1L16 19l2.1.9L19 22l.9-2.1L22 19l-2.1-.9zM5 3l-.7 1.3L3 5l1.3.7L5 7l.7-1.3L7 5l-1.3-.7z"/></svg>',
+  fallback: '<svg class="hvh-category-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+} as const;
+
 function categoryAppearance(category: string) {
+  const normalizedCategory = category.toLocaleLowerCase('vi-VN');
+  const icon = normalizedCategory.includes('chụp')
+    ? CATEGORY_ICON_SVGS.camera
+    : normalizedCategory.includes('váy')
+      ? CATEGORY_ICON_SVGS.dress
+      : normalizedCategory.includes('trang điểm')
+        ? CATEGORY_ICON_SVGS.makeup
+        : normalizedCategory.includes('studio')
+          ? CATEGORY_ICON_SVGS.aperture
+          : CATEGORY_ICON_SVGS.fallback;
   const hue = Array.from(category).reduce((value, character) => value + character.charCodeAt(0), 0) % 360;
   return {
-    icon: category.trim().charAt(0).toLocaleUpperCase('vi-VN') || '•',
-    color: `hsl(${hue} 38% 48%)`,
-    bg: `hsl(${hue} 55% 94%)`,
+    icon,
+    color: `hsl(${hue} 42% 42%)`,
+    bg: `hsl(${hue} 58% 94%)`,
   };
 }
 
@@ -63,37 +72,10 @@ function createVendorMarker(vendor: MapVendor, highlighted: boolean, selected: b
   element.setAttribute('aria-label', `${vendor.name} ${vendor.category}`);
   element.innerHTML = `
     <span class="hvh-vendor-marker__pulse"></span>
-    <span class="hvh-vendor-marker__icon">${escapeHtml(appearance.icon)}</span>
+    <span class="hvh-vendor-marker__icon">${appearance.icon}</span>
     ${rank ? `<span class="hvh-vendor-marker__rank">${rank}</span>` : ''}
   `;
   return element;
-}
-
-function popupHtml(vendor: MapVendor, highlighted: boolean, rank: number | null): string {
-  const appearance = categoryAppearance(vendor.category);
-  const stars = '★'.repeat(Math.floor(vendor.rating));
-  return `
-    <div class="hvh-rich-popup">
-      <div class="hvh-rich-popup__image">
-        ${vendor.image ? `<img src="${escapeHtml(vendor.image)}" alt="${escapeHtml(vendor.name)}" />` : ''}
-        <span class="hvh-rich-popup__category">${escapeHtml(appearance.icon)} ${escapeHtml(vendor.category)}</span>
-        ${highlighted && rank ? `<span class="hvh-rich-popup__rank">#${rank} đề xuất</span>` : ''}
-      </div>
-      <div class="hvh-rich-popup__body">
-        <div class="hvh-rich-popup__title-row">
-          <div>
-            <strong>${escapeHtml(vendor.name)}</strong>
-            <small>${escapeHtml(vendor.address)}</small>
-          </div>
-          ${vendor.priceRange ? `<span class="hvh-rich-popup__price">${escapeHtml(vendor.priceRange)}</span>` : ''}
-        </div>
-        <div class="hvh-rich-popup__rating"><span>${stars}</span><b>${vendor.rating}</b><small>(${vendor.reviews})</small></div>
-        <p>${escapeHtml(vendor.description)}</p>
-        ${(vendor.phone || vendor.hours) ? `<div class="hvh-rich-popup__details">${vendor.phone ? `<span>📞 ${escapeHtml(vendor.phone)}</span>` : ''}${vendor.hours ? `<span>🕐 ${escapeHtml(vendor.hours)}</span>` : ''}</div>` : ''}
-        <div class="hvh-rich-popup__chips">${vendor.specialties.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>
-      </div>
-    </div>
-  `;
 }
 
 export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters, onSelectVendor }: HoVanHueMapProps) {
@@ -288,7 +270,6 @@ export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters
       const rank = highlighted ? highlightedIds.indexOf(vendor.id) + 1 : null;
       const marker = new Marker({ element: createVendorMarker(vendor, highlighted, selected, rank), anchor: 'bottom' })
         .setLngLat([vendor.lng, vendor.lat])
-        .setPopup(new Popup({ offset: 28, maxWidth: '320px' }).setHTML(popupHtml(vendor, highlighted, rank)))
         .addTo(map);
 
       marker.getElement().addEventListener('click', () => onSelectVendor(vendor.id));
@@ -301,7 +282,16 @@ export function HoVanHueMap({ vendors, highlightedIds, selectedId, activeFilters
       .filter((vendor): vendor is MapVendor => Boolean(vendor))
       .forEach(vendor => bounds.extend([vendor.lng, vendor.lat]));
 
-    if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 58, maxZoom: highlightedIds.length > 0 ? 17.5 : 16.7 });
+    const selectedVendor = selectedId ? vendors.find(vendor => vendor.id === selectedId) : null;
+    if (selectedVendor) {
+      map.easeTo({
+        center: [selectedVendor.lng, selectedVendor.lat],
+        zoom: Math.max(map.getZoom(), 17.5),
+        duration: 350,
+      });
+    } else if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, { padding: 58, maxZoom: highlightedIds.length > 0 ? 17.5 : 16.7 });
+    }
   }, [filteredVendors, highlightedIds, mapReady, onSelectVendor, selectedId, vendors]);
 
   const locateMe = () => {
