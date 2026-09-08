@@ -51,6 +51,16 @@ export type DemoAccount = {
   iconColor: string;
 };
 
+/** One-click role account used by the local/demo login panel. */
+export type QuickLoginAccount = {
+  id: AccountRole;
+  label: string;
+  description: string;
+  email: string;
+  password: string;
+  accountRole: AccountRole;
+};
+
 export type LoginFormValues = {
   email: string;
   password: string;

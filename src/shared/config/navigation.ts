@@ -67,7 +67,7 @@ export const NAV_ACTIONS: AppNavItem[] = [
     id: 'bi',
     label: 'Kinh doanh',
     path: ROUTES.businessIntelligence,
-    audiences: ['business', 'admin'],
+    audiences: ['business'],
     emphasis: 'primary',
   },
 ];
@@ -78,14 +78,14 @@ export const ACCOUNT_MENU: AccountMenuItem[] = [
     id: 'dashboard',
     label: 'Hành trình cưới',
     path: ROUTES.dashboard,
-    audiences: ['couple', 'admin'],
+    audiences: ['couple'],
     description: 'Tiến trình & ưu đãi của bạn',
   },
   {
     id: 'bi',
     label: 'Business Intelligence',
     path: ROUTES.businessIntelligence,
-    audiences: ['business', 'admin'],
+    audiences: ['business'],
     description: 'Phân tích & vận hành',
   },
   {
@@ -106,7 +106,7 @@ export const WORKSPACE_PATHS: StaticRoutePath[] = [
 
 export function audiencesForRole(accountRole: AccountRole | null | undefined): NavAudience[] {
   if (!accountRole) return ['public'];
-  if (accountRole === 'admin') return ['public', 'couple', 'business', 'admin'];
+  if (accountRole === 'admin') return ['public', 'couple', 'admin'];
   if (accountRole === 'vendor') return ['public', 'business'];
   return ['public', 'couple'];
 }

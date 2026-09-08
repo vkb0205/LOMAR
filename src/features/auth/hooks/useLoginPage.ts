@@ -2,15 +2,24 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { defaultPostLoginPath } from '../../../shared/config/navigation';
 import { useAuth } from './useAuth';
-import { DEMO_PASSWORD } from '../constants';
-import type { AuthMode, DemoAccount, LoginFormValues, UserProfile } from '../types';
+import type {
+  AccountRole,
+  AuthMode,
+  LoginFormValues,
+  QuickLoginAccount,
+  UserProfile,
+} from '../types';
 import { validateLoginForm } from '../services/loginValidationService';
 
-function resolveRedirect(explicit: string | null, user: UserProfile | null): string {
+function resolveRedirect(
+  explicit: string | null,
+  user: UserProfile | null,
+  fallbackRole?: AccountRole,
+): string {
   if (explicit && explicit.startsWith('/') && !explicit.startsWith('//')) {
     return explicit;
   }
-  return defaultPostLoginPath(user?.accountRole);
+  return defaultPostLoginPath(user?.accountRole ?? fallbackRole);
 }
 
 export function useLoginPage() {
@@ -45,18 +54,23 @@ export function useLoginPage() {
     setError('');
   };
 
-  const completeAuth = (nextUser?: UserProfile | null) => {
+  const completeAuth = (nextUser?: UserProfile | null, fallbackRole?: AccountRole) => {
     setSuccess(true);
     window.setTimeout(() => {
-      navigate(resolveRedirect(explicitRedirect, nextUser ?? user));
+      navigate(resolveRedirect(explicitRedirect, nextUser ?? user, fallbackRole));
     }, 500);
   };
 
-  const handleDemoLogin = async (account: DemoAccount) => {
+  const handleQuickLogin = async (account: QuickLoginAccount) => {
+    if (!account.email || !account.password) {
+      setError(`${account.label} is not configured for quick login.`);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
-    const { error: signInError } = await signIn(account.email, DEMO_PASSWORD);
+    const { error: signInError } = await signIn(account.email, account.password);
 
     if (signInError) {
       setError('Không thể đăng nhập tài khoản demo. Vui lòng thử lại.');
@@ -64,7 +78,7 @@ export function useLoginPage() {
       return;
     }
 
-    completeAuth();
+    completeAuth(undefined, account.accountRole);
     setLoading(false);
   };
 
@@ -114,7 +128,7 @@ export function useLoginPage() {
 
   return {
     error,
-    handleDemoLogin,
+    handleQuickLogin,
     handleOAuthLogin,
     handleSubmit,
     loading,

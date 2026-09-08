@@ -1,4 +1,4 @@
-import type { DemoAccount } from './types';
+import type { DemoAccount, QuickLoginAccount } from './types';
 
 export const demoAccounts: DemoAccount[] = [
   {
@@ -24,3 +24,36 @@ export const demoAccounts: DemoAccount[] = [
 ];
 
 export const DEMO_PASSWORD = 'demo-password';
+
+/**
+ * One-click role accounts for local/demo environments.
+ *
+ * VITE_* values are bundled into the browser, so these must only point to
+ * disposable demo accounts and never to real production credentials.
+ */
+export const quickLoginAccounts: QuickLoginAccount[] = [
+  {
+    id: 'customer',
+    label: 'Người dùng',
+    description: 'Normal user · Bride / Groom',
+    email: import.meta.env.VITE_QUICK_LOGIN_CUSTOMER_EMAIL || demoAccounts[0].email,
+    password: import.meta.env.VITE_QUICK_LOGIN_CUSTOMER_PASSWORD || DEMO_PASSWORD,
+    accountRole: 'customer',
+  },
+  {
+    id: 'vendor',
+    label: 'Doanh nghiệp',
+    description: 'Shop / Studio workspace',
+    email: import.meta.env.VITE_QUICK_LOGIN_BUSINESS_EMAIL || '',
+    password: import.meta.env.VITE_QUICK_LOGIN_BUSINESS_PASSWORD || '',
+    accountRole: 'vendor',
+  },
+  {
+    id: 'admin',
+    label: 'Quản trị viên',
+    description: 'Overall platform admin',
+    email: import.meta.env.VITE_QUICK_LOGIN_ADMIN_EMAIL || '',
+    password: import.meta.env.VITE_QUICK_LOGIN_ADMIN_PASSWORD || '',
+    accountRole: 'admin',
+  },
+];
