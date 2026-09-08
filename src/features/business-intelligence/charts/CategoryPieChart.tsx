@@ -1,7 +1,15 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import type { BICategory } from '../types';
 
 const COLORS = ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5', '#ea580c'];
+
+const DUMMY_CATEGORIES = [
+  { name: 'Wedding dresses', amount: '₫ 1.2B', share: '38%' },
+  { name: 'Venues', amount: '₫ 860M', share: '27%' },
+  { name: 'Photography', amount: '₫ 540M', share: '17%' },
+  { name: 'Catering', amount: '₫ 320M', share: '10%' },
+  { name: 'Flowers & decor', amount: '₫ 160M', share: '5%' },
+  { name: 'Other', amount: '₫ 95M', share: '3%' },
+];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -27,8 +35,8 @@ const renderLegend = (props: any) => {
   );
 };
 
-export function CategoryPieChart({ data }: { data: BICategory[] }) {
-  const chartData = data.map(c => ({ ...c, value: parseFloat(c.share.replace('%', '')) }));
+export function CategoryPieChart() {
+  const chartData = DUMMY_CATEGORIES.map(c => ({ ...c, value: parseFloat(c.share.replace('%', '')) }));
 
   return (
     <ResponsiveContainer width="100%" height={280}>
