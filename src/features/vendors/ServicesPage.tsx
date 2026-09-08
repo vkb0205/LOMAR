@@ -1,9 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { Search, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { MessageCircle, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AssistantChat } from '../ai-consultant/components/AssistantChat';
 import { useConsultantChat } from '../ai-consultant/hooks/useConsultantChat';
-import { openContextualAssistant } from '../chat/openAssistant';
 import { ROUTES } from '../../shared/config/routes';
 import { SERVICES_PAGE_SIZE } from './hooks/useServicesPage';
 import { CategoryFilterBar } from './components/CategoryFilterBar';
@@ -18,6 +17,7 @@ export default function Services() {
   const navigate = useNavigate();
   const services = useServicesPage();
   const chat = useConsultantChat('services');
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const categoryBarRef = useRef<HTMLDivElement>(null);
   const prevPageRef = useRef(services.currentPage);
 
@@ -126,28 +126,49 @@ export default function Services() {
           </aside>
         </div>
 
-        {/* Mobile AI banner — hairline sheet */}
-        <div className="mt-8 flex flex-col justify-between gap-4 rounded-xl border border-hairline bg-surface-soft p-5 sm:flex-row sm:items-center lg:hidden">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-deep">
-              <Sparkles strokeWidth={1.5} className="h-5 w-5 text-canvas" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-ink">Cần gợi ý nhanh?</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted">
-                Mở Bé Song Hỷ để hỏi ngân sách, concept hoặc dịch vụ phù hợp ngay tại đây.
-              </p>
-            </div>
-          </div>
+        {/* Mobile consultant — floating launcher and compact chat sheet. */}
+        {!mobileChatOpen && (
           <button
             type="button"
-            onClick={() => openContextualAssistant()}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-canvas transition-colors duration-200 hover:bg-ink-soft active:bg-ink-soft"
+            onClick={() => setMobileChatOpen(true)}
+            aria-label="Mở trò chuyện với Bé Song Hỷ"
+            title="Mở trò chuyện với Bé Song Hỷ"
+            className="fixed bottom-5 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-canvas shadow-lift transition-all duration-200 hover:-translate-y-0.5 hover:bg-ink-soft lg:hidden"
           >
-            Mở tư vấn AI
-            <Sparkles strokeWidth={1.5} className="h-4 w-4" />
+            <MessageCircle strokeWidth={1.5} className="h-5 w-5" />
           </button>
-        </div>
+        )}
+
+        {mobileChatOpen && (
+          <section
+            aria-label="Trợ lý AI Bé Song Hỷ"
+            className="fixed inset-x-3 bottom-3 z-50 h-[min(500px,calc(100dvh-1.5rem))] lg:hidden"
+          >
+            <AssistantChat
+              title="Bé Song Hỷ"
+              subtitle="Gợi ý dịch vụ phù hợp"
+              input={chat.input}
+              isTyping={chat.isTyping}
+              messages={chat.messages}
+              messagesEndRef={chat.messagesEndRef}
+              scrollContainerRef={chat.scrollContainerRef}
+              retrievedServices={chat.retrievedServices}
+              onInputChange={chat.setInput}
+              onSubmit={chat.submitMessage}
+              compact
+              className="shadow-float"
+            />
+            <button
+              type="button"
+              onClick={() => setMobileChatOpen(false)}
+              aria-label="Đóng trò chuyện"
+              title="Đóng trò chuyện"
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-canvas text-muted transition-colors hover:bg-surface-soft hover:text-ink"
+            >
+              <X strokeWidth={1.5} className="h-4 w-4" />
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );
